@@ -6,11 +6,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use JaOcero\FilaChat\Traits\HasFilaChat;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasFilaChat;
 
     /**
      * The attributes that are mass assignable.
@@ -21,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -45,4 +47,36 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    // Relationships
+    public function admin()
+    {
+        return $this->hasOne(Admin::class, 'id', 'id');
+    }
+
+    public function mekanik()
+    {
+        return $this->hasOne(Mekanik::class, 'id', 'id');
+    }
+
+    public function konsumen()
+    {
+        return $this->hasOne(Konsumen::class, 'id', 'id');
+    }
+
+    // checking the role
+    public function isMekanik()
+    {
+        return $this->role === 'mekanik';
+    }
+
+    public function isKonsumen()
+    {
+        return $this->role === 'konsumen';
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }   
 }
