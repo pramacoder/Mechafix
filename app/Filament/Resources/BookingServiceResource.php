@@ -47,9 +47,18 @@ class BookingServiceResource extends Resource
                     ->searchable()
                     ->placeholder('Select a mechanic'),
                 Forms\Components\DatePicker::make('tanggal_booking')
-                    ->label('Booking Date')
+                    ->label('Tanggal Booking')
                     ->required()
-                    ->default(today()),
+                    ->minDate(now()->addDay())
+                    ->maxDate(now()->addMonths(3))
+                    ->disabledDates(function () {
+                        return \App\Models\HariLibur::getHolidayDates(
+                            now()->format('Y-m-d'),
+                            now()->addMonths(3)->format('Y-m-d')
+                        );
+                    })
+                    ->helperText('Tanggal yang diblokir adalah hari libur nasional')
+                    ->reactive(),
                 Forms\Components\TimePicker::make('estimasi_kedatangan')
                     ->label('Estimated Arrival')
                     ->required(),
@@ -144,7 +153,7 @@ class BookingServiceResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-                
+
                 // Admin bisa assign mechanic jika booking dalam status 'menunggu'
                 Tables\Actions\Action::make('assign_mechanic')
                     ->label('Assign Mechanic')
@@ -167,7 +176,7 @@ class BookingServiceResource extends Resource
                             'status_booking' => 'dikonfirmasi'
                         ]);
                     })
-                    ->visible(fn (BookingService $record) => $record->status_booking === 'menunggu'),
+                    ->visible(fn(BookingService $record) => $record->status_booking === 'menunggu'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BookingService;
+use App\Models\HariLibur;
 use App\Models\PlatKendaraan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,15 +26,26 @@ class BookingServiceController extends Controller
     {
         // Get user's vehicles - Simple belongsTo relationship
         $userVehicles = PlatKendaraan::where('id_konsumen', Auth::user()->konsumen->id_konsumen)->get();
-        
+
         return view('booking.create', compact('userVehicles'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'id_plat_kendaraan' => 'required|exists:plat_kendaraans,id_plat_kendaraan',
-            'tanggal_booking' => 'required|date|after:today',
+            'id_plat_kendaraan' => 'required|exists:plat_kendaraan,id_plat_kendaraan',
+            'tanggal_booking' => [
+                'required',
+                'date',
+                'after:today',
+                'before_or_equal:' . now()->addMonths(3)->format('Y-m-d'),
+                function ($attribute, $value, $fail) {
+                    if (HariLibur::isHoliday($value)) {
+                        $holidayName = HariLibur::getHolidayName($value);
+                        $fail("Tanggal {$value} adalah hari libur ({$holidayName}). Silakan pilih tanggal lain.");
+                    }
+                },
+            ],
             'estimasi_kedatangan' => 'required',
             'keluhan_konsumen' => 'required|string|max:1000',
         ]);
@@ -69,7 +81,7 @@ class BookingServiceController extends Controller
 
         // Check cancel deadline (3 days before)
         $cancelDeadline = Carbon::parse($booking->tanggal_booking)->subDays(3);
-        
+
         if (now() > $cancelDeadline) {
             return back()->with('error', 'Cannot cancel booking. Cancellation must be done at least 3 days before the booking date.');
         }

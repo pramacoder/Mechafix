@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\MekanikResource\Pages;
 use App\Models\Mekanik;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -21,12 +22,28 @@ class MekanikResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('id')
+                Forms\Components\Select::make('id_user')
                     ->label('User Account')
-                    ->relationship('user', 'name')
+                    ->options(function () {
+                        return User::where('role', 'mekanik')
+                            ->whereDoesntHave('mekanik')
+                            ->get()
+                            ->mapWithKeys(function ($user) {
+                                return [$user->id => $user->name . ' (' . $user->email . ')'];
+                            });
+                    })
                     ->required()
                     ->searchable()
-                    ->getOptionLabelFromRecordUsing(fn($record) => $record->name . ' (' . $record->email . ')'),
+                    ->placeholder('Select a user with mechanic role'),
+
+                Forms\Components\TextInput::make('kuantitas_hari')
+                    ->label('Days Available')
+                    ->numeric()
+                    ->required()
+                    ->default(0)
+                    ->minValue(1)
+                    ->maxValue(7)
+                    ->helperText('Number of days available each week (1-7)'),
             ]);
     }
 
@@ -44,24 +61,90 @@ class MekanikResource extends Resource
                 Tables\Columns\TextColumn::make('user.email')
                     ->label('Email')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('bookingServices_count')
-                    ->label('Active Jobs')
-                    ->counts('bookingServices'),
+                Tables\Columns\TextColumn::make('kuantitas_hari')
+                    ->label('Days Available')
+                    ->sortable()
+                    ->badge()
+                    ->color(fn (int $state): string => match (true) {
+                        $state >= 4 => 'success',
+                        $state <= 3 => 'warning',
+                        default => 'danger',
+                    }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('availability')
+                    ->label('Availability')
+                    ->options([
+                        'high' => 'High (5+ days)',
+                        'medium' => 'Medium (3-4 days)', 
+                        'low' => 'Low (1-2 days)',
+                        'none' => 'Not Available (0 days)'
+                    ])
+                    ->query(function ($query, array $data) {
+                        if (!$data['value']) return $query;
+                        
+                        return match($data['value']) {
+                            'high' => $query->where('kuantitas_hari', '>=', 5),
+                            'medium' => $query->whereBetween('kuantitas_hari', [3, 4]),
+                            'low' => $query->whereBetween('kuantitas_hari', [1, 2]),
+                            'none' => $query->where('kuantitas_hari', 0),
+                            default => $query,
+                        };
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
+                Tables\Actions\Action::make('updateAvailability')
+                    ->label('Update Days')
+                    ->icon('heroicon-o-calendar')
+                    ->color('warning')
+                    ->form([
+                        Forms\Components\TextInput::make('kuantitas_hari')
+                            ->label('Days Available')
+                            ->numeric()
+                            ->required()
+                            ->minValue(1)
+                            ->maxValue(7),
+                    ])
+                    ->action(function (Mekanik $record, array $data) {
+                        $record->update(['kuantitas_hari' => $data['kuantitas_hari']]);
+                    })
+                    ->successNotificationTitle('Days availability updated successfully'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('bulkUpdateAvailability')
+                        ->label('Update Days Available')
+                        ->icon('heroicon-o-calendar')
+                        ->color('warning')
+                        ->form([
+                            Forms\Components\TextInput::make('kuantitas_hari')
+                                ->label('Days Available')
+                                ->numeric()
+                                ->required()
+                                ->minValue(1)
+                                ->maxValue(7),
+                        ])
+                        ->action(function ($records, array $data) {
+                            foreach ($records as $record) {
+                                $record->update(['kuantitas_hari' => $data['kuantitas_hari']]);
+                            }
+                        })
+                        ->successNotificationTitle('Bulk update completed'),
                 ]),
-            ]);
+            ])
+            ->defaultSort('kuantitas_hari', 'desc');
     }
 
     public static function getPages(): array
@@ -71,5 +154,16 @@ class MekanikResource extends Resource
             'create' => Pages\CreateMekanik::route('/create'),
             'edit' => Pages\EditMekanik::route('/{record}/edit'),
         ];
+    }
+
+    // ADD: Custom navigation badge
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::where('kuantitas_hari', '>', 0)->count();
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'success';
     }
 }

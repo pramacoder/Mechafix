@@ -15,7 +15,6 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
     protected static ?string $navigationIcon = 'heroicon-o-users';
     protected static ?string $navigationGroup = 'User Management';
-    protected static ?string $navigationLabel = 'Users';
 
     public static function form(Form $form): Form
     {
@@ -27,19 +26,24 @@ class UserResource extends Resource
                 Forms\Components\TextInput::make('email')
                     ->email()
                     ->required()
-                    ->maxLength(255)
-                    ->unique(ignoreRecord: true),
-                Forms\Components\TextInput::make('password')
-                    ->password()
-                    ->required(fn($context) => $context === 'create')
-                    ->dehydrated(fn($state) => filled($state))
                     ->maxLength(255),
                 Forms\Components\DateTimePicker::make('email_verified_at'),
-                Forms\Components\Select::make('roles')
-                    ->relationship('roles', 'name')
-                    ->multiple()
-                    ->preload()
-                    ->searchable(),
+                Forms\Components\TextInput::make('password')
+                    ->password()
+                    ->required()
+                    ->maxLength(255)
+                    ->dehydrateStateUsing(fn ($state) => bcrypt($state))
+                    ->hiddenOn('edit'),
+                
+                Forms\Components\Select::make('role')
+                    ->label('Role')
+                    ->options([
+                        'admin' => 'Admin',
+                        'konsumen' => 'Konsumen', 
+                        'mekanik' => 'Mekanik'
+                    ])
+                    ->required()
+                    ->default('konsumen'),
             ]);
     }
 
@@ -48,7 +52,6 @@ class UserResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')
-                    ->label('ID')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
@@ -56,32 +59,30 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('email')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\BadgeColumn::make('roles.name')
-                    ->label('Role')
-                    ->colors([
-                        'primary' => 'admin',
-                        'success' => 'konsumen',
-                        'warning' => 'mekanik',
-                    ]),
-                Tables\Columns\IconColumn::make('email_verified_at')
-                    ->label('Verified')
-                    ->boolean()
-                    ->getStateUsing(fn($record) => !is_null($record->email_verified_at)),
-                Tables\Columns\TextColumn::make('created_at')
+                Tables\Columns\TextColumn::make('role')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'admin' => 'danger',
+                        'mekanik' => 'warning', 
+                        'konsumen' => 'success',
+                        default => 'gray',
+                    }),
+                Tables\Columns\TextColumn::make('email_verified_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('roles')
-                    ->relationship('roles', 'name'),
-                Tables\Filters\TernaryFilter::make('email_verified_at')
-                    ->label('Email Verified')
-                    ->nullable(),
+                Tables\Filters\SelectFilter::make('role')
+                    ->options([
+                        'admin' => 'Admin',
+                        'konsumen' => 'Konsumen',
+                        'mekanik' => 'Mekanik'
+                    ]),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -92,7 +93,8 @@ class UserResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc');
     }
 
     public static function getPages(): array
