@@ -28,8 +28,13 @@ class Mekanik extends Model
         return $this->belongsTo(User::class, 'id', 'id');
     }
 
-    public function riwayatPerbaikan()
+    public function riwayatPerbaikans()
     {
         return $this->hasMany(RiwayatPerbaikan::class, 'id_mekanik', 'id_mekanik');
+    }
+
+    public function bookingServices()
+    {
+        return $this->hasMany(BookingService::class, 'id_mekanik', 'id_mekanik');
     }
 }

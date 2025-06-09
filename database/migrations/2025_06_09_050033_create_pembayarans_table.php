@@ -17,14 +17,17 @@ return new class extends Migration
             $table->bigInteger('total_pembayaran');
             $table->string('qris');
             $table->string('bukti_pembayaran')->nullable();
+            $table->enum('status_pembayaran', ['Belum Dibayar', 'Sudah Dibayar'])->default('Belum Dibayar');
             $table->unsignedBigInteger('id_transaksi_barang')->nullable();
             $table->unsignedBigInteger('id_transaksi_service')->nullable();
+            $table->unsignedBigInteger('id_booking_service')->nullable();
             $table->unsignedBigInteger('id_plat_kendaraan');
             $table->timestamps();
 
             // foreign keys
             $table->foreign('id_transaksi_barang')->references('id_transaksi_barang')->on('transaksi_spare_parts')->onDelete('cascade');
             $table->foreign('id_transaksi_service')->references('id_transaksi_service')->on('transaksi_services')->onDelete('cascade');
+            $table->foreign('id_booking_service')->references('id_booking_service')->on('booking_services')->onDelete('cascade');
             $table->foreign('id_plat_kendaraan')->references('id_plat_kendaraan')->on('plat_kendaraans')->onDelete('cascade');
         });
     }

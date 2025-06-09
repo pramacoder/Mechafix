@@ -20,6 +20,7 @@ class BookingService extends Model
         'status_booking',
         'id_konsumen',
         'id_plat_kendaraan',
+        'id_mekanik',
     ];
 
     protected $casts = [
@@ -38,5 +39,62 @@ class BookingService extends Model
     public function platKendaraan()
     {
         return $this->belongsTo(PlatKendaraan::class, 'id_plat_kendaraan', 'id_plat_kendaraan');
+    }
+
+    public function mekanik()
+    {
+        return $this->belongsTo(Mekanik::class, 'id_mekanik', 'id_mekanik');
+    }
+
+    public function pembayarans()
+    {
+        return $this->hasMany(Pembayaran::class, 'id_booking_service', 'id_booking_service');
+    }
+
+    public function isCompleted()
+    {
+        return $this->status_booking === 'selesai';
+    }
+
+    public function isPaid()
+    {
+        return $this->pembayarans()->where('status_pembayaran', 'Sudah Dibayar')->exists();
+    }
+
+    public function isConfirmed()
+    {
+        return $this->status_booking === 'dikonfirmasi';
+    }
+
+    public function isPending()
+    {
+        return $this->status_booking === 'menunggu';
+    }
+
+    public function transaksiServices()
+    {
+        return $this->hasMany(TransaksiService::class, 'id_booking_service', 'id_booking_service');
+    }
+
+    public function serviceDetails()
+    {
+        return $this->transaksiServices();
+    }
+    
+    public function services()
+    {
+        return $this->belongsToMany(
+            Service::class, 
+            'transaksi_services',
+            'id_booking_service',
+            'id_service',
+        )
+        ->withPivot('kuantitas_service', 'subtotal_service')
+        ->withTimestamps();
+    }
+
+    public function getTotalBiayaAttribute()
+    {
+        return $this->transaksiServices()->sum('subtotal_service');
     }
 }

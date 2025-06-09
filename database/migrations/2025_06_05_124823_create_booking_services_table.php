@@ -19,11 +19,13 @@ return new class extends Migration
             $table->enum('status_booking', ['menunggu', 'dikonfirmasi', 'selesai', 'batal'])->default('menunggu');
             $table->unsignedBigInteger('id_konsumen');
             $table->unsignedBigInteger('id_plat_kendaraan');
+            $table->unsignedBigInteger('id_mekanik')->nullable();
             $table->timestamps();
 
             // foreign keys
             $table->foreign('id_konsumen')->references('id_konsumen')->on('konsumens')->onDelete('cascade');
             $table->foreign('id_plat_kendaraan')->references('id_plat_kendaraan')->on('plat_kendaraans')->onDelete('cascade');
+            $table->foreign('id_mekanik')->references('id_mekanik')->on('mekaniks')->onDelete('set null');
         });
     }
 

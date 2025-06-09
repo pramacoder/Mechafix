@@ -22,7 +22,7 @@ class Service extends Model
 
     protected $casts = [
         'nama_service' => 'string',
-        'kategori_service' => 'string',
+        'jenis_service' => 'string',
         'biaya_service' => 'integer',
         'estimasi_waktu' => 'integer',
     ];
@@ -31,5 +31,22 @@ class Service extends Model
     public function transaksiService()
     {
         return $this->hasMany(TransaksiService::class, 'id_service', 'id_service');
+    }
+
+    public function bookingServices()
+    {
+        return $this->belongsToMany(
+            BookingService::class, 
+            'transaksi_services', 
+            'id_service', 
+            'id_booking_service',
+        )
+        ->withPivot('kuantitas_service', 'subtotal_service')
+        ->withTimestamps();
+    }
+
+    public function getFormattedBiayaAttribute()
+    {
+        return number_format($this->biaya_service, 0, ',', '.');
     }
 }

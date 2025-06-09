@@ -14,12 +14,14 @@ return new class extends Migration
         Schema::create('transaksi_services', function (Blueprint $table) {
             $table->id('id_transaksi_service');
             $table->unsignedBigInteger('id_service');
+            $table->unsignedBigInteger('id_booking_service')->nullable();
             $table->integer('kuantitas_service');
             $table->bigInteger('subtotal_service');
             $table->timestamps();
 
             // foreign key
             $table->foreign('id_service')->references('id_service')->on('services')->onDelete('cascade');
+            $table->foreign('id_booking_service')->references('id_booking_service')->on('booking_services')->onDelete('set null');
         });
     }
 
@@ -28,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transaksi_spare_parts');
+        Schema::dropIfExists('transaksi_services');
     }
 };

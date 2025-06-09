@@ -10,37 +10,37 @@ class PlatKendaraan extends Model
     use HasFactory;
 
     protected $table = 'plat_kendaraans';
-    protected $primaryKey = 'id_kendaraan';
+    protected $primaryKey = 'id_plat_kendaraan';
     public $incrementing = true;
 
     protected $fillable = [
-        'nomor_plat',
+        'nomor_plat_kendaraan',
         'cc_kendaraan',
         'id_konsumen',
     ];
 
     protected $casts = [
-        'nomor_plat' => 'string',
+        'nomor_plat_kendaraan' => 'string',
         'cc_motor' => 'integer',
     ];
 
     // Relationships
-    public function konsumen()
+    public function konsumens()
     {
         return $this->belongsTo(Konsumen::class, 'id_konsumen', 'id_konsumen');
     }
 
-    public function pembayaran()
+    public function pembayarans()
     {
         return $this->hasMany(Pembayaran::class, 'id_plat_kendaraan', 'id_plat_kendaraan');
     }
 
-    public function bookingService()
+    public function bookingServices()
     {
         return $this->hasMany(BookingService::class, 'id_plat_kendaraan', 'id_plat_kendaraan');
     }
 
-    public function riwayatPerbaikan()
+    public function riwayatPerbaikans()
     {
         return $this->hasMany(RiwayatPerbaikan::class, 'id_plat_kendaraan', 'id_plat_kendaraan');
     }

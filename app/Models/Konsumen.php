@@ -34,7 +34,7 @@ class Konsumen extends Model
         return $this->hasMany(PlatKendaraan::class, 'id_konsumen', 'id_konsumen');
     }
 
-    public function bookingService()
+    public function bookingServices()
     {
         return $this->hasMany(BookingService::class, 'id_konsumen', 'id_konsumen');
     }

@@ -20,7 +20,6 @@ class Admin extends Model
     ];
 
     protected $casts = [
-        'shift_kerja' => 'enum: Pagi, Sore',
         'gaji' => 'integer',
     ];
 
@@ -34,4 +33,14 @@ class Admin extends Model
     {
         return $this->hasMany(HariLibur::class, 'id_admin', 'id_admin');
     }    
+
+    public function isPagiShift()
+    {
+        return $this->shift_kerja === 'Pagi';
+    }
+
+    public function isSoreShift()
+    {
+        return $this->shift_kerja === 'Sore';
+    }
 }

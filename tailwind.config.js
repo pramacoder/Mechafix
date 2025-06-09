@@ -1,12 +1,20 @@
+import defaultTheme from "tailwindcss/defaultTheme";
+import forms from "@tailwindcss/forms";
+import typography from "@tailwindcss/typography";
+
 /** @type {import('tailwindcss').Config} */
 export default {
     content: [
-        "./index.html",
-        "./src/**/*.{js,ts,jsx,tsx}",
-        "./vendor/jaocero/filachat/resources/views/**/**/*.blade.php",
+        "./resources/**/*.blade.php",
+        "./resources/**/*.js",
+        "./resources/**/*.vue",
+        "./vendor/laravel/jetstream/**/*.blade.php",
     ],
     theme: {
         extend: {},
     },
-    plugins: [],
+    plugins: [
+        require("@tailwindcss/forms"),
+        require("@tailwindcss/typography"),
+    ],
 };
