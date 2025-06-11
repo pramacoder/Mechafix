@@ -187,6 +187,35 @@
                 </div>
             @endif
         </div>
+
+        <!-- Chat Inbox Section -->
+        <div class="mb-6">
+            <h4 class="text-md font-medium text-gray-700 mb-4">💬 Customer Chat Inbox</h4>
+            @if(isset($conversations) && $conversations->count())
+                <div class="space-y-4">
+                    @foreach($conversations as $conversation)
+                        <a href="{{ route('filachat.mekanik.chat', $conversation->id) }}" class="block bg-gray-50 border rounded-lg p-4 hover:bg-blue-50 transition">
+                            <div class="flex justify-between items-center mb-2">
+                                <div>
+                                    <span class="font-semibold text-blue-700">
+                                        {{ $conversation->sender->agentable->name ?? 'Unknown Konsumen' }}
+                                    </span>
+                                    <span class="text-xs text-gray-500 ml-2">
+                                        (Last: {{ $conversation->messages->last()?->created_at?->diffForHumans() ?? '-' }})
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="mb-2 text-gray-800">
+                                <strong>Last message:</strong>
+                                {{ $conversation->messages->last()?->message ?? 'No messages yet.' }}
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            @else
+                <div class="text-gray-500">No chat conversations yet.</div>
+            @endif
+        </div>
     </div>
 </div>
 

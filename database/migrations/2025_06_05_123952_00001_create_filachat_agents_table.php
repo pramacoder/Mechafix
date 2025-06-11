@@ -12,9 +12,10 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('agentable_id');
             $table->string('agentable_type');
+            $table->string('role');
             $table->timestamps();
 
-            $table->unique(['agentable_id', 'agentable_type']);
+            $table->unique(['agentable_id', 'agentable_type', 'role']);
         });
     }
 

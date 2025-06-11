@@ -33,7 +33,7 @@ class BookingServiceController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id_plat_kendaraan' => 'required|exists:plat_kendaraan,id_plat_kendaraan',
+            'id_plat_kendaraan' => 'required|exists:plat_kendaraans,id_plat_kendaraan',
             'tanggal_booking' => [
                 'required',
                 'date',
