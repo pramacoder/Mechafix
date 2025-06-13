@@ -43,7 +43,6 @@ class AdminSeeder extends Seeder
         ];
 
         foreach ($admins as $adminData) {
-            // Check if admin user already exists
             $existingUser = User::where('email', $adminData['email'])->first();
 
             if ($existingUser) {
@@ -51,7 +50,6 @@ class AdminSeeder extends Seeder
                 continue;
             }
 
-            // Create User
             $user = User::create([
                 'name' => $adminData['name'],
                 'email' => $adminData['email'],
@@ -60,7 +58,6 @@ class AdminSeeder extends Seeder
                 'email_verified_at' => now(),
             ]);
 
-            // Create Admin record  
             Admin::create([
                 'id' => $user->id,
                 'shift_kerja' => $adminData['shift_kerja'],

@@ -16,7 +16,7 @@ class PembayaranResource extends Resource
 {
     protected static ?string $model = Pembayaran::class;
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
-    protected static ?string $navigationGroup = 'Financial Management';
+    protected static ?string $navigationGroup = 'User Management';
     protected static ?string $navigationLabel = 'Payments';
 
     public static function form(Form $form): Form
@@ -56,7 +56,7 @@ class PembayaranResource extends Resource
                     ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
                         static::calculateTotal($state, $get('id_transaksi_barang'), $set);
                     }),
-                
+
                 Forms\Components\Select::make('id_transaksi_barang')
                     ->label('Spare Part Transaction')
                     ->relationship('transaksiSparePart', 'id_transaksi_barang')
@@ -67,12 +67,12 @@ class PembayaranResource extends Resource
                     ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
                         static::calculateTotal($get('id_transaksi_service'), $state, $set);
                     }),
-                
+
                 Forms\Components\DatePicker::make('tanggal_pembayaran')
                     ->label('Payment Date')
                     ->required()
                     ->default(today()),
-                
+
                 Forms\Components\TextInput::make('total_pembayaran')
                     ->label('Total Payment')
                     ->numeric()
@@ -88,7 +88,7 @@ class PembayaranResource extends Resource
                     ->visibility('public')
                     ->default('oli motor.webp')
                     ->helperText('QRIS code untuk pembayaran digital'),
-                
+
                 Forms\Components\FileUpload::make('bukti_pembayaran')
                     ->label('Payment Proof')
                     ->image()
@@ -96,7 +96,7 @@ class PembayaranResource extends Resource
                     ->visibility('public')
                     ->nullable()
                     ->helperText('Upload bukti pembayaran dari customer'),
-                
+
                 Forms\Components\Select::make('status_pembayaran')
                     ->label('Payment Status')
                     ->options([
@@ -136,12 +136,12 @@ class PembayaranResource extends Resource
                 Tables\Columns\TextColumn::make('id_pembayaran')
                     ->label('Payment ID')
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('bookingService.konsumen.user.name')
                     ->label('Customer')
                     ->searchable()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('platKendaraan.nomor_plat_kendaraan')
                     ->label('Vehicle')
                     ->searchable(),
@@ -159,7 +159,7 @@ class PembayaranResource extends Resource
                     ->tooltip(function ($record) {
                         return $record->transaksiSparePart?->sparePart?->nama_barang ?? 'No spare part';
                     }),
-                
+
                 Tables\Columns\TextColumn::make('total_pembayaran')
                     ->label('Amount')
                     ->money('IDR')
@@ -169,24 +169,24 @@ class PembayaranResource extends Resource
                     ->label('QRIS')
                     ->size(40)
                     ->circular(),
-                
+
                 Tables\Columns\BadgeColumn::make('status_pembayaran')
                     ->label('Status')
                     ->colors([
                         'danger' => 'Belum Dibayar',
                         'success' => 'Sudah Dibayar',
                     ]),
-                
+
                 Tables\Columns\ImageColumn::make('bukti_pembayaran')
                     ->label('Payment Proof')
                     ->size(40)
                     ->tooltip('Click to view payment proof'),
-                
+
                 Tables\Columns\TextColumn::make('tanggal_pembayaran')
                     ->label('Payment Date')
                     ->date()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime()
@@ -199,7 +199,7 @@ class PembayaranResource extends Resource
                         'Belum Dibayar' => 'Belum Dibayar',
                         'Sudah Dibayar' => 'Sudah Dibayar',
                     ]),
-                
+
                 Tables\Filters\Filter::make('has_bukti_pembayaran')
                     ->label('Has Payment Proof')
                     ->query(fn ($query) => $query->whereNotNull('bukti_pembayaran')),
@@ -211,7 +211,7 @@ class PembayaranResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-                
+
                 Tables\Actions\Action::make('approve')
                     ->label('Approve Payment')
                     ->icon('heroicon-o-check-circle')
@@ -227,7 +227,7 @@ class PembayaranResource extends Resource
                     ->action(fn (Pembayaran $record) => $record->update(['status_pembayaran' => 'Belum Dibayar']))
                     ->requiresConfirmation()
                     ->visible(fn (Pembayaran $record) => $record->status_pembayaran === 'Sudah Dibayar'),
-                
+
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([

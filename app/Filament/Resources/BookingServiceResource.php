@@ -18,7 +18,7 @@ class BookingServiceResource extends Resource
 {
     protected static ?string $model = BookingService::class;
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
-    protected static ?string $navigationGroup = 'Booking Management';
+    protected static ?string $navigationGroup = 'User Management';
     protected static ?string $navigationLabel = 'Bookings';
 
     public static function form(Form $form): Form
@@ -26,7 +26,7 @@ class BookingServiceResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Select::make('id_konsumen')
-                    ->label('Customer')
+                    ->label('Id_Customer')
                     ->relationship('konsumen', 'id_konsumen')
                     ->getOptionLabelFromRecordUsing(fn($record) => $record->user->name ?? 'Unknown User')
                     ->required()

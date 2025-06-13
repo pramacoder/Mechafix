@@ -15,6 +15,7 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
     protected static ?string $navigationIcon = 'heroicon-o-users';
     protected static ?string $navigationGroup = 'User Management';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
@@ -34,12 +35,12 @@ class UserResource extends Resource
                     ->maxLength(255)
                     ->dehydrateStateUsing(fn ($state) => bcrypt($state))
                     ->hiddenOn('edit'),
-                
+
                 Forms\Components\Select::make('role')
                     ->label('Role')
                     ->options([
                         'admin' => 'Admin',
-                        'konsumen' => 'Konsumen', 
+                        'konsumen' => 'Konsumen',
                         'mekanik' => 'Mekanik'
                     ])
                     ->required()
@@ -63,7 +64,7 @@ class UserResource extends Resource
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'admin' => 'danger',
-                        'mekanik' => 'warning', 
+                        'mekanik' => 'warning',
                         'konsumen' => 'success',
                         default => 'gray',
                     }),
