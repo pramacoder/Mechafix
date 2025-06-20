@@ -17,7 +17,6 @@ class HariLiburResource extends Resource
 {
     protected static ?string $model = HariLibur::class;
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
-    protected static ?string $navigationGroup = 'Master Data';
     protected static ?string $navigationLabel = 'Hari Libur';
     protected static ?string $pluralModelLabel = 'Hari Libur';
     protected static ?string $modelLabel = 'Hari Libur';
@@ -115,7 +114,7 @@ class HariLiburResource extends Resource
                         $now = now('Asia/Singapore')->startOfDay();
                         $start = $record->tanggal_mulai->setTimezone('Asia/Singapore')->startOfDay();
                         $end = $record->tanggal_berakhir->setTimezone('Asia/Singapore')->startOfDay();
-                        
+
                         if ($now->lt($start)) {
                             // Hari libur belum dimulai
                             $days = $now->diffInDays($start);
@@ -210,7 +209,7 @@ class HariLiburResource extends Resource
                     ])
                     ->query(function ($query, array $data) {
                         if (!$data['value']) return $query;
-                        
+
                         return match($data['value']) {
                             '1' => $query->whereRaw('DATEDIFF(tanggal_berakhir, tanggal_mulai) = 0'),
                             '2-3' => $query->whereRaw('DATEDIFF(tanggal_berakhir, tanggal_mulai) BETWEEN 1 AND 2'),
@@ -226,7 +225,7 @@ class HariLiburResource extends Resource
                     ->modalContent(function ($record) {
                         $days = $record->tanggal_mulai->diffInDays($record->tanggal_berakhir) + 1;
                         $isActive = $record->tanggal_berakhir->gte(now('Asia/Singapore')->startOfDay());
-                        
+
                         return view('filament.resources.hari-libur.view', [
                             'record' => $record,
                             'days' => $days,
@@ -279,7 +278,7 @@ class HariLiburResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    
+
                     Tables\Actions\BulkAction::make('bulkDuplicate')
                         ->label('Duplikasi Massal')
                         ->icon('heroicon-o-document-duplicate')
@@ -298,7 +297,7 @@ class HariLiburResource extends Resource
                         ])
                         ->action(function ($records, array $data) {
                             $targetYear = $data['target_year'];
-                            
+
                             foreach ($records as $record) {
                                 $currentYear = $record->tanggal_mulai->year;
                                 $yearDiff = $targetYear - $currentYear;

@@ -13,7 +13,9 @@ class Available extends BaseWidget
             Stat::make('Unique views', '192.1k')
                 ->description('Jumlah Pesanan'),
             Stat::make('Bounce rate', '21%')
-                ->description('Jumlah Pesanan')
+                ->description('Jumlah Pesanan'),
+            Stat::make('Pageviews', '1.2M')
+                ->description('Jumlah Pesanan'),
         ];
     }
 }

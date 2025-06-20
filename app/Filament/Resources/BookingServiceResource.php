@@ -18,8 +18,9 @@ class BookingServiceResource extends Resource
 {
     protected static ?string $model = BookingService::class;
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
-    protected static ?string $navigationGroup = 'User Management';
+    protected static ?string $navigationGroup = 'Dipake?';
     protected static ?string $navigationLabel = 'Bookings';
+    protected static ?int $navigationSort = 5;
 
     public static function form(Form $form): Form
     {

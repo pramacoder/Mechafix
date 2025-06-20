@@ -15,7 +15,7 @@ class MekanikResource extends Resource
 {
     protected static ?string $model = Mekanik::class;
     protected static ?string $navigationIcon = 'heroicon-o-wrench';
-    protected static ?string $navigationGroup = 'Mechanics';
+    protected static ?string $navigationGroup = 'Workers';
     protected static ?string $navigationLabel = 'Mecha Available';
     protected static ?int $navigatioinsort = 3;
 

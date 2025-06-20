@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Resources\BookingServiceResource\Widgets\TotalService;
 use App\Filament\Resources\DashboardResource\Widgets\Available;
 use App\Filament\Resources\DashboardResource\Widgets\PenjualanBarangChart;
+use App\Filament\Resources\KalenderKerjaResource\Widgets\Calender;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\Widgets;
@@ -22,6 +23,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use App\Filament\Resources\ServiceResource\Widgets\PenjualanChart;
 use App\Filament\Resources\UserResource;
+use App\Filament\Widgets\MyCalenderWidget;
 use Illuminate\Support\Facades\App;
 
 class AdminPanelProvider extends PanelProvider
@@ -49,6 +51,7 @@ class AdminPanelProvider extends PanelProvider
                 Available::class,
                 PenjualanChart::class,
                 PenjualanBarangChart::class,
+                MyCalenderWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

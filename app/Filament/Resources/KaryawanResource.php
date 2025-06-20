@@ -2,49 +2,59 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\UserResource\Pages;
-use App\Models\User;
+use App\Filament\Resources\KaryawanResource\Pages;
+use App\Filament\Resources\KaryawanResource\RelationManagers;
+use App\Models\Karyawan;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class UserResource extends Resource
+class KaryawanResource extends Resource
 {
-    protected static ?string $model = User::class;
-    protected static ?string $navigationIcon = 'heroicon-o-users';
-    protected static ?string $navigationGroup = 'Customer Management';
-    protected static ?int $navigationSort = 1;
+    protected static ?string $model = Karyawan::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
+                Forms\Components\TextInput::make('Id_Karyawan')
+                    ->required()
+                    ->maxLength(10),
                 Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\Select::make('role')
+                    ->label('Role')
+                    ->options([
+                        'admin' => 'Admin',
+                        'staff' => 'staff',
+                        'mekanik' => 'Mekanik'
+                    ])
+                    ->required()
+                    ->default('Obey'),
+                Forms\Components\TextInput::make('sallary')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('email')
                     ->email()
                     ->required()
                     ->maxLength(255),
-                Forms\Components\DateTimePicker::make('email_verified_at'),
+                // Forms\Components\DateTimePicker::make('email_verified_at'),
+                Forms\Components\TextInput::make('phone')
+                    ->required()
+                    ->maxLength(255),
                 Forms\Components\TextInput::make('password')
                     ->password()
                     ->required()
                     ->maxLength(255)
-                    ->dehydrateStateUsing(fn ($state) => bcrypt($state))
+                    ->dehydrateStateUsing(fn($state) => bcrypt($state))
                     ->hiddenOn('edit'),
-
-                Forms\Components\Select::make('role')
-                    ->label('Role')
-                    ->options([
-                        'admin' => 'Admin',
-                        'konsumen' => 'Konsumen',
-                        'mekanik' => 'Mekanik'
-                    ])
-                    ->required()
-                    ->default('konsumen'),
             ]);
     }
 
@@ -62,10 +72,10 @@ class UserResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('role')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'admin' => 'danger',
                         'mekanik' => 'warning',
-                        'konsumen' => 'success',
+                        'staff' => 'success',
                         default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('email_verified_at')
@@ -81,7 +91,7 @@ class UserResource extends Resource
                 Tables\Filters\SelectFilter::make('role')
                     ->options([
                         'admin' => 'Admin',
-                        'konsumen' => 'Konsumen',
+                        'staff' => 'staff',
                         'mekanik' => 'Mekanik'
                     ]),
             ])
@@ -98,12 +108,19 @@ class UserResource extends Resource
             ->defaultSort('created_at', 'desc');
     }
 
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            'index' => Pages\ListKaryawans::route('/'),
+            'create' => Pages\CreateKaryawan::route('/create'),
+            'edit' => Pages\EditKaryawan::route('/{record}/edit'),
         ];
     }
 }
