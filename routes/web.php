@@ -10,7 +10,7 @@ use App\Models\FilachatConversation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn() => view('welcome'));
+Route::get('/', fn() => view('/konsumen/home'));
 
 Route::middleware([
     'auth:sanctum',
