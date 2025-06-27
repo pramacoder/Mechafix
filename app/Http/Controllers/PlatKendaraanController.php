@@ -39,7 +39,7 @@ class PlatKendaraanController extends Controller
     public function edit($id_plat_kendaraan)
     {
         $kendaraan = PlatKendaraan::findOrFail($id_plat_kendaraan);
-        
+
         // Check if kendaraan belongs to current user
         if ($kendaraan->id_konsumen !== Auth::user()->konsumen->id_konsumen) {
             abort(403);
@@ -51,7 +51,7 @@ class PlatKendaraanController extends Controller
     public function update(Request $request, $id_plat_kendaraan)
     {
         $kendaraan = PlatKendaraan::findOrFail($id_plat_kendaraan);
-        
+
         // Check ownership
         if ($kendaraan->id_konsumen !== Auth::user()->konsumen->id_konsumen) {
             abort(403);
@@ -73,7 +73,7 @@ class PlatKendaraanController extends Controller
     public function destroy($id_plat_kendaraan)
     {
         $kendaraan = PlatKendaraan::findOrFail($id_plat_kendaraan);
-        
+
         // Check ownership
         if ($kendaraan->id_konsumen !== Auth::user()->konsumen->id_konsumen) {
             abort(403);
@@ -87,5 +87,13 @@ class PlatKendaraanController extends Controller
         $kendaraan->delete();
 
         return redirect()->route('platkendaraan.index')->with('success', 'Kendaraan removed successfully!');
+    }
+
+    public function history($id)
+    {
+        $platkendaraan = PlatKendaraan::findOrFail($id);
+        $riwayats = $platkendaraan->riwayatPerbaikans()->with('mekanik')->latest()->get();
+
+        return view('platkendaraan.history', compact('platkendaraan', 'riwayats'));
     }
 }

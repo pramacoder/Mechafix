@@ -21,6 +21,7 @@ class BookingService extends Model
         'id_konsumen',
         'id_plat_kendaraan',
         'id_mekanik',
+        'id_pembayaran',
     ];
 
     protected $casts = [
@@ -48,7 +49,7 @@ class BookingService extends Model
 
     public function pembayarans()
     {
-        return $this->hasMany(Pembayaran::class, 'id_booking_service', 'id_booking_service');
+        return $this->belongsTo(Pembayaran::class, 'id_pembayaran', 'id_pembayaran');
     }
 
     public function isCompleted()
@@ -76,25 +77,40 @@ class BookingService extends Model
         return $this->hasMany(TransaksiService::class, 'id_booking_service', 'id_booking_service');
     }
 
+    // public function transaksiSpareParts()
+    // {
+    //     return $this->hasMany(TransaksiSparePart::class, 'id_booking_service', 'id_booking_service');
+    // }
+
+    public function transaksiSpareParts()
+    {
+        return $this->hasMany(TransaksiSparePart::class, 'id_booking_service');
+    }
+
     public function serviceDetails()
     {
         return $this->transaksiServices();
     }
-    
+
     public function services()
     {
         return $this->belongsToMany(
-            Service::class, 
+            Service::class,
             'transaksi_services',
             'id_booking_service',
             'id_service',
         )
-        ->withPivot('kuantitas_service', 'subtotal_service')
-        ->withTimestamps();
+            ->withPivot('kuantitas_service', 'subtotal_service')
+            ->withTimestamps();
     }
 
     public function getTotalBiayaAttribute()
     {
         return $this->transaksiServices()->sum('subtotal_service');
+    }
+
+    public function getGrandTotalAttribute()
+    {
+        return $this->transaksiServices->sum('subtotal_service') + $this->transaksiSpareParts->sum('subtotal_barang');
     }
 }

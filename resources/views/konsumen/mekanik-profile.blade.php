@@ -228,9 +228,11 @@
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                @if ($booking->pembayarans->first())
-                                                    Rp
-                                                    {{ number_format($booking->pembayarans->first()->total_pembayaran, 0, ',', '.') }}
+                                                @php
+                                                    $payment = optional($booking->pembayarans)->first();
+                                                @endphp
+                                                @if ($payment)
+                                                    Rp {{ number_format($payment->total_pembayaran, 0, ',', '.') }}
                                                 @else
                                                     -
                                                 @endif
@@ -269,34 +271,40 @@
                 <div class="p-6 lg:p-8">
                     <h3 class="text-lg font-medium text-gray-900 mb-4">💬 Chat with {{ $mekanik->user->name }}</h3>
                     @auth
-                    <div class="max-h-64 overflow-y-auto mb-4 border rounded p-3 bg-gray-50">
-                        @if(isset($conversation) && $messages->count())
-                            @foreach($messages as $msg)
-                                <div class="mb-2 flex {{ $msg->senderable_id == $conversation->senderable_id ? 'justify-end' : 'justify-start' }}">
-                                    <div class="inline-block px-3 py-2 rounded-lg {{ $msg->senderable_id == $conversation->senderable_id ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800' }}">
-                                        <div class="text-xs font-semibold mb-1">
-                                            {{ $msg->sender->agentable->name ?? 'Unknown' }}
-                                            <span class="text-[10px] text-gray-400 ml-1">{{ $msg->created_at->diffForHumans() }}</span>
+                        <div class="max-h-64 overflow-y-auto mb-4 border rounded p-3 bg-gray-50">
+                            @if (isset($conversation) && $messages->count())
+                                @foreach ($messages as $msg)
+                                    <div
+                                        class="mb-2 flex {{ $msg->senderable_id == $conversation->senderable_id ? 'justify-end' : 'justify-start' }}">
+                                        <div
+                                            class="inline-block px-3 py-2 rounded-lg {{ $msg->senderable_id == $conversation->senderable_id ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800' }}">
+                                            <div class="text-xs font-semibold mb-1">
+                                                {{ $msg->sender->agentable->name ?? 'Unknown' }}
+                                                <span
+                                                    class="text-[10px] text-gray-400 ml-1">{{ $msg->created_at->diffForHumans() }}</span>
+                                            </div>
+                                            <div>{{ $msg->message }}</div>
                                         </div>
-                                        <div>{{ $msg->message }}</div>
                                     </div>
-                                </div>
-                            @endforeach
-                        @else
-                            <div class="text-gray-500 text-sm">No messages yet. Start the conversation!</div>
-                        @endif
-                    </div>
-                    <form action="{{ route('filachat.send', $mekanik->id_mekanik) }}" method="POST" class="flex space-x-2">
-                        @csrf
-                        <input type="text" name="message" class="flex-1 border rounded px-2 py-1" placeholder="Type your message..." required>
-                        <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded">Send</button>
-                    </form>
+                                @endforeach
+                            @else
+                                <div class="text-gray-500 text-sm">No messages yet. Start the conversation!</div>
+                            @endif
+                        </div>
+                        <form action="{{ route('filachat.send', $mekanik->id_mekanik) }}" method="POST"
+                            class="flex space-x-2">
+                            @csrf
+                            <input type="text" name="message" class="flex-1 border rounded px-2 py-1"
+                                placeholder="Type your message..." required>
+                            <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded">Send</button>
+                        </form>
                     @else
-                    <div class="text-center py-8 bg-gray-50 rounded-lg">
-                        <div class="text-gray-400 text-4xl mb-4">🔒</div>
-                        <p class="text-gray-500">Login untuk mulai chat dengan mekanik ini.</p>
-                        <a href="{{ route('login') }}" class="mt-2 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Login</a>
-                    </div>
+                        <div class="text-center py-8 bg-gray-50 rounded-lg">
+                            <div class="text-gray-400 text-4xl mb-4">🔒</div>
+                            <p class="text-gray-500">Login untuk mulai chat dengan mekanik ini.</p>
+                            <a href="{{ route('login') }}"
+                                class="mt-2 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Login</a>
+                        </div>
                     @endauth
                 </div>
             </div>

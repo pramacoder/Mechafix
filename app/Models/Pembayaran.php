@@ -19,10 +19,7 @@ class Pembayaran extends Model
         'qris',
         'bukti_pembayaran',
         'status_pembayaran',
-        'id_transaksi_barang',
-        'id_transaksi_service',
-        'id_booking_service',
-        'id_plat_kendaraan',
+        'id_konsumen',
     ];
 
     protected $casts = [
@@ -43,6 +40,21 @@ class Pembayaran extends Model
         return $this->belongsTo(TransaksiService::class, 'id_transaksi_service', 'id_transaksi_service');
     }
 
+    public function transaksiServices()
+    {
+        return $this->hasMany(TransaksiService::class, 'id_pembayaran');
+    }
+
+    public function transaksiSpareParts()
+    {
+        return $this->hasMany(TransaksiSparePart::class, 'id_pembayaran');
+    }
+
+    public function konsumen()
+    {
+        return $this->belongsTo(Konsumen::class, 'id_konsumen');
+    }
+
     public function platKendaraan()
     {
         return $this->belongsTo(PlatKendaraan::class, 'id_plat_kendaraan', 'id_plat_kendaraan');
@@ -55,7 +67,7 @@ class Pembayaran extends Model
 
     public function bookingService()
     {
-        return $this->belongsTo(BookingService::class, 'id_booking_service', 'id_booking_service');
+        return $this->hasOne(BookingService::class, 'id_pembayaran', 'id_pembayaran');
     }
 
     public function markBookingAsCompleted()
@@ -70,8 +82,10 @@ class Pembayaran extends Model
         parent::boot();
 
         static::updated(function ($pembayaran) {
-            if ($pembayaran->isDirty('status_pembayaran') && 
-                $pembayaran->status_pembayaran === 'Sudah Dibayar') {
+            if (
+                $pembayaran->isDirty('status_pembayaran') &&
+                $pembayaran->status_pembayaran === 'Sudah Dibayar'
+            ) {
                 $pembayaran->markBookingAsCompleted();
             }
         });

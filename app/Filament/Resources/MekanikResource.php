@@ -15,9 +15,8 @@ class MekanikResource extends Resource
 {
     protected static ?string $model = Mekanik::class;
     protected static ?string $navigationIcon = 'heroicon-o-wrench';
-    protected static ?string $navigationGroup = 'Workers';
-    protected static ?string $navigationLabel = 'Mecha Available';
-    protected static ?int $navigatioinsort = 3;
+    protected static ?string $navigationGroup = 'User Management';
+    protected static ?string $navigationLabel = 'Mechanics';
 
     public static function form(Form $form): Form
     {
@@ -85,13 +84,13 @@ class MekanikResource extends Resource
                     ->label('Availability')
                     ->options([
                         'high' => 'High (5+ days)',
-                        'medium' => 'Medium (3-4 days)',
+                        'medium' => 'Medium (3-4 days)', 
                         'low' => 'Low (1-2 days)',
                         'none' => 'Not Available (0 days)'
                     ])
                     ->query(function ($query, array $data) {
                         if (!$data['value']) return $query;
-
+                        
                         return match($data['value']) {
                             'high' => $query->where('kuantitas_hari', '>=', 5),
                             'medium' => $query->whereBetween('kuantitas_hari', [3, 4]),

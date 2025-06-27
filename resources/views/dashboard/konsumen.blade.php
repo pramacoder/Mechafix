@@ -94,7 +94,7 @@
         ->user()
         ->konsumen->bookingServices()
         ->where('status_booking', 'selesai')
-        ->with(['platKendaraan', 'pembayarans', 'transaksiServices.service'])
+        ->with(['platKendaraan', 'pembayarans', 'transaksiServices.service', 'transaksiSpareParts.sparePart'])
         ->whereHas('pembayarans', function ($q) {
             $q->where('status_pembayaran', 'Belum Dibayar');
         })
@@ -107,7 +107,18 @@
             <h3 class="text-lg font-medium text-red-900 mb-4">⚠️ Pending Payments</h3>
             <div class="space-y-4">
                 @foreach ($pendingPayments as $booking)
-                    @php $payment = $booking->pembayarans->first(); @endphp
+                    @php
+                        $payment = $booking->pembayarans->first();
+                        $serviceTotal = $booking->transaksiServices->sum('subtotal_service');
+                        $sparepartTotal = $booking->transaksiSpareParts->sum('subtotal_barang');
+                        $calculatedTotal = $serviceTotal + $sparepartTotal;
+                        $isPaid = $payment && $payment->status_pembayaran === 'Sudah Dibayar';
+                        $isCashConfirmed = $payment && $payment->bukti_pembayaran === 'cash_payment_confirmed';
+                        $isProofUploaded =
+                            $payment &&
+                            $payment->bukti_pembayaran &&
+                            $payment->bukti_pembayaran !== 'cash_payment_confirmed';
+                    @endphp
                     <div class="bg-white border border-red-200 rounded-lg p-4">
                         <div class="flex justify-between items-start mb-4">
                             <div class="flex-1">
@@ -127,26 +138,41 @@
                                                     {{ number_format($transaksi->subtotal_service, 0, ',', '.') }}</span>
                                             </div>
                                         @endforeach
+                                        @foreach ($booking->transaksiSpareParts as $transaksi)
+                                            <div class="flex justify-between text-sm">
+                                                <span class="text-green-700">
+                                                    {{ $transaksi->sparePart->nama_barang ?? '-' }}
+                                                    @if ($transaksi->kuantitas_barang > 1)
+                                                        (x{{ $transaksi->kuantitas_barang }})
+                                                    @endif
+                                                </span>
+                                                <span class="font-medium text-green-900">Rp
+                                                    {{ number_format($transaksi->subtotal_barang ?? 0, 0, ',', '.') }}</span>
+                                            </div>
+                                        @endforeach
                                         <div class="border-t pt-2 mt-2">
                                             <div class="flex justify-between text-sm font-semibold">
                                                 <span class="text-gray-800">Total Amount:</span>
-                                                <span class="text-red-600">Rp
-                                                    {{ number_format($payment->total_pembayaran, 0, ',', '.') }}</span>
+                                                <span class="text-red-600">
+                                                    Rp {{ number_format($calculatedTotal, 0, ',', '.') }}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="text-right ml-4">
-                                <p class="text-lg font-bold text-red-600">Rp
-                                    {{ number_format($payment->total_pembayaran, 0, ',', '.') }}</p>
+                                <p class="text-lg font-bold text-red-600">
+                                    Rp {{ number_format($calculatedTotal, 0, ',', '.') }}
+                                </p>
                                 <p class="text-xs text-gray-500">Due:
-                                    {{ $payment->tanggal_pembayaran->format('d M Y') }}</p>
+                                    {{ optional($payment->tanggal_pembayaran)->format('d M Y') }}
+                                </p>
                             </div>
                         </div>
 
                         <div class="border-t pt-4">
-                            <h5 class="font-medium text-gray-800 mb-3">Payment Options:</h5>
+                            <h5 class="font-medium text-gray-800 mb-3">Payment:</h5>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- QRIS Payment -->
@@ -162,12 +188,14 @@
                                         method="POST" enctype="multipart/form-data" class="space-y-3">
                                         @csrf
                                         <div>
-                                            <label class="block text-sm font-medium text-blue-800 mb-1">Upload Payment
-                                                Proof:</label>
+                                            <label class="block text-sm font-medium text-blue-800 mb-1">
+                                                Upload Payment Proof:
+                                            </label>
                                             <input type="file" name="bukti_pembayaran" accept="image/*" required
                                                 class="w-full px-3 py-2 border border-blue-300 rounded-md text-sm">
                                         </div>
-                                        @if ($payment->bukti_pembayaran && $payment->bukti_pembayaran != 'cash_payment_confirmed')
+
+                                        @if ($payment->bukti_pembayaran && $payment->bukti_pembayaran !== 'cash_payment_confirmed')
                                             <div class="text-xs text-green-600">
                                                 ✅ Proof uploaded, waiting for verification
                                             </div>
@@ -184,25 +212,47 @@
                                 <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                                     <h6 class="font-medium text-green-900 mb-2">💰 Cash Payment</h6>
                                     <p class="text-sm text-green-700 mb-3">Pay directly at our cashier counter</p>
-                                    <form action="{{ route('konsumen.cash-payment', $payment->id_pembayaran) }}"
-                                        method="POST">
-                                        @csrf
-                                        @if ($payment->bukti_pembayaran === 'cash_payment_confirmed')
-                                            <div class="text-xs text-green-600 mb-2">
-                                                ✅ Cash payment confirmed. Please pay at counter.
-                                            </div>
-                                            <button type="button" disabled
-                                                class="w-full bg-gray-400 text-white px-3 py-2 rounded text-sm cursor-not-allowed">
-                                                Cash Payment Confirmed
-                                            </button>
-                                        @else
-                                            <button type="submit"
-                                                onclick="return confirm('Confirm that you will pay Rp {{ number_format($payment->total_pembayaran, 0, ',', '.') }} in cash at our counter?')"
+
+                                    @php
+                                        $payment =
+                                            $booking->pembayarans->firstWhere('status_pembayaran', 'Belum Dibayar') ??
+                                            $booking->pembayarans->first();
+
+                                        $bukti = trim((string) ($payment->bukti_pembayaran ?? ''));
+                                        $status = $payment->status_pembayaran ?? 'Belum Dibayar';
+
+                                        $isCashConfirmed = $bukti === 'cash_payment_confirmed';
+                                        $isProofUploaded = $bukti !== '' && $bukti !== 'cash_payment_confirmed';
+                                        $isNoPaymentYet = $bukti === '' && $status === 'Belum Dibayar';
+                                    @endphp
+
+                                    @if ($isCashConfirmed)
+                                        <div class="text-xs text-green-600 mb-2">
+                                            ✅ Cash payment confirmed. Please pay at counter.
+                                        </div>
+                                        <button type="button" disabled
+                                            class="w-full bg-gray-400 text-white px-3 py-2 rounded text-sm cursor-not-allowed">
+                                            Cash Payment Confirmed
+                                        </button>
+                                    @elseif ($isProofUploaded)
+                                        <div class="text-xs text-blue-600 mb-2">
+                                            📤 Proof uploaded, waiting for verification
+                                        </div>
+                                        <button type="button" disabled
+                                            class="w-full bg-gray-400 text-white px-3 py-2 rounded text-sm cursor-not-allowed">
+                                            Cash Payment Disabled
+                                        </button>
+                                    @elseif ($isNoPaymentYet)
+                                        <form action="{{ route('konsumen.cash-payment', $payment->id_pembayaran) }}"
+                                            method="POST">
+                                            @csrf
+                                            <button type="button"
+                                                onclick="showCashConfirmModal(this.form, {{ $payment->total_pembayaran }})"
                                                 class="w-full bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700">
                                                 I'll Pay Cash at Counter
                                             </button>
-                                        @endif
-                                    </form>
+                                        </form>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -210,8 +260,25 @@
                 @endforeach
             </div>
         </div>
+        <div id="cashConfirmModal"
+            class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+                <h3 class="text-lg font-semibold mb-4 text-gray-900">Confirm Cash Payment</h3>
+                <p class="mb-6 text-gray-700" id="cashConfirmText">
+                    Are you sure you will pay in cash at our counter?
+                </p>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="closeCashConfirmModal()"
+                        class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">No</button>
+                    <button type="button" id="cashConfirmYesBtn"
+                        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Yes, Confirm</button>
+                </div>
+            </div>
+        </div>
     </div>
 @endif
+
+{{-- @include('dashboard.spare-part') --}}
 
 <!-- Quick Actions -->
 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mb-6">
@@ -239,7 +306,13 @@
             $recentBookings = auth()
                 ->user()
                 ->konsumen->bookingServices()
-                ->with(['platKendaraan', 'mekanik.user', 'pembayarans', 'transaksiServices.service'])
+                ->with([
+                    'platKendaraan',
+                    'mekanik.user',
+                    'pembayarans',
+                    'transaksiServices.service',
+                    'transaksiSpareParts.sparePart',
+                ])
                 ->latest()
                 ->take(10)
                 ->get();
@@ -274,15 +347,14 @@
                                         {{ $booking->platKendaraan->nomor_plat_kendaraan }}</div>
                                     <div class="text-sm text-gray-500">{{ $booking->platKendaraan->cc_kendaraan }} CC
                                     </div>
-                                    <!-- Cancel booking jika masih menunggu dan >= 3 hari -->
                                     @if ($booking->status_booking === 'menunggu' && now()->diffInDays($booking->tanggal_booking, false) >= 3)
                                         <form
                                             action="{{ route('konsumen.cancel-booking', $booking->id_booking_service) }}"
                                             method="POST" class="inline mt-1">
                                             @csrf
                                             @method('PATCH')
-                                            <button type="submit"
-                                                onclick="return confirm('Are you sure you want to cancel this booking?')"
+                                            <button type="button"
+                                                onclick="showCancelModal({{ $booking->id_booking_service }})"
                                                 class="text-red-600 hover:text-red-900 text-xs bg-red-100 px-2 py-1 rounded">
                                                 Cancel Booking
                                             </button>
@@ -306,38 +378,65 @@
                                 </td>
 
                                 <td class="px-6 py-4">
-                                    @if ($booking->transaksiServices && $booking->transaksiServices->count() > 0)
+                                    @php
+                                        $serviceCount = $booking->transaksiServices->count();
+                                        $sparepartCount = $booking->transaksiSpareParts->count();
+
+                                        $totalService = $booking->transaksiServices->sum(
+                                            fn($s) => $s->subtotal_service ?? 0,
+                                        );
+                                        $totalSparepart = $booking->transaksiSpareParts->sum(
+                                            fn($s) => $s->subtotal_barang ?? 0,
+                                        );
+                                        $total = $totalService + $totalSparepart;
+                                    @endphp
+                                    @if ($serviceCount > 0 || $sparepartCount > 0)
                                         <div class="text-sm">
-                                            <!-- Service List -->
-                                            <div class="space-y-1 mb-2">
-                                                @foreach ($booking->transaksiServices as $transaksi)
-                                                    <div class="flex justify-between">
-                                                        <span
-                                                            class="text-gray-700 text-xs">{{ Str::limit($transaksi->service->nama_service, 20) }}</span>
-                                                        <span class="text-gray-900 text-xs font-medium">Rp
-                                                            {{ number_format($transaksi->subtotal_service, 0, ',', '.') }}</span>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                            <!-- Total -->
+                                            @if ($serviceCount)
+                                                <div class="space-y-1 mb-2">
+                                                    @foreach ($booking->transaksiServices as $transaksi)
+                                                        <div class="flex justify-between">
+                                                            <span
+                                                                class="text-gray-700 text-xs">{{ Str::limit($transaksi->service->nama_service, 20) }}</span>
+                                                            <span class="text-gray-900 text-xs font-medium">Rp
+                                                                {{ number_format($transaksi->subtotal_service, 0, ',', '.') }}</span>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                            @if ($sparepartCount)
+                                                <div class="space-y-1 mb-2">
+                                                    @foreach ($booking->transaksiSpareParts as $transaksi)
+                                                        <div class="flex justify-between">
+                                                            <span class="text-green-700 text-xs">
+                                                                {{ Str::limit($transaksi->sparePart->nama_barang ?? '-', 20) }}
+                                                                @if ($transaksi->kuantitas_barang > 1)
+                                                                    (x{{ $transaksi->kuantitas_barang }})
+                                                                @endif
+                                                            </span>
+                                                            <span class="text-green-900 text-xs font-medium">Rp
+                                                                {{ number_format($transaksi->subtotal_barang ?? 0, 0, ',', '.') }}</span>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endif
                                             <div class="border-t pt-1">
                                                 <div class="flex justify-between">
                                                     <span class="text-sm font-semibold text-gray-800">Total:</span>
                                                     <span class="text-sm font-bold text-blue-600">
-                                                        Rp
-                                                        {{ number_format($booking->transaksiServices->sum('subtotal_service'), 0, ',', '.') }}
+                                                        Rp {{ number_format($total, 0, ',', '.') }}
                                                     </span>
                                                 </div>
                                             </div>
                                         </div>
                                     @else
-                                        <span class="text-gray-400 text-sm">No services selected</span>
+                                        <span class="text-gray-400 text-sm">No services or spare parts selected</span>
                                     @endif
                                 </td>
 
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    @if ($booking->pembayarans && $booking->pembayarans->first())
-                                        @php $payment = $booking->pembayarans->first(); @endphp
+                                    @php $payment = $booking->pembayarans; @endphp
+                                    @if ($payment)
                                         @if ($payment->status_pembayaran === 'Sudah Dibayar')
                                             <span
                                                 class="px-3 py-2 text-xs font-semibold bg-green-100 text-green-800 rounded-full">
@@ -349,7 +448,6 @@
                                                     class="px-2 py-1 text-xs font-semibold bg-red-100 text-red-800 rounded-full block mb-2">
                                                     ❌ Unpaid
                                                 </span>
-                                                <!-- Tombol Selesaikan Pembayaran -->
                                                 <button
                                                     onclick="openPaymentModal({{ $payment->id_pembayaran }}, '{{ $booking->platKendaraan->nomor_plat_kendaraan }}', {{ $payment->total_pembayaran }}, '{{ addslashes($payment->qris) }}')"
                                                     class="px-3 py-2 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 w-full">
@@ -367,26 +465,19 @@
                                 {{-- KOLOM NEXT SERVICE --}}
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     @php
-                                        // Cek apakah ada transaksi service (bukan spare part)
                                         $hasService =
                                             $booking->transaksiServices && $booking->transaksiServices->count() > 0;
-                                        $isPaid =
-                                            $booking->pembayarans &&
-                                            $booking->pembayarans->first() &&
-                                            $booking->pembayarans->first()->status_pembayaran === 'Sudah Dibayar';
-
-                                        // Cari next service dari riwayat perbaikan
+                                        $payment = $booking->pembayaran ?? null;
+                                        $isPaid = $payment && $payment->status_pembayaran === 'Sudah Dibayar';
                                         $nextServiceDate = null;
+
                                         if ($hasService && $isPaid) {
                                             $riwayat = \App\Models\RiwayatPerbaikan::where(
                                                 'id_plat_kendaraan',
                                                 $booking->id_plat_kendaraan,
                                             )
-                                                ->whereHas('pembayaran', function ($q) use ($booking) {
-                                                    $q->where('id_booking_service', $booking->id_booking_service);
-                                                })
+                                                ->where('id_pembayaran', $payment->id_pembayaran)
                                                 ->first();
-
                                             if ($riwayat && $riwayat->next_service) {
                                                 $nextServiceDate = \Carbon\Carbon::parse($riwayat->next_service);
                                             }
@@ -453,6 +544,24 @@
                         @endforeach
                     </tbody>
                 </table>
+                <div id="cancelModal"
+                    class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
+                    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-900">Cancel Booking</h3>
+                        <p class="mb-6 text-gray-700">Are you sure you want to cancel this booking?</p>
+                        <form id="cancelBookingForm" method="POST">
+                            @csrf
+                            @method('PATCH')
+                            <div class="flex justify-end space-x-2">
+                                <button type="button" onclick="closeCancelModal()"
+                                    class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">No</button>
+                                <button type="submit"
+                                    class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Yes,
+                                    Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         @else
             <div class="text-center py-8 bg-gray-50 rounded-lg">
@@ -638,22 +747,84 @@
     }
 
     // Close modal when clicking outside
-    window.onclick = function(event) {
+    document.addEventListener('mousedown', function(event) {
         const paymentModal = document.getElementById('paymentModal');
-        if (event.target === paymentModal) {
-            paymentModal.classList.add('hidden');
+        if (paymentModal && !paymentModal.classList.contains('hidden') && event.target === paymentModal) {
+            closePaymentModal();
         }
+    });
+
+    // Show success/error messages from session
+    document.addEventListener('DOMContentLoaded', function() {
+        @if (session('success'))
+            showAlert('success', '{{ session('success') }}');
+        @elseif (session('error'))
+            showAlert('error', '{{ session('error') }}');
+        @endif
+    });
+
+    function showAlert(type, message) {
+        const alertBox = document.createElement('div');
+        alertBox.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg text-sm 
+            ${type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : ''}
+            ${type === 'error' ? 'bg-red-50 border border-red-200 text-red-800' : ''}`;
+        alertBox.innerHTML = `
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    ${type === 'success' ? 
+                        '<svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 00-2 0v6a1 1 0 002 0V5z" clip-rule="evenodd" /></svg>' :
+                        '<svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 00-2 0v6a1 1 0 002 0V5z" clip-rule="evenodd" /></svg>'
+                    }
+                </div>
+                <div class="ml-3">
+                    <p class="font-medium">${type === 'success' ? 'Success!' : 'Error!'}</p>
+                    <p class="mt-1">${message}</p>
+                </div>
+                <div class="ml-auto pl-3">
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-500">
+                        <span class="sr-only">Close</span>
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(alertBox);
+        setTimeout(() => {
+            alertBox.remove();
+        }, 5000);
     }
 
-    // Show success/error messages
-    @if (session('success'))
-        alert('✅ {{ session('success') }}');
-        setTimeout(() => {
-            location.reload();
-        }, 1500);
-    @endif
+    function showCancelModal(bookingId) {
+        const modal = document.getElementById('cancelModal');
+        const form = document.getElementById('cancelBookingForm');
+        form.action = `/booking/${bookingId}/cancel`; // sesuaikan dengan route PATCH kamu
+        modal.classList.remove('hidden');
+    }
 
-    @if (session('error'))
-        alert('❌ {{ session('error') }}');
-    @endif
+    function closeCancelModal() {
+        document.getElementById('cancelModal').classList.add('hidden');
+    }
+
+    let cashPaymentFormToSubmit = null;
+
+    function showCashConfirmModal(form, amount) {
+        cashPaymentFormToSubmit = form;
+        document.getElementById('cashConfirmText').textContent =
+            `Confirm that you will pay Rp ${Number(amount).toLocaleString('id-ID')} in cash at our counter?`;
+        document.getElementById('cashConfirmModal').classList.remove('hidden');
+    }
+
+    function closeCashConfirmModal() {
+        document.getElementById('cashConfirmModal').classList.add('hidden');
+        cashPaymentFormToSubmit = null;
+    }
+
+    document.getElementById('cashConfirmYesBtn').onclick = function() {
+        if (cashPaymentFormToSubmit) {
+            cashPaymentFormToSubmit.submit();
+            closeCashConfirmModal();
+        }
+    };
 </script>
