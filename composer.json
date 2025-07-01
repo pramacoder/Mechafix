@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.2",
         "alkoumi/laravel-hijri-date": "^1.0",
+        "guava/calendar": "^1.14",
         "jaocero/filachat": "dev-main",
         "laravel/framework": "^11.0",
         "laravel/jetstream": "^5.3",
