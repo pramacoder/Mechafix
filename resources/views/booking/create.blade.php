@@ -50,7 +50,8 @@
                                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                     <p class="mt-1 text-xs text-gray-500">
-                                        <span class="text-red-500">⚠️</span> Jika tidak bisa memilih tanggal maka bengkel tutup.
+                                        <span class="text-red-500">⚠️</span> Jika tidak bisa memilih tanggal maka
+                                        bengkel tutup.
                                     </p>
                                 </div>
 
@@ -94,7 +95,7 @@
                                     d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m11 0v-4a2 2 0 00-2-2h-4m-2 0h-4a2 2 0 00-2 2v4m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v8" />
                             </svg>
                             <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ditemukan kendaraan</h3>
-                            <p class="mt-1 text-sm text-gray-500">Kamu harus melakukan login sebelum booking service.
+                            <p class="mt-1 text-sm text-gray-500">Kamu harus menambah kendaraan sebelum booking service.
                             </p>
                             <div class="mt-6">
                                 <a href="{{ route('platkendaraan.create') }}"
@@ -115,16 +116,12 @@
 
             // Ambil semua data hari libur dari sistem (database Filament)
             const holidayDates = @json(\App\Models\HariLibur::getHolidayDates(now()->format('Y-m-d'), now()->addMonths(3)->format('Y-m-d')));
-
-            // Ambil detail hari libur untuk nama
             const holidayDetails = @json(\App\Models\HariLibur::getHolidayDetails(now()->format('Y-m-d'), now()->addMonths(3)->format('Y-m-d')));
 
-            // Fungsi untuk mengecek apakah tanggal adalah hari libur
             function isHoliday(date) {
                 return holidayDates.includes(date);
             }
 
-            // Fungsi untuk mendapatkan nama hari libur
             function getHolidayName(date) {
                 const holiday = holidayDetails.find(h =>
                     h.dates && h.dates.includes(date)
@@ -132,23 +129,20 @@
                 return holiday ? holiday.nama : 'Hari Libur';
             }
 
-            // Event listener untuk validasi tanggal
             dateInput.addEventListener('change', function() {
                 const selectedDate = this.value;
-
                 if (selectedDate && isHoliday(selectedDate)) {
                     const holidayName = getHolidayName(selectedDate);
 
-                    // Tampilkan pesan error dengan nama hari libur
-                    alert(
-                        `🚫 Tanggal yang Anda pilih adalah hari libur:\n"${holidayName}"\n\nSilakan pilih tanggal lain.`
-                        );
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Tanggal Libur!',
+                        html: `Tanggal yang Anda pilih adalah hari libur:<br><b>"${holidayName}"</b><br>Silakan pilih tanggal lain.`,
+                        confirmButtonText: 'OK'
+                    });
 
-                    // Reset input
                     this.value = '';
                     this.focus();
-
-                    // Tambahkan highlight merah sementara
                     this.classList.add('border-red-500', 'bg-red-50');
                     setTimeout(() => {
                         this.classList.remove('border-red-500', 'bg-red-50');
@@ -156,34 +150,24 @@
                 }
             });
 
-            // Validasi saat form akan disubmit
             const form = dateInput.closest('form');
             if (form) {
                 form.addEventListener('submit', function(e) {
                     const selectedDate = dateInput.value;
-
                     if (selectedDate && isHoliday(selectedDate)) {
                         e.preventDefault();
                         const holidayName = getHolidayName(selectedDate);
-                        alert(
-                            `❌ Tidak bisa booking di hari libur!\n"${holidayName}"\n\nSilakan pilih tanggal lain.`
-                            );
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Tidak bisa booking di hari libur!',
+                            html: `Hari libur: <b>"${holidayName}"</b><br>Silakan pilih tanggal lain.`,
+                            confirmButtonText: 'OK'
+                        });
                         dateInput.focus();
                         return false;
                     }
                 });
             }
-            // Opsional: Highlight weekend juga (Sabtu & Minggu) - jika diperlukan
-            // dateInput.addEventListener('input', function() {
-            //     const selectedDate = new Date(this.value);
-            //     const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 6 = Saturday
-
-            //     if (dayOfWeek === 0 || dayOfWeek === 6) {
-            //         const dayName = dayOfWeek === 0 ? 'Minggu' : 'Sabtu';
-            //         alert(`⚠️ Hari ${dayName} biasanya tutup.\nSilakan pilih hari kerja.`);
-            //         this.value = '';
-            //     }
-            // });
         });
     </script>
 </x-app-layout>

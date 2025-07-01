@@ -15,7 +15,7 @@ class KonsumenResource extends Resource
 {
     protected static ?string $model = Konsumen::class;
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
-    protected static ?string $navigationGroup = 'Customer Management';
+    protected static ?string $navigationGroup = 'User Management';
     protected static ?string $navigationLabel = 'Customers';
 
     public static function form(Form $form): Form

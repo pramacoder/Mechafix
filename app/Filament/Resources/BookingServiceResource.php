@@ -13,40 +13,66 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Carbon;
 
 class BookingServiceResource extends Resource
 {
     protected static ?string $model = BookingService::class;
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
-    protected static ?string $navigationGroup = 'Dipake?';
+    protected static ?string $navigationGroup = 'Booking Management';
     protected static ?string $navigationLabel = 'Bookings';
-    protected static ?int $navigationSort = 5;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\Select::make('id_konsumen')
-                    ->label('Id_Customer')
-                    ->relationship('konsumen', 'id_konsumen')
-                    ->getOptionLabelFromRecordUsing(fn($record) => $record->user->name ?? 'Unknown User')
-                    ->required()
-                    ->searchable(),
+                    ->label('Customer')
+                    ->options(function () {
+                        return Konsumen::with('user')->get()->mapWithKeys(function ($konsumen) {
+                            return [$konsumen->id_konsumen => $konsumen->user->name ?? 'Unknown User'];
+                        });
+                    })
+                    ->afterStateUpdated(function (callable $set) {
+                        $set('id_plat_kendaraan', null);
+                    })
+                    ->reactive()
+                    ->nullable()
+                    ->searchable()
+                    ->placeholder('Select a customer'),
                 Forms\Components\Select::make('id_plat_kendaraan')
                     ->label('Vehicle')
-                    ->relationship('platKendaraan', 'nomor_plat_kendaraan')
+                    ->options(function (callable $get) {
+                        $idKonsumen = $get('id_konsumen');
+                        if (!$idKonsumen) return [];
+
+                        return \App\Models\PlatKendaraan::where('id_konsumen', $idKonsumen)
+                            ->get()
+                            ->mapWithKeys(function ($plat) {
+                                return [$plat->id_plat_kendaraan => $plat->nomor_plat_kendaraan .
+                                    ($plat->tipe_kendaraan ? ' - ' . $plat->tipe_kendaraan : '')];
+                            });
+                    })
+                    ->reactive()
+                    ->searchable()
                     ->required()
-                    ->searchable(),
+                    ->placeholder('Select a vehicle'),
                 Forms\Components\Select::make('id_mekanik')
                     ->label('Mechanic')
                     ->options(function () {
-                        return Mekanik::with('user')->get()->mapWithKeys(function ($mekanik) {
-                            return [$mekanik->id_mekanik => $mekanik->user->name ?? 'Unknown User'];
-                        });
+                        $today = Carbon::now()->dayOfWeekIso;
+
+                        return \App\Models\Mekanik::with('user')
+                            ->where('kuantitas_hari', '>=', $today)
+                            ->get()
+                            ->mapWithKeys(function ($mekanik) {
+                                return [$mekanik->id_mekanik => $mekanik->user->name ?? 'Unknown User'];
+                            });
                     })
                     ->nullable()
                     ->searchable()
-                    ->placeholder('Select a mechanic'),
+                    ->placeholder('Select a mechanic')
+                    ->helperText('Only available mechanics for today are listed.'),
                 Forms\Components\DatePicker::make('tanggal_booking')
                     ->label('Tanggal Booking')
                     ->required()
@@ -62,11 +88,8 @@ class BookingServiceResource extends Resource
                     ->reactive(),
                 Forms\Components\TimePicker::make('estimasi_kedatangan')
                     ->label('Estimated Arrival')
+                    ->default(Carbon::now('Asia/Makassar')->format('H:i'))
                     ->required(),
-                Forms\Components\Textarea::make('keluhan_konsumen')
-                    ->label('Customer Complaint')
-                    ->required()
-                    ->rows(3),
                 Forms\Components\Select::make('status_booking')
                     ->label('Status')
                     ->options([
@@ -77,12 +100,11 @@ class BookingServiceResource extends Resource
                     ])
                     ->required()
                     ->default('menunggu'),
-                Forms\Components\TextInput::make('total_biaya')
-                    ->label('Total Cost')
-                    ->numeric()
-                    ->prefix('Rp')
-                    ->nullable()
-                    ->disabled(),
+                Forms\Components\Textarea::make('keluhan_konsumen')
+                    ->label('Customer Complaint')
+                    ->required()
+                    ->rows(3)
+                    ->columnSpanFull()
             ]);
     }
 
@@ -118,10 +140,6 @@ class BookingServiceResource extends Resource
                 Tables\Columns\TextColumn::make('mekanik.user.name')
                     ->label('Mechanic')
                     ->default('Not assigned'),
-                Tables\Columns\TextColumn::make('total_biaya')
-                    ->label('Total Cost')
-                    ->money('IDR')
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('keluhan_konsumen')
                     ->label('Complaint')
                     ->limit(50),
@@ -176,6 +194,17 @@ class BookingServiceResource extends Resource
                             'id_mekanik' => $data['id_mekanik'],
                             'status_booking' => 'dikonfirmasi'
                         ]);
+
+                        $mekanik = Mekanik::find($data['id_mekanik']);
+                        if ($mekanik && $mekanik->user) {
+                            $mekanik->user->notify(new \App\Notifications\MekanikJobAssigned($record));
+                        }
+
+                        $record->loadMissing(['mekanik.user']);
+
+                        if ($record->konsumen && $record->konsumen->user) {
+                            $record->konsumen->user->notify(new \App\Notifications\MekanikAssignedToBooking($record));
+                        }
                     })
                     ->visible(fn(BookingService $record) => $record->status_booking === 'menunggu'),
             ])

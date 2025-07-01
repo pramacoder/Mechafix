@@ -12,7 +12,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Ramsey\Uuid\Type\Integer;
 
 class SparePartResource extends Resource
 {
@@ -20,7 +19,6 @@ class SparePartResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
     protected static ?string $navigationGroup = 'Master Data';
     protected static ?string $navigationLabel = 'Spare Parts';
-    protected static ?Int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {
@@ -116,7 +114,7 @@ class SparePartResource extends Resource
                 Tables\Filters\Filter::make('stok_rendah')
                     ->label('Stok Rendah')
                     ->query(fn (Builder $query): Builder => $query->where('kuantitas_barang', '<=', 10)),
-
+                
                 Tables\Filters\Filter::make('stok_habis')
                     ->label('Stok Habis')
                     ->query(fn (Builder $query): Builder => $query->where('kuantitas_barang', '=', 0)),

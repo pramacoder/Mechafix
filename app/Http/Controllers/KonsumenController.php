@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pembayaran;
 use App\Models\BookingService;
 use App\Models\Mekanik;
+use App\Notifications\PaymentSuccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -41,6 +42,9 @@ class KonsumenController extends Controller
                 'bukti_pembayaran' => $path
             ]);
 
+            $booking = $pembayaran->bookingService;
+            $booking->konsumen->user->notify(new PaymentSuccess($pembayaran));
+
             Log::info('Bukti pembayaran uploaded: ' . $path);
 
             return redirect()->back()->with('success', 'Bukti pembayaran berhasil diupload! Menunggu verifikasi admin.');
@@ -57,27 +61,24 @@ class KonsumenController extends Controller
             Log::info('Konsumen ID from pembayaran: ' . $pembayaran->bookingService->id_konsumen);
             Log::info('Auth konsumen ID: ' . auth()->user()->konsumen->id_konsumen);
 
-            // Pastikan pembayaran milik konsumen yang login
             if ($pembayaran->bookingService->id_konsumen !== auth()->user()->konsumen->id_konsumen) {
-                Log::error('Unauthorized: Payment not belongs to logged user');
                 return redirect()->back()->with('error', 'Unauthorized action.');
             }
 
-            // Pastikan status pembayaran masih belum dibayar
-            if ($pembayaran->status_pembayaran === 'Sudah Dibayar') {
-                return redirect()->back()->with('error', 'Pembayaran sudah lunas.');
+            if (!empty($pembayaran->bukti_pembayaran)) {
+                return redirect()->back()->with('error', 'Payment method has already been selected.');
             }
 
-            // Update bukti pembayaran dengan marker cash payment
             $pembayaran->update([
-                'bukti_pembayaran' => 'cash_payment_confirmed'
+                'bukti_pembayaran' => 'cash_payment_confirmed',
+                'status_pembayaran' => 'Belum Dibayar',
             ]);
 
-            Log::info('Cash payment confirmed for payment: ' . $pembayaran->id_pembayaran);
+            $booking = $pembayaran->bookingService;
+            $booking->konsumen->user->notify(new PaymentSuccess($pembayaran));
 
-            return redirect()->back()->with('success', 'Konfirmasi pembayaran tunai berhasil! Silakan bayar ke admin/kasir dengan total Rp ' . number_format($pembayaran->total_pembayaran, 0, ',', '.'));
+            return redirect()->back()->with('success', 'Konfirmasi pembayaran tunai berhasil! Silakan bayar ke admin.');
         } catch (\Exception $e) {
-            Log::error('Error confirming cash payment: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Gagal konfirmasi pembayaran: ' . $e->getMessage());
         }
     }
@@ -149,7 +150,7 @@ class KonsumenController extends Controller
             $specialties = $mekanik->bookingServices()
                 ->with('transaksiServices.service')
                 ->get()
-                ->flatMap(function($booking) {
+                ->flatMap(function ($booking) {
                     return $booking->transaksiServices->pluck('service.kategori_service');
                 })
                 ->filter()
@@ -162,24 +163,23 @@ class KonsumenController extends Controller
                 'completion_rate' => $stats['total_jobs'] > 0 ? round(($stats['completed_jobs'] / $stats['total_jobs']) * 100) : 0,
                 'avg_jobs_per_month' => $stats['working_months'] > 0 ? round($stats['total_jobs'] / $stats['working_months'], 1) : 0,
                 'total_revenue' => $mekanik->bookingServices()
-                    ->whereHas('pembayarans', function($q) {
+                    ->whereHas('pembayarans', function ($q) {
                         $q->where('status_pembayaran', 'Sudah Dibayar');
                     })
                     ->with('pembayarans')
                     ->get()
-                    ->sum(function($booking) {
+                    ->sum(function ($booking) {
                         return $booking->pembayarans->first()->total_pembayaran ?? 0;
                     })
             ];
 
             return view('konsumen.mekanik-profile', compact(
-                'mekanik', 
-                'stats', 
-                'myBookings', 
+                'mekanik',
+                'stats',
+                'myBookings',
                 'specialties',
                 'performance'
             ));
-
         } catch (\Exception $e) {
             Log::error('Error loading mechanic profile: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Failed to load mechanic profile.');

@@ -14,7 +14,7 @@ class PlatKendaraanResource extends Resource
 {
     protected static ?string $model = PlatKendaraan::class;
     protected static ?string $navigationIcon = 'heroicon-o-truck';
-    protected static ?string $navigationGroup = 'Dipake?';
+    protected static ?string $navigationGroup = 'Vehicle Management';
     protected static ?string $navigationLabel = 'Vehicles';
 
     public static function form(Form $form): Form

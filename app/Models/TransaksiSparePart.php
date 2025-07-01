@@ -17,6 +17,8 @@ class TransaksiSparePart extends Model
         'id_barang',
         'kuantitas_barang',
         'subtotal_barang',
+        'id_booking_service',
+        'id_pembayaran',
     ];
 
     protected $casts = [
@@ -33,5 +35,10 @@ class TransaksiSparePart extends Model
     public function pembayaran()
     {
         return $this->hasMany(Pembayaran::class, 'id_transaksi_barang', 'id_transaksi_barang');
+    }
+
+    public function bookingService()
+    {
+        return $this->belongsTo(BookingService::class, 'id_booking_service', 'id_booking_service');
     }
 }

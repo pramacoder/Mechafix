@@ -52,7 +52,7 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach (auth()->user()->mekanik->bookingServices()->where('status_booking', 'dikonfirmasi')->with(['konsumen.user', 'platKendaraan', 'transaksiServices.service'])->get() as $booking)
+                            @foreach (auth()->user()->mekanik->bookingServices()->where('status_booking', 'dikonfirmasi')->with(['konsumen.user', 'platKendaraan', 'transaksiServices.service', 'transaksiSpareParts.sparePart'])->get() as $booking)
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                         #{{ $booking->id_booking_service }}
@@ -76,45 +76,52 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        @if ($booking->transaksiServices && $booking->transaksiServices->count() > 0)
+                                        @php
+                                            $totalBiaya =
+                                                $booking->transaksiServices->sum('subtotal_service') +
+                                                $booking->transaksiSpareParts->sum('subtotal_barang');
+                                            $serviceCount = $booking->transaksiServices->count();
+                                            $sparepartCount = $booking->transaksiSpareParts->count();
+                                        @endphp
+                                        @if ($serviceCount > 0 || $sparepartCount > 0)
                                             <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
-                                                Services Selected
+                                                Services/Parts Selected
                                             </span>
                                             <div class="text-xs text-gray-600 mt-1">
-                                                Total: Rp {{ number_format($booking->total_biaya, 0, ',', '.') }}
+                                                Total: Rp {{ number_format($totalBiaya, 0, ',', '.') }}
                                             </div>
                                             <div class="text-xs text-gray-500 mt-1">
-                                                {{ $booking->transaksiServices->count() }} service(s)
+                                                {{ $serviceCount }} service(s), {{ $sparepartCount }} part(s)
                                             </div>
+                                            @if ($sparepartCount)
+                                                <div class="text-xs text-green-700 mt-1">
+                                                    Spare Parts:
+                                                    @foreach ($booking->transaksiSpareParts as $ts)
+                                                        {{ $ts->sparePart->nama_barang ?? '-' }}@if ($ts->kuantitas_barang > 1)
+                                                            (x{{ $ts->kuantitas_barang }})
+                                                        @endif{{ !$loop->last ? ',' : '' }}
+                                                    @endforeach
+                                                </div>
+                                            @endif
                                         @else
                                             <span class="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
                                                 Need Analysis
                                             </span>
                                         @endif
                                     </td>
-
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        @if ($booking->transaksiServices->count() === 0)
-                                            <!-- Step 1: Select Services -->
+                                        @if ($serviceCount === 0 && $sparepartCount === 0)
                                             <button
                                                 onclick="openServiceModal({{ $booking->id_booking_service }}, '{{ $booking->platKendaraan->nomor_plat_kendaraan }}', '{{ $booking->konsumen->user->name }}')"
                                                 class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs">
-                                                Select Services
+                                                Select Services/Parts
                                             </button>
                                         @else
-                                            <!-- Step 2: Complete Job -->
-                                            <form method="POST"
-                                                action="{{ route('mekanik.complete-job', $booking->id_booking_service) }}"
-                                                class="inline">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit"
-                                                    onclick="return confirm('Mark this job as completed? Customer will be able to make payment.\n\nTotal: Rp {{ number_format($booking->total_biaya, 0, ',', '.') }}')"
-                                                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs">
-                                                    Complete Job (Rp
-                                                    {{ number_format($booking->total_biaya, 0, ',', '.') }})
-                                                </button>
-                                            </form>
+                                            <a href="{{ route('mekanik.complete-job', $booking->id_booking_service) }}"
+                                                onclick="return confirmCompleteJob(event, {{ $totalBiaya }})"
+                                                class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs font-semibold">
+                                                Complete Job (Rp {{ number_format($totalBiaya, 0, ',', '.') }})
+                                            </a>
                                         @endif
                                     </td>
                                 </tr>
@@ -137,7 +144,7 @@
 
             @if (auth()->user()->mekanik && auth()->user()->mekanik->bookingServices()->where('status_booking', 'selesai')->exists())
                 <div class="space-y-3">
-                    @foreach (auth()->user()->mekanik->bookingServices()->where('status_booking', 'selesai')->with(['konsumen.user', 'platKendaraan', 'pembayarans'])->latest('updated_at')->take(5)->get() as $completed)
+                    @foreach (auth()->user()->mekanik->bookingServices()->where('status_booking', 'selesai')->with(['konsumen.user', 'platKendaraan', 'pembayarans', 'transaksiServices.service', 'transaksiSpareParts.sparePart'])->latest('updated_at')->take(5)->get() as $completed)
                         <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                             <div class="flex justify-between items-start">
                                 <div class="flex-1">
@@ -153,8 +160,18 @@
                                     </p>
                                     <p class="text-sm text-green-800">
                                         <strong>Amount:</strong> Rp
-                                        {{ number_format($completed->total_biaya ?? 0, 0, ',', '.') }}
+                                        {{ number_format($completed->transaksiServices->sum('subtotal_service') + $completed->transaksiSpareParts->sum('subtotal_barang'), 0, ',', '.') }}
                                     </p>
+                                    @if ($completed->transaksiSpareParts->count())
+                                        <div class="text-xs text-green-700 mt-1">
+                                            Spare Parts:
+                                            @foreach ($completed->transaksiSpareParts as $ts)
+                                                {{ $ts->sparePart->nama_barang ?? '-' }}@if ($ts->kuantitas_barang > 1)
+                                                    (x{{ $ts->kuantitas_barang }})
+                                                @endif{{ !$loop->last ? ',' : '' }}
+                                            @endforeach
+                                        </div>
+                                    @endif
                                 </div>
                                 <div class="ml-4 text-right">
                                     @if ($completed->pembayarans && $completed->pembayarans->first())
@@ -191,17 +208,19 @@
         <!-- Chat Inbox Section -->
         <div class="mb-6">
             <h4 class="text-md font-medium text-gray-700 mb-4">💬 Customer Chat Inbox</h4>
-            @if(isset($conversations) && $conversations->count())
+            @if (isset($conversations) && $conversations->count())
                 <div class="space-y-4">
-                    @foreach($conversations as $conversation)
-                        <a href="{{ route('filachat.mekanik.chat', $conversation->id) }}" class="block bg-gray-50 border rounded-lg p-4 hover:bg-blue-50 transition">
+                    @foreach ($conversations as $conversation)
+                        <a href="{{ route('filachat.mekanik.chat', $conversation->id) }}"
+                            class="block bg-gray-50 border rounded-lg p-4 hover:bg-blue-50 transition">
                             <div class="flex justify-between items-center mb-2">
                                 <div>
                                     <span class="font-semibold text-blue-700">
                                         {{ $conversation->sender->agentable->name ?? 'Unknown Konsumen' }}
                                     </span>
                                     <span class="text-xs text-gray-500 ml-2">
-                                        (Last: {{ $conversation->messages->last()?->created_at?->diffForHumans() ?? '-' }})
+                                        (Last:
+                                        {{ $conversation->messages->last()?->created_at?->diffForHumans() ?? '-' }})
                                     </span>
                                 </div>
                             </div>
@@ -219,13 +238,12 @@
     </div>
 </div>
 
-<!-- Modal for Service Selection -->
+<!-- Modal for Service & Spare Part Selection -->
 <div id="serviceModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
     <div
         class="relative top-10 mx-auto p-5 border w-[800px] shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
         <div class="mt-3">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">🔧 Select Services Performed</h3>
-
+            <h3 class="text-lg font-medium text-gray-900 mb-4">🔧 Select Services & Spare Parts</h3>
             <form id="serviceForm" method="POST">
                 @csrf
                 @method('PATCH')
@@ -237,7 +255,7 @@
                 </div>
 
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-3">Services Performed</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Pilih service yang tersedia</label>
                     <div class="max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-4">
                         @foreach (\App\Models\Service::orderBy('jenis_service')->orderBy('nama_service')->get()->groupBy('jenis_service') as $jenis => $services)
                             <div class="mb-4">
@@ -274,6 +292,32 @@
                     </div>
                 </div>
 
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Spare Parts Used</label>
+                    <div class="max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-4">
+                        @foreach (\App\Models\SparePart::orderBy('nama_barang')->get() as $sparepart)
+                            <div
+                                class="flex items-center justify-between p-3 hover:bg-gray-50 rounded border border-gray-100">
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="spareparts[]" value="{{ $sparepart->id_barang }}"
+                                        data-price="{{ $sparepart->harga_barang }}"
+                                        data-name="{{ $sparepart->nama_barang }}"
+                                        id="sparepart_{{ $sparepart->id_barang }}"
+                                        class="sparepart-checkbox h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                                    <label for="sparepart_{{ $sparepart->id_barang }}"
+                                        class="ml-3 text-sm cursor-pointer flex-1">
+                                        <div class="font-medium text-green-900">
+                                            {{ $sparepart->nama_barang }}</div>
+                                    </label>
+                                </div>
+                                <div class="text-sm font-medium text-green-700 ml-4">
+                                    Rp {{ number_format($sparepart->harga_barang, 0, ',', '.') }}
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-lg font-medium text-blue-900">Total Cost:</span>
@@ -284,7 +328,7 @@
                         <span id="totalTime">0 minutes</span>
                     </div>
                     <div class="text-xs text-blue-600 mt-2">
-                        <span id="selectedCount">0</span> service(s) selected
+                        <span id="selectedCount">0</span> item(s) selected
                     </div>
                 </div>
 
@@ -296,7 +340,7 @@
                     <button type="submit" id="saveServicesBtn"
                         class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                         disabled>
-                        Save Services
+                        Save Selection
                     </button>
                 </div>
             </form>
@@ -308,7 +352,6 @@
     let currentBookingId = null;
 
     function openServiceModal(bookingId, vehicle, customer) {
-        console.log('Opening modal for booking:', bookingId);
         currentBookingId = bookingId;
 
         document.getElementById('serviceModal').classList.remove('hidden');
@@ -316,7 +359,7 @@
         document.getElementById('vehicleCustomerInfo').value = `${vehicle} - ${customer}`;
 
         // Reset checkboxes and calculation
-        document.querySelectorAll('.service-checkbox').forEach(checkbox => {
+        document.querySelectorAll('.service-checkbox, .sparepart-checkbox').forEach(checkbox => {
             checkbox.checked = false;
         });
         calculateTotal();
@@ -330,70 +373,105 @@
     function calculateTotal() {
         let totalCost = 0;
         let totalTime = 0;
-        let selectedCount = 0;
+        let selectedServiceCount = 0;
+        let selectedSparepartCount = 0;
 
+        // Services
         document.querySelectorAll('.service-checkbox:checked').forEach(checkbox => {
             totalCost += parseInt(checkbox.getAttribute('data-price'));
             totalTime += parseInt(checkbox.getAttribute('data-time'));
-            selectedCount++;
+            selectedServiceCount++;
+        });
+
+        // Spareparts
+        document.querySelectorAll('.sparepart-checkbox:checked').forEach(checkbox => {
+            totalCost += parseInt(checkbox.getAttribute('data-price'));
+            selectedSparepartCount++;
         });
 
         // Update DOM elements
         document.getElementById('totalCost').textContent = 'Rp ' + totalCost.toLocaleString('id-ID');
         document.getElementById('totalTime').textContent = totalTime + ' minutes';
-        document.getElementById('selectedCount').textContent = selectedCount;
+        document.getElementById('selectedCount').textContent = selectedServiceCount + selectedSparepartCount;
 
         // Enable/disable save button
         const saveBtn = document.getElementById('saveServicesBtn');
-        if (selectedCount > 0) {
+        if (selectedServiceCount > 0 || selectedSparepartCount > 0) {
             saveBtn.disabled = false;
-            saveBtn.textContent = `Save Services (${selectedCount})`;
+            saveBtn.textContent =
+                `Save Selection (${selectedServiceCount} service${selectedServiceCount !== 1 ? 's' : ''}, ${selectedSparepartCount} part${selectedSparepartCount !== 1 ? 's' : ''})`;
         } else {
             saveBtn.disabled = true;
-            saveBtn.textContent = 'Save Services';
+            saveBtn.textContent = 'Save Selection';
         }
-
-        console.log('Selected services:', selectedCount, 'Total cost:', totalCost);
     }
 
-    // Event listeners
+    // Toast function
+    function showAlert(type, message) {
+        const alertBox = document.createElement('div');
+        alertBox.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg text-sm 
+        ${type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : ''}
+        ${type === 'error' ? 'bg-red-50 border border-red-200 text-red-800' : ''}`;
+        alertBox.innerHTML = `
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                ${type === 'success' ? 
+                    '<svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 00-2 0v6a1 1 0 002 0V5z" clip-rule="evenodd" /></svg>' :
+                    '<svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 00-2 0v6a1 1 0 002 0V5z" clip-rule="evenodd" /></svg>'
+                }
+            </div>
+            <div class="ml-3">
+                <p class="font-medium">${type === 'success' ? 'Success!' : 'Error!'}</p>
+                <p class="mt-1">${message}</p>
+            </div>
+            <div class="ml-auto pl-3">
+                <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-500">
+                    <span class="sr-only">Close</span>
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    `;
+        document.body.appendChild(alertBox);
+
+        setTimeout(() => {
+            alertBox.remove();
+        }, 5000);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         // Add change listeners to checkboxes
-        document.querySelectorAll('.service-checkbox').forEach(checkbox => {
+        document.querySelectorAll('.service-checkbox, .sparepart-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', calculateTotal);
         });
 
         // Handle form submission
         document.getElementById('serviceForm').addEventListener('submit', function(e) {
             const selectedServices = document.querySelectorAll('.service-checkbox:checked');
-            if (selectedServices.length === 0) {
+            const selectedSpareparts = document.querySelectorAll('.sparepart-checkbox:checked');
+            if (selectedServices.length === 0 && selectedSpareparts.length === 0) {
                 e.preventDefault();
-                alert('Please select at least one service!');
+                showAlert('error', 'Please select at least one service or spare part!');
                 return false;
             }
 
-            console.log('Submitting form with', selectedServices.length, 'services');
             document.getElementById('saveServicesBtn').disabled = true;
             document.getElementById('saveServicesBtn').textContent = 'Saving...';
         });
 
-        // Show success/error messages
+        // Show flash messages as toast
         @if (session('success'))
-            alert('✅ {{ session('success') }}');
-            // Auto-refresh after successful save
-            setTimeout(() => {
-                console.log('Auto-refreshing page...');
-                location.reload();
-            }, 1500);
+            showAlert('success', '{{ session('success') }}');
         @endif
 
         @if (session('error'))
-            alert('❌ {{ session('error') }}');
+            showAlert('error', '{{ session('error') }}');
             console.error('Error:', '{{ session('error') }}');
         @endif
     });
 
-    // Close modal when clicking outside
     window.onclick = function(event) {
         const serviceModal = document.getElementById('serviceModal');
         if (event.target === serviceModal) {
@@ -401,17 +479,25 @@
         }
     }
 
-    // Prevent modal close on form click
     document.getElementById('serviceForm').addEventListener('click', function(e) {
         e.stopPropagation();
     });
 
-    // Debug function
-    function debugBooking(bookingId) {
-        console.log('Debug booking:', bookingId);
-        fetch(`/debug/booking/${bookingId}`)
-            .then(response => response.json())
-            .then(data => console.log('Booking data:', data))
-            .catch(error => console.error('Debug error:', error));
+    // Ganti confirm pada tombol Complete Job dengan SweetAlert2
+    window.confirmCompleteJob = function(event, total) {
+        event.preventDefault();
+        Swal.fire({
+            title: 'Mark this job as completed?',
+            text: 'Customer will be able to make payment.\nTotal: Rp ' + total.toLocaleString('id-ID'),
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Complete',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location = event.target.href;
+            }
+        });
+        return false;
     }
 </script>
