@@ -90,4 +90,21 @@ class Pembayaran extends Model
             }
         });
     }
+    public function getRemainingTimeAttribute()
+    {
+        if ($this->status_booking === 'dikonfirmasi') {
+            $completion = $this->estimated_completion;
+            if ($completion) {
+                $remaining = $completion->diffInSeconds(Carbon::now());
+                return $remaining > 0 ? $remaining : 0;
+            }
+        }
+        return null;
+    }
+        // Scope for filtering by status
+    public function scopeByStatus($query, $status)
+        {
+            return $query->where('status_booking', $status);
+        }
+
 }

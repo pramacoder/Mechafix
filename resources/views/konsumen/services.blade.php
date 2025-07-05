@@ -113,6 +113,8 @@
             </div>
         </div>
     </div>
+    <x-brand-trusted/>
+    <x-price-list/>
 
     <script>
         // Add some interactive behavior

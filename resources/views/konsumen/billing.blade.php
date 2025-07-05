@@ -197,7 +197,8 @@
 
                             <div class="flex justify-between">
                                 <span class="font-medium text-gray-700">Plat number</span>
-                                <span class="text-gray-800">DK 1988 ADS</span>
+                                <span class="text-gray-800">DK 1988 ADS</span> 
+                                <!-- ambil data dari bookingservis -->
                             </div>
                         </div>
 
@@ -209,7 +210,7 @@
                             </div>
                         </div>
 
-                        {{-- Service Details --}}
+                        {{-- Service Details --}} 
                         <div class="space-y-3">
                             <div class="flex justify-between py-2 border-b border-gray-200">
                                 <span class="text-gray-700">Basic Service</span>

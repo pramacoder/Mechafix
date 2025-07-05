@@ -27,7 +27,7 @@
                     <div class="bg-white rounded-lg shadow-md p-4">
                         <p class="text-gray-700 mb-4">Very thick oil visible. We replaced it with visceral matic oil.
                         </p>
-                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjZjNmNGY2Ii8+CjxjaXJjbGUgY3g9IjE1MCIgY3k9IjEwMCIgcj0iNDAiIGZpbGw9IiNkYzI2MjYiLz4KPHN2ZyB4PSI4MCIgeT0iNjAiIHdpZHRoPSIxNDAiIGhlaWdodD0iODAiPgo8cmVjdCB3aWR0aD0iMTQwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjNjY2IiByeD0iMTAiLz4KPHN2Zz4KPC9zdmc+"
+                        <img src=""
                             alt="Oil Engine Repair" class="w-full h-48 object-cover rounded-lg">
                     </div>
                 </div>

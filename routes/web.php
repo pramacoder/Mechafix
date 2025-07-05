@@ -10,12 +10,20 @@ use App\Models\FilachatConversation;
 use App\Models\PlatKendaraan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-
-Route::get('/', fn() => view('konsumen.home'));
-Route::get('/services', fn() => view('konsumen.services'))->name('services');
-Route::get('/part_shop', fn() => view('konsumen.part_shop'))->name('part_shop');
-Route::get('/history', fn() => view('konsumen.history'))->name('history');
+Route::get('/', fn() => view('konsumen.home'))->name('konsumen.home');
+Route::get('/services', fn() => view('konsumen.services'))->name('konsumen.services');
+Route::get('/part_shop', fn() => view('konsumen.part_shop'))->name('konsumen.part_shop');
+Route::get('/our_profile', fn() => view('konsumen.our_profile'))->name('konsumen.our_profile');
+Route::get('/chat_contact', fn() => view('konsumen.chat_contact'))->name('konsumen.chat_contact');
+Route::get('/history', fn() => view('konsumen.history'))->name('konsumen.history');
 Route::get('/billing', fn() => view('konsumen.billing'))->name('billing');
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
+Route::get('/register', function () {
+    return view('auth.register');
+})->name('register');
+
 
 Route::middleware([
     'auth:sanctum',
@@ -82,3 +90,30 @@ Route::post('/notifications/mark-read/{id}', function($id) {
 })->middleware('auth');
 
 
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+
+// Booking API Routes
+Route::prefix('booking')->group(function () {
+    // Get booking status by license plate number
+    Route::get('status/{plateNumber}', [BookingController::class, 'getBookingStatus']);
+    
+    // Update booking status (protected route - requires authentication)
+    Route::middleware('auth:sanctum')->put('status/{id}', [BookingController::class, 'updateBookingStatus']);
+    
+    // Get all bookings (protected route - requires authentication)
+    Route::middleware('auth:sanctum')->get('all', [BookingController::class, 'getAllBookings']);
+    
+    // Get booking statistics (protected route - requires authentication)
+    Route::middleware('auth:sanctum')->get('statistics', [BookingController::class, 'getBookingStatistics']);
+});
+
+// Public API Routes (no authentication required)
+Route::get('booking-status/{plateNumber}', [BookingController::class, 'getBookingStatus']);
+
+// Alternative routes for web requests
+Route::prefix('v1')->group(function () {
+    Route::get('booking-status/{plateNumber}', [BookingController::class, 'getBookingStatus']);
+    Route::get('booking-statistics', [BookingController::class, 'getBookingStatistics']);
+});
