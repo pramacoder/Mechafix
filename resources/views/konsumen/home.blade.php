@@ -1,3 +1,0 @@
-<x-layoutkonsumen>
-
-</x-layoutkonsumen>

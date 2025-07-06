@@ -1,12 +1,12 @@
 {{-- resources/views/components/contact-section.blade.php --}}
-<div class="min-h-screen bg-gradient-to-br from-purple-100 via-pink-50 to-orange-50 py-16 px-4" x-data="contactComponent()">
+<div class="min-h-screen bg-gradient-to-br from-purple-900 via-orange-300 to-orange-50 py-16 px-4" x-data="contactComponent()">
     <div class="max-w-7xl mx-auto">
         {{-- Header --}}
         <div class="text-center mb-16">
             <h1 class="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
                 Contact Us
             </h1>
-            <div class="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full"></div>
+            <div class="w-24 h-1 bg-gradient-to-r from-purple- to-pink-500 mx-auto rounded-full"></div>
         </div>
 
         <div class="grid lg:grid-cols-2 gap-12 items-start">
@@ -58,8 +58,8 @@
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <h3 class="text-2xl font-bold text-gray-900 mb-2">Office</h3>
-                            <p class="text-gray-600 mb-4">123 Sample St, Sydney NSW 2000 AU</p>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">Our Workshop</h3>
+                            <p class="text-gray-600 mb-4"> Universitas Udayana - Kampus Sudirman</p>
                             <button @click="showMap = true" class="inline-flex items-center text-purple-600 hover:text-purple-700 font-semibold transition-colors duration-200">
                                 Get Directions
                                 <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,21 +100,12 @@
             </div>
 
             {{-- Interactive Map --}}
-            <div class="lg:sticky lg:top-8">
+            <div class="lg:relative lg:top-8">
                 <div class="bg-white rounded-2xl p-4 shadow-lg border border-gray-200 overflow-hidden">
                     <div class="aspect-w-16 aspect-h-12 rounded-xl overflow-hidden">
                         <div id="map" class="w-full h-96 bg-gray-100 rounded-xl relative cursor-pointer" @click="openFullMap">
                             {{-- Placeholder Map (Replace with actual map implementation) --}}
-                            <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-400 to-purple-500">
-                                <div class="text-center text-white">
-                                    <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    </svg>
-                                    <h4 class="text-xl font-bold mb-2">Our Location</h4>
-                                    <p class="text-blue-100">Click to view in Google Maps</p>
-                                </div>
-                            </div>
+                            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63102.03473892871!2d115.14616905908449!3d-8.703212890385402!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd240ec7b6fbad9%3A0x870580569f7703d5!2sUniversitas%20Udayana%20-%20Kampus%20Sudirman!5e0!3m2!1sid!2sid!4v1751823657966!5m2!1sid!2sid" width="100%" height="100%" style="border:0; border-radius: 0.75rem;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                             
                             {{-- Map markers --}}
                             <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -164,22 +155,22 @@
                 <div class="h-96 bg-gray-100 rounded-xl mb-4">
                     {{-- Full size map implementation --}}
                     <iframe 
-                        src="https://www.openstreetmap.org/export/embed.html?bbox=151.1957-33.8675%2C151.2957-33.8775&layer=mapnik&marker=-33.8688%2C151.2093" 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63102.03473892871!2d115.14616905908449!3d-8.703212890385402!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd240ec7b6fbad9%3A0x870580569f7703d5!2sUniversitas%20Udayana%20-%20Kampus%20Sudirman!5e0!3m2!1sid!2sid!4v1751823657966!5m2!1sid!2sid" 
                         width="100%" 
                         height="100%" 
                         style="border: 0; border-radius: 0.75rem;"
-                        loading="lazy">
+                        allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
                     </iframe>
                 </div>
                 
                 <div class="grid md:grid-cols-2 gap-4">
                     <div class="bg-gray-50 p-4 rounded-xl">
                         <h4 class="font-semibold text-gray-900 mb-2">Address</h4>
-                        <p class="text-gray-600">123 Sample St, Sydney NSW 2000 AU</p>
+                        <p class="text-gray-600">Universitas Udayana - Kampus Sudirman<br>86G9+RJV, Jalan P.B. Sudirman, Dangin Puri Klod, Kec. Denpasar Bar., Kota Denpasar, Bali 80234</p>
                     </div>
                     <div class="bg-gray-50 p-4 rounded-xl">
                         <h4 class="font-semibold text-gray-900 mb-2">Get Directions</h4>
-                        <a href="https://www.google.com/maps/dir/?api=1&destination=123+Sample+St,+Sydney+NSW+2000+AU" target="_blank" class="text-blue-600 hover:text-blue-700 font-medium">
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=Universitas+Udayana+-+Kampus+Sudirman,+Jalan+P.B.+Sudirman,+Dangin+Puri+Klod,+Kec.+Denpasar+Bar.,+Kota+Denpasar,+Bali+80234" target="_blank" class="text-blue-600 hover:text-blue-700 font-medium">
                             Open in Google Maps →
                         </a>
                     </div>
@@ -187,51 +178,52 @@
             </div>
         </div>
     </div>
+    
 </div>
 
-<!-- FAQ Section -->
-<div class="max-w-3xl mx-auto mt-40 mb-10">
-    <h2 class="text-3xl md:text-4xl font-bold text-black mb-8 text-center">Frequently Asked Questions</h2>
-    <div class="space-y-4">
-        <details class="group border border-orange-200 rounded-xl bg-white p-6">
-            <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
-                Bagaimana cara booking service di Mechafix?
-                <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
-            </summary>
-            <div class="mt-3 text-gray-700">
-                Anda dapat booking service melalui menu "Book Your Service" di website, pilih layanan, isi data, dan pilih jadwal yang tersedia.
-            </div>
-        </details>
-        <details class="group border border-orange-200 rounded-xl bg-white p-6">
-            <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
-                Apakah bisa konsultasi masalah motor sebelum booking?
-                <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
-            </summary>
-            <div class="mt-3 text-gray-700">
-                Tentu! Silakan gunakan fitur chat atau contact yang tersedia untuk konsultasi gratis dengan tim kami.
-            </div>
-        </details>
-        <details class="group border border-orange-200 rounded-xl bg-white p-6">
-            <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
-                Apa saja metode pembayaran yang diterima?
-                <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
-            </summary>
-            <div class="mt-3 text-gray-700">
-                Kami menerima pembayaran tunai, transfer bank, dan e-wallet (OVO, Gopay, dll).
-            </div>
-        </details>
-        <details class="group border border-orange-200 rounded-xl bg-white p-6">
-            <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
-                Apakah sparepart yang dijual original?
-                <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
-            </summary>
-            <div class="mt-3 text-gray-700">
-                Semua sparepart yang kami jual dijamin original dan bergaransi.
-            </div>
-        </details>
-    </div>
-</div>
 
+<!-- FAQ Section dipindahkan ke dalam grid dan span 2 kolom di layar besar -->
+<div class="lg:col-span-2 w-full max-w-3xl mx-auto mt-20 mb-10 clear-both">
+                <h2 class="text-3xl md:text-4xl font-bold text-black mb-8 text-center">Frequently Asked Questions</h2>
+                <div class="space-y-4">
+                    <details class="group border border-orange-200 rounded-xl bg-white p-6">
+                        <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
+                            Bagaimana cara booking service di Mechafix?
+                            <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
+                        </summary>
+                        <div class="mt-3 text-gray-700">
+                            Anda dapat booking service melalui menu "Book Your Service" di website, pilih layanan, isi data, dan pilih jadwal yang tersedia.
+                        </div>
+                    </details>
+                    <details class="group border border-orange-200 rounded-xl bg-white p-6">
+                        <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
+                            Apakah bisa konsultasi masalah motor sebelum booking?
+                            <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
+                        </summary>
+                        <div class="mt-3 text-gray-700">
+                            Tentu! Silakan gunakan fitur chat atau contact yang tersedia untuk konsultasi gratis dengan tim kami.
+                        </div>
+                    </details>
+                    <details class="group border border-orange-200 rounded-xl bg-white p-6">
+                        <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
+                            Apa saja metode pembayaran yang diterima?
+                            <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
+                        </summary>
+                        <div class="mt-3 text-gray-700">
+                            Kami menerima pembayaran tunai, transfer bank, dan e-wallet (OVO, Gopay, dll).
+                        </div>
+                    </details>
+                    <details class="group border border-orange-200 rounded-xl bg-white p-6">
+                        <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
+                            Apakah sparepart yang dijual original?
+                            <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
+                        </summary>
+                        <div class="mt-3 text-gray-700">
+                            Semua sparepart yang kami jual dijamin original dan bergaransi.
+                        </div>
+                    </details>
+                </div>
+            </div>
 <script>
 function contactComponent() {
     return {

@@ -10,7 +10,7 @@ use App\Models\FilachatConversation;
 use App\Models\PlatKendaraan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\SparePartController;
 
 // Guest routes (untuk tamu yang belum login)
 Route::get('/', fn() => view('guest.home'))->name('guest.home');
@@ -59,14 +59,14 @@ Route::middleware([
                 ->sortByDesc(fn($conv) => optional($conv->messages->last())->created_at);
             $data['conversations'] = $conversations;
         }
-        return view('dashboard', $data);
-    })->name('dashboard');
+        return view('dashboard.konsumen', $data);
+    })->name('dashboard.konsumen');
 
     // Konsumen routes
     Route::middleware('role:konsumen')->group(function () {
-        Route::get('/konsumen/dashboard', function () {
+        Route::get('/dashboard/konsumen', function () {
             return view('dashboard.konsumen');
-        })->name('konsumen.dashboard');
+        })->name('dashboard.konsumen');
         Route::get('/konsumen/profile', function () {
             return view('profile.show');
         })->name('konsumen.profile');
@@ -79,6 +79,7 @@ Route::middleware([
         Route::post('/konsumen/payment/{pembayaran}/upload-bukti', [KonsumenController::class, 'uploadBuktiPembayaran'])->name('konsumen.upload-bukti');
         Route::get('/mekanik/{mekanik}/profile', [KonsumenController::class, 'mekanikProfile'])->name('konsumen.mekanik-profile');
         Route::get('/platkendaraan/{id}/history', [PlatKendaraanController::class, 'history'])->name('platkendaraan.history');
+        Route::get('/konsumen/part_shop', [\App\Http\Controllers\SparePartController::class, 'index'])->name('konsumen.part_shop');
     });
 
     // Mekanik routes
@@ -147,3 +148,14 @@ Route::prefix('v1')->group(function () {
 Route::get('/dashboard/konsumen', function () {
     return view('dashboard.konsumen');
 })->name('dashboard.konsumen');
+
+Route::get('/booking-status/{plateNumber}', [BookingServiceController::class, 'getBookingStatus']);
+Route::get('/konsumen/part_shop', [SparePartController::class, 'index'])->name('konsumen.part_shop');
+
+// Chat dengan mekanik
+Route::get('mekanik/{mekanik}/chat', [FilachatController::class, 'showChat'])->name('filachat.show');
+// Chat dengan admin
+Route::middleware(['auth', 'role:konsumen'])->group(function () {
+    Route::get('admin/{admin}/chat', [\App\Http\Controllers\FilachatController::class, 'showAdminChat'])->name('filachat.admin.show');
+    Route::post('admin/{admin}/chat', [\App\Http\Controllers\FilachatController::class, 'sendAdminMessage'])->name('filachat.admin.send');
+});

@@ -158,7 +158,10 @@
 
         // Fetch booking data
         fetch(`/api/booking-status/${encodeURIComponent(plateNumber)}`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
             .then(data => {
                 document.getElementById('loadingState').classList.add('hidden');
                 
@@ -178,7 +181,7 @@
 
     function updateEstimationStats(booking) {
         // Update customer name (license plate)
-        document.getElementById('customerName').textContent = booking.plat_kendaraan.nomor_plat;
+        document.getElementById('customerName').textContent = booking.plat_kendaraan.nomor_plat_kendaraan;
 
         // Update progress status
         const statusMap = {

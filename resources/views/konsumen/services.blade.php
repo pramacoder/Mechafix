@@ -1,7 +1,7 @@
 <x-layoutkonsumen>
 
     <div class="relative min-h-96 bg-cover bg-center" 
-        style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('{{ asset('Services1.png') }}');">
+        style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('{{ asset('Services1.png') }}');">
         <div class="absolute inset-0 bg-black/60"></div>
         <div class="container mx-auto px-6 py-24 relative z-10">
             <div class="max-w-2xl">
@@ -13,17 +13,17 @@
                         class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded font-semibold transition duration-300">
                         Inquire
                     </button>
-                    <button
+                    <a href="#booking-section"
                         class="border-2 border-white text-white hover:bg-white hover:text-gray-800 px-8 py-3 rounded font-semibold transition duration-300">
                         Schedule
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Booking Section -->
-    <div class="container mx-auto px-6 py-16">
+    <div id="booking-section" class="container mx-auto px-6 py-16">
         <div class="flex flex-col lg:flex-row gap-12">
             <!-- Left Side - Info -->
             <div class="lg:w-1/2">
@@ -39,7 +39,7 @@
                                 <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
                             </svg>
                         </div>
-                        <span class="text-gray-700">info@motorbikeworkshop.com</span>
+                        <span class="text-gray-700">mechafix@fixyou.com</span>
                     </div>
 
                     <div class="flex items-center">
@@ -50,7 +50,7 @@
                                 </path>
                             </svg>
                         </div>
-                        <span class="text-gray-700">+1 (555) 123-4567</span>
+                        <span class="text-gray-700">+62 877 43447862</span>
                     </div>
 
                     <div class="flex items-center">
@@ -61,7 +61,7 @@
                                     clip-rule="evenodd"></path>
                             </svg>
                         </div>
-                        <span class="text-gray-700">456 Motorbike Ave, Sydney NSW 2000 AU</span>
+                        <span class="text-gray-700">Universitas Udayana, Kampus Sudirman</span>
                     </div>
                 </div>
             </div>
@@ -115,7 +115,7 @@
         </div>
     </div>
     <x-brand-trusted/>
-    <x-price-list/>
+
 
     <script>
         // Add some interactive behavior
@@ -134,6 +134,18 @@
                 this.style.transform = 'translateY(0)';
             });
         });
+
+        // Smooth scroll untuk Schedule
+        const scheduleBtn = document.querySelector('a[href="#booking-section"]');
+        if (scheduleBtn) {
+            scheduleBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.getElementById('booking-section');
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        }
     </script>
 
 

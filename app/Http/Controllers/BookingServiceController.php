@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Http\JsonResponse;
 use App\Models\BookingService;
 use App\Models\HariLibur;
 use App\Models\Mekanik;
@@ -12,6 +12,62 @@ use Carbon\Carbon;
 
 class BookingServiceController extends Controller
 {
+    public function getBookingStatus($plateNumber): JsonResponse
+    {
+        try {
+            $normalizedPlate = strtoupper(str_replace(' ', '', $plateNumber));
+            $platKendaraan = PlatKendaraan::whereRaw("REPLACE(UPPER(nomor_plat_kendaraan), ' ', '') = ?", [$normalizedPlate])->first();
+
+            if (!$platKendaraan) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Plat nomor tidak ditemukan'
+                ], 404);
+            }
+            $booking = BookingService::with(['konsumen', 'platKendaraan', 'mekanik'])
+            ->where('id_plat_kendaraan', $platKendaraan->id_plat_kendaraan)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+
+            if (!$booking) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada booking untuk plat nomor ini'
+                ], 404);
+            }
+            $estimatedCompletion = null;
+            $remainingTime = null;
+            if ($booking->status_booking === 'dikonfirmasi') {
+                $confirmationTime = Carbon::parse($booking->updated_at);
+                $estimatedCompletion = $confirmationTime->copy()->addHours(48);
+                $remainingTime = $estimatedCompletion->diffInSeconds(now());
+                if ($remainingTime < 0) $remainingTime = 0;
+            }
+            // ...lanjutkan response sukses seperti biasa...
+            return response()->json([
+                'success' => true,
+                'booking' => [
+                    'id_booking_service' => $booking->id_booking_service,
+                    'tanggal_booking' => $booking->tanggal_booking,
+                    'estimasi_kedatangan' => $booking->estimasi_kedatangan,
+                    'keluhan_konsumen' => $booking->keluhan_konsumen,
+                    'status_booking' => $booking->status_booking,
+                    'created_at' => $booking->created_at,
+                    'updated_at' => $booking->updated_at,
+                    'konsumen' => $booking->konsumen,
+                    'plat_kendaraan' => $booking->platKendaraan,
+                    'mekanik' => $booking->mekanik,
+                    // tambahkan field lain jika perlu
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
     public function index()
     {
         $user = Auth::user();
@@ -98,74 +154,7 @@ class BookingServiceController extends Controller
     /**
      * Get booking status by license plate number
      */
-    public function getBookingStatus($plateNumber): JsonResponse
-    {
-        try {
-            // Find the license plate
-            $platKendaraan = PlatKendaraan::where('nomor_plat', $plateNumber)->first();
-            
-            if (!$platKendaraan) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'License plate not found'
-                ], 404);
-            }
 
-            // Get the latest booking for this license plate
-            $booking = BookingService::with(['konsumen', 'platKendaraan', 'mekanik'])
-                ->where('id_plat_kendaraan', $platKendaraan->id_plat_kendaraan)
-                ->orderBy('created_at', 'desc')
-                ->first();
-
-            if (!$booking) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No booking found for this license plate'
-                ], 404);
-            }
-
-            // Calculate estimated completion time if status is 'dikonfirmasi'
-            $estimatedCompletion = null;
-            $remainingTime = null;
-            
-            if ($booking->status_booking === 'dikonfirmasi') {
-                // Get the timestamp when status changed to 'dikonfirmasi'
-                // For simplicity, using updated_at. In production, you might want to track status changes separately
-                $confirmationTime = Carbon::parse($booking->updated_at);
-                $estimatedCompletion = $confirmationTime->addHours(48);
-                $remainingTime = $estimatedCompletion->diffInSeconds(Carbon::now());
-                
-                // If remaining time is negative, it's overdue
-                if ($remainingTime < 0) {
-                    $remainingTime = 0;
-                }
-            }
-
-            return response()->json([
-                'success' => true,
-                'booking' => [
-                    'id_booking_service' => $booking->id_booking_service,
-                    'tanggal_booking' => $booking->tanggal_booking,
-                    'estimasi_kedatangan' => $booking->estimasi_kedatangan,
-                    'keluhan_konsumen' => $booking->keluhan_konsumen,
-                    'status_booking' => $booking->status_booking,
-                    'created_at' => $booking->created_at,
-                    'updated_at' => $booking->updated_at,
-                    'konsumen' => $booking->konsumen,
-                    'plat_kendaraan' => $booking->platKendaraan,
-                    'mekanik' => $booking->mekanik,
-                    'estimated_completion' => $estimatedCompletion,
-                    'remaining_time_seconds' => $remainingTime
-                ]
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Internal server error'
-            ], 500);
-        }
-    }
 
     /**
      * Update booking status

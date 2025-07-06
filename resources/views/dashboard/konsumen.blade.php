@@ -1,14 +1,12 @@
 <x-layoutkonsumen>
 <x-get-your-estimate />
-    <x-dashboard-konsumen>
-
-    </x-dashboard-konsumen>
-    <x-footer>
-
-    </x-footer>
-    <script src="{{ asset('js/app.js') }}"></script>
+<div class="w-full h-1 bg-black mx-auto rounded-full"></div>
+<x-price-list/>
+<x-brand-trusted></x-brand-trusted>
 </x-layoutkonsumen>
 
+
+    <script src="{{ asset('js/app.js') }}"></script>
 <script>
     let currentPaymentId = null;
 

@@ -62,9 +62,9 @@
                 
                 <p class="text-gray-600 mb-6">Best price fort the best part</p>
                 
-                <button class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-200">
+                <a href="{{ route('konsumen.part_shop') }}" class="w-full block text-center bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-200">
                     See Product
-                </button>
+                </a>
             </div>
         </div>
 
@@ -160,9 +160,9 @@
                     </li>
                 </ul>
                 
-                <button class="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-200">
+                <a href="/konsumen/services#booking-section" class="w-full block text-center bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-200">
                     Booking Service
-                </button>
+                </a>
             </div>
 
             {{-- 150-250cc Card (Popular) --}}
@@ -207,9 +207,9 @@
                     </li>
                 </ul>
                 
-                <button class="w-full bg-white hover:bg-gray-100 text-orange-600 font-semibold py-3 px-6 rounded-xl transition-colors duration-200">
+                <a href="/konsumen/services#booking-section" class="w-full block text-center bg-white hover:bg-gray-100 text-orange-600 font-semibold py-3 px-6 rounded-xl transition-colors duration-200">
                     Booking Service
-                </button>
+                </a>
             </div>
 
             {{-- >250cc Card --}}
@@ -250,9 +250,9 @@
                     </li>
                 </ul>
                 
-                <button class="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-200">
+                <a href="/konsumen/services#booking-section" class="w-full block text-center bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-200">
                     Booking Service
-                </button>
+                </a>
             </div>
         </div>
     </div>
@@ -281,6 +281,21 @@ function pricingComponent() {
         }
     }
 }
+
+// Smooth scroll untuk Booking Service ke #booking-section
+const bookingLinks = document.querySelectorAll('a[href="/konsumen/services#booking-section"]');
+bookingLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+        // Cek jika di halaman yang sama
+        if (window.location.pathname === '/konsumen/services') {
+            e.preventDefault();
+            const target = document.getElementById('booking-section');
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    });
+});
 </script>
 
 <style>

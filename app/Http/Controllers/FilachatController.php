@@ -6,6 +6,7 @@ use App\Models\FilachatAgent;
 use App\Models\FilachatConversation;
 use App\Models\FilachatMessage;
 use App\Models\Mekanik;
+use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -69,7 +70,7 @@ class FilachatController extends Controller
             'avg_jobs_per_month' => $stats['working_months'] > 0 ? round($stats['total_jobs'] / $stats['working_months'], 1) : 0,
             'total_revenue' => $total_revenue,
         ];
-        return view('konsumen.mekanik-profile', compact('mekanik', 'mekanikUser', 'conversation', 'messages', 'stats', 'performance', 'myBookings'));
+        return view('konsumen.chat_contact', compact('mekanik', 'mekanikUser', 'conversation', 'messages'));
     }
 
     // Konsumen sends message to mekanik
@@ -177,5 +178,65 @@ class FilachatController extends Controller
         $messages = $conversation->messages()->with('sender.agentable')->orderBy('created_at')->get();
 
         return view('dashboard.mekanik-chat', compact('conversation', 'messages'));
+    }
+
+    public function showAdminChat($adminId)
+    {
+        $user = Auth::user();
+        $konsumenAgent = FilachatAgent::firstOrCreate([
+            'agentable_id' => $user->id,
+            'agentable_type' => get_class($user),
+            'role' => 'konsumen',
+        ]);
+        $admin = Admin::findOrFail($adminId);
+        $adminUser = $admin->user;
+        $adminAgent = FilachatAgent::firstOrCreate([
+            'agentable_id' => $adminUser->id,
+            'agentable_type' => 'App\\Models\\User',
+            'role' => 'admin',
+        ]);
+        $conversation = FilachatConversation::firstOrCreate([
+            'senderable_id' => $konsumenAgent->id,
+            'senderable_type' => get_class($konsumenAgent),
+            'receiverable_id' => $adminAgent->id,
+            'receiverable_type' => get_class($adminAgent),
+        ]);
+        $messages = $conversation->messages()->with('sender.agentable')->orderBy('created_at')->get();
+        return view('konsumen.chat_contact', compact('admin', 'adminUser', 'conversation', 'messages'));
+    }
+
+    public function sendAdminMessage(Request $request, $adminId)
+    {
+        $request->validate([
+            'message' => 'required|string',
+        ]);
+        $user = Auth::user();
+        $konsumenAgent = FilachatAgent::firstOrCreate([
+            'agentable_id' => $user->id,
+            'agentable_type' => get_class($user),
+            'role' => 'konsumen',
+        ]);
+        $admin = Admin::findOrFail($adminId);
+        $adminUser = $admin->user;
+        $adminAgent = FilachatAgent::firstOrCreate([
+            'agentable_id' => $adminUser->id,
+            'agentable_type' => 'App\\Models\\User',
+            'role' => 'admin',
+        ]);
+        $conversation = FilachatConversation::firstOrCreate([
+            'senderable_id' => $konsumenAgent->id,
+            'senderable_type' => get_class($konsumenAgent),
+            'receiverable_id' => $adminAgent->id,
+            'receiverable_type' => get_class($adminAgent),
+        ]);
+        FilachatMessage::create([
+            'filachat_conversation_id' => $conversation->id,
+            'message' => $request->message,
+            'senderable_id' => $konsumenAgent->id,
+            'senderable_type' => get_class($konsumenAgent),
+            'receiverable_id' => $adminAgent->id,
+            'receiverable_type' => get_class($adminAgent),
+        ]);
+        return redirect()->route('filachat.admin.show', ['admin' => $adminId]);
     }
 }

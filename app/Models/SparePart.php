@@ -26,7 +26,7 @@ class SparePart extends Model
         'nama_barang' => 'string',
         'deskripsi_barang' => 'string',
         'harga_barang' => 'integer',
-        'banyak_barang' => 'integer',
+        'kuantitas_barang' => 'integer', // perbaiki ini
         'gambar_barang' => 'string',
         'link_shopee' => 'string',
     ];

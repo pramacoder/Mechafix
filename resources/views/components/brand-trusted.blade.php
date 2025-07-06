@@ -1,5 +1,5 @@
 {{-- resources/views/components/brand-carousel.blade.php --}}
-<div class="relative overflow-hidden bg-gradient-to-r from-orange-400 to-yellow-400 py-8">
+<div class="relative overflow-hidden bg-gradient-to-r from-orange-400 to-yellow-400 py-8 border-t-4 border-b-4" style="border-top-width:3px; border-bottom-width:3px; border-color:#000;">
     <div class="absolute inset-0 bg-orange opacity-10"></div>
     
     {{-- Header --}}
@@ -7,7 +7,7 @@
         <h2 class="text-2xl md:text-3xl font-bold text-black mb-2">
             Trusted by top brands in the industry
         </h2>
-        <div class="w-24 h-1 bg-black mx-auto rounded-full"></div>
+        <div class="w-full max-w-[400px] h-1 bg-black mx-auto rounded-full"></div>
     </div>
 
     {{-- Infinite Scroll Container --}}
