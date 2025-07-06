@@ -31,17 +31,33 @@
                     <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
                 </label>
             </div>
+            <div class="block mt-4 mb-20">
+                @if (Route::has('register'))
+                    <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-4" href="{{ route('register') }}">
+                        {{ __('Dont have account?') }}
+                    </a>
+                @endif
 
-            <div class="flex items-center justify-end mt-4">
                 @if (Route::has('password.request'))
                     <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
                         {{ __('Forgot your password?') }}
                     </a>
                 @endif
+            </div>
+
+            
+            <div class="flex items-center justify-end mt-4">
+                
 
                 <x-button class="ms-4">
                     {{ __('Log in') }}
                 </x-button>
+                <a href="{{ route('guest.home') }}" class="inline-flex rounded-md items-center px-4 py-2 bg-gray-800 border border-transparent font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition ease-in-out duration-150 ms-4">
+                    Guest?
+                </a>
+
+
+
             </div>
         </form>
     </x-authentication-card>

@@ -1,4 +1,5 @@
-<x-layout>
+<x-layoutkonsumen>
+
     <!-- Main Content -->
     <div class="container mx-auto px-6 py-8">
         <!-- Title Section -->
@@ -242,4 +243,5 @@
             // Here you would implement actual filtering logic
         });
     </script>
-</x-layout>
+
+</x-layoutkonsumen>

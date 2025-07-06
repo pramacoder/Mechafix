@@ -1,8 +1,9 @@
-<x-layout>
-    <!-- Hero Section -->
-    <div class="relative min-h-96 bg-cover bg-center"
-        style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI2MDAiIHZpZXdCb3g9IjAgMCAxMjAwIDYwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjMzMzIi8+CjxjaXJjbGUgY3g9IjMwMCIgY3k9IjMwMCIgcj0iNDAiIGZpbGw9IiM2NjYiLz4KPGNpcmNsZSBjeD0iOTAwIiBjeT0iMzAwIiByPSI0MCIgZmlsbD0iIzY2NiIvPgo8cmVjdCB4PSIyNDAiIHk9IjI2MCIgd2lkdGg9IjcyMCIgaGVpZ2h0PSI4MCIgZmlsbD0iIzU1NSIvPgo8L3N2Zz4=');">
-        <div class="container mx-auto px-6 py-24">
+<x-layoutkonsumen>
+
+    <div class="relative min-h-96 bg-cover bg-center" 
+        style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('{{ asset('Services1.png') }}');">
+        <div class="absolute inset-0 bg-black/60"></div>
+        <div class="container mx-auto px-6 py-24 relative z-10">
             <div class="max-w-2xl">
                 <h1 class="text-5xl font-bold text-white mb-4">Book Your Service Today!</h1>
                 <p class="text-xl text-gray-200 mb-8">Contact us now to schedule your appointment or to learn more
@@ -134,4 +135,6 @@
             });
         });
     </script>
-</x-layout>
+
+
+</x-layoutkonsumen>

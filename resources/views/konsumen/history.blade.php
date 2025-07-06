@@ -1,6 +1,6 @@
-<x-layout>
-    <!-- Header -->
-    <div class="text-center mb-16">
+<x-layoutkonsumen>
+
+<div class="text-center mb-16">
         <div class="text-orange-500 font-bold text-sm mb-4">MECHAFIX</div>
         <h1 class="text-4xl font-bold text-gray-900 mb-2">History Repair of</h1>
         <h2 class="text-4xl font-bold text-gray-900 mb-4">DK 1988 ADS</h2>
@@ -150,4 +150,6 @@
             });
         });
     </script>
-</x-layout>
+
+
+</x-layourkonsumen>

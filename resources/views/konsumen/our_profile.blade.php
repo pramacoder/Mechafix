@@ -1,3 +1,5 @@
-<x-layout>
-    <x-contact-us/>
-</x-layout>
+<x-layoutkonsumen>
+
+<x-contact-us/>
+
+</x-layoutkonsumen>

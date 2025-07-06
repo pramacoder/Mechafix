@@ -89,7 +89,35 @@
         {{ $slot }}
     </main>
     <x-footer></x-footer>
-    <script src="{{ asset('js/app.js') }}"></script>
+    <script src="{{ asset('js/app.js') }}">
+document.addEventListener('DOMContentLoaded', function () {
+    const group = document.getElementById('more-info-group');
+    const dropdown = document.getElementById('more-info-dropdown');
+    let timeout;
+
+    group.addEventListener('mouseenter', function () {
+        clearTimeout(timeout);
+        dropdown.classList.remove('hidden');
+    });
+
+    group.addEventListener('mouseleave', function () {
+        timeout = setTimeout(() => {
+            dropdown.classList.add('hidden');
+        }, 1000); // 200ms delay, bisa diubah sesuai selera
+    });
+
+    dropdown.addEventListener('mouseenter', function () {
+        clearTimeout(timeout);
+        dropdown.classList.remove('hidden');
+    });
+
+    dropdown.addEventListener('mouseleave', function () {
+        timeout = setTimeout(() => {
+            dropdown.classList.add('hidden');
+        }, 1000);
+    });
+});
+    </script>
 </body>
 
 </html>

@@ -189,6 +189,49 @@
     </div>
 </div>
 
+<!-- FAQ Section -->
+<div class="max-w-3xl mx-auto mt-40 mb-10">
+    <h2 class="text-3xl md:text-4xl font-bold text-black mb-8 text-center">Frequently Asked Questions</h2>
+    <div class="space-y-4">
+        <details class="group border border-orange-200 rounded-xl bg-white p-6">
+            <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
+                Bagaimana cara booking service di Mechafix?
+                <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="mt-3 text-gray-700">
+                Anda dapat booking service melalui menu "Book Your Service" di website, pilih layanan, isi data, dan pilih jadwal yang tersedia.
+            </div>
+        </details>
+        <details class="group border border-orange-200 rounded-xl bg-white p-6">
+            <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
+                Apakah bisa konsultasi masalah motor sebelum booking?
+                <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="mt-3 text-gray-700">
+                Tentu! Silakan gunakan fitur chat atau contact yang tersedia untuk konsultasi gratis dengan tim kami.
+            </div>
+        </details>
+        <details class="group border border-orange-200 rounded-xl bg-white p-6">
+            <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
+                Apa saja metode pembayaran yang diterima?
+                <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="mt-3 text-gray-700">
+                Kami menerima pembayaran tunai, transfer bank, dan e-wallet (OVO, Gopay, dll).
+            </div>
+        </details>
+        <details class="group border border-orange-200 rounded-xl bg-white p-6">
+            <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
+                Apakah sparepart yang dijual original?
+                <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="mt-3 text-gray-700">
+                Semua sparepart yang kami jual dijamin original dan bergaransi.
+            </div>
+        </details>
+    </div>
+</div>
+
 <script>
 function contactComponent() {
     return {

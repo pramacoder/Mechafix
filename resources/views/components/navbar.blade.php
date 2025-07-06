@@ -99,7 +99,7 @@
         
         <div class="max-w-screen-xl mx-auto px-6 py-4 flex items-center justify-between">
             <!-- Logo with hover effect -->
-            <a href="{{ route('konsumen.home') }}" class="flex items-center group">
+            <a href="{{ route('guest.home') }}" class="flex items-center group">
                 <div>
                     <img src="{{ asset('LogoMechafix.svg') }}" alt="Mechafix Logo" class="w-16 h-16 object-contain bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
                 </div>
@@ -107,29 +107,29 @@
 
             <!-- Desktop Nav -->
             <div class="hidden md:flex flex-1 justify-center items-center space-x-8">
-                <a href="{{ route('konsumen.home') }}" 
+                <a href="{{ route('guest.home') }}" 
                    class="nav-link px-4 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300 font-medium">
                     Home Page
                 </a>
-                <a href="{{ route('konsumen.services') }}" 
+                <a href="{{ route('guest.services') }}" 
                    class="nav-link px-4 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300 font-medium">
                     Services Offered
                 </a>
-                <a href="{{ route('konsumen.part_shop') }}" 
+                <a href="{{ route('guest.part_shop') }}" 
                    class="nav-link px-4 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300 font-medium">
                     Part Shop
                 </a>
                 
                 <!-- More Info Dropdown -->
-                <div class="relative group">
-                    <button class="nav-link px-4 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300 font-medium flex items-center">
+                <div class="relative group" id="more-info-group">
+                    <button  class="nav-link px-4 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300 font-medium flex items-center">
                         More Info
                         <svg class="w-4 h-4 ml-1 transform group-hover:rotate-180 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </button>
-                    <div class="absolute hidden group-hover:block bg-white shadow-xl rounded-xl top-full left-0 mt-2 w-56 py-4 border border-orange-100 z-50">
-                        <a href="{{ route('konsumen.our_profile') }}" 
+                    <div id="more-info-dropdown" class="absolute hidden group-hover:block bg-white shadow-xl rounded-xl top-full left-0 mt-2 w-56 py-4 border border-orange-100 z-50">
+                        <a href="{{ route('guest.our_profile') }}" 
                            class="block px-6 py-3 text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300">
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,7 +138,7 @@
                                 Our Profile
                             </div>
                         </a>
-                        <a href="{{ route('konsumen.chat_contact') }}" 
+                        <a href="{{ route('guest.chat_contact') }}" 
                            class="block px-6 py-3 text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300">
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,7 +147,7 @@
                                 Chat Contact
                             </div>
                         </a>
-                        <a href="{{ route('konsumen.history') }}" 
+                        <a href="{{ route('guest.history') }}" 
                            class="block px-6 py-3 text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300">
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,7 +168,7 @@
                                 class="relative p-2 rounded-full hover:bg-orange-50 transition-all duration-300 hover-glow">
                             <img src="{{ asset('Lonceng.svg') }}" alt="Notifications" class="w-6 h-6 object-contain">
                             <span x-show="unreadCount > 0" 
-                                class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center notification-badge"
+                                class="absolute -top-1 -right-1 bg-red-500 text-orange-500 border-2 border-orange-500 text-xs rounded-full w-5 h-5 flex items-center justify-center notification-badge"
                                 x-text="unreadCount"></span>
                         </button>
                         
@@ -236,7 +236,7 @@
 
                 <!-- Sign In Button -->
                 <a href="{{ route('login') }}" 
-                   class="hidden md:inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium">
+                   class="md:inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-orange-500 border-2 border-orange-500 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
                     </svg>
@@ -267,15 +267,15 @@
              class="md:hidden border-t border-orange-100 bg-white">
             
             <div class="px-6 py-4 space-y-2">
-                <a href="{{ route('konsumen.home') }}" 
+                <a href="{{ route('guest.home') }}" 
                    class="block px-4 py-3 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300 font-medium">
                     Home Page
                 </a>
-                <a href="{{ route('konsumen.services') }}" 
+                <a href="{{ route('guest.services') }}" 
                    class="block px-4 py-3 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300 font-medium">
                     Services Offered
                 </a>
-                <a href="{{ route('konsumen.part_shop') }}" 
+                <a href="{{ route('guest.part_shop') }}" 
                    class="block px-4 py-3 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300 font-medium">
                     Part Shop
                 </a>
@@ -300,15 +300,15 @@
                          x-transition:leave-start="opacity-1 transform scale-100"
                          x-transition:leave-end="opacity-0 transform scale-95"
                          class="ml-4 mt-2 space-y-1">
-                        <a href="{{ route('konsumen.our_profile') }}" 
+                        <a href="{{ route('guest.our_profile') }}" 
                            class="block px-4 py-2 rounded-lg text-gray-600 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300">
                             Our Profile
                         </a>
-                        <a href="{{ route('konsumen.chat_contact') }}" 
+                        <a href="{{ route('guest.chat_contact') }}" 
                            class="block px-4 py-2 rounded-lg text-gray-600 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300">
                             Chat Contact
                         </a>
-                        <a href="{{ route('konsumen.history') }}" 
+                        <a href="{{ route('guest.history') }}" 
                            class="block px-4 py-2 rounded-lg text-gray-600 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300">
                             History Repair
                         </a>
@@ -318,7 +318,7 @@
                 <!-- Mobile Sign In -->
                 <div class="pt-4 border-t border-orange-100">
                     <a href="{{ route('login') }}" 
-                       class="flex items-center justify-center w-full px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-300 transform hover:scale-105 shadow-lg font-medium">
+                       class="flex items-center justify-center w-full px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-orange-500 border-2 border-orange-500 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-300 transform hover:scale-105 shadow-lg font-medium">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
                         </svg>

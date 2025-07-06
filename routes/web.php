@@ -10,13 +10,25 @@ use App\Models\FilachatConversation;
 use App\Models\PlatKendaraan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-Route::get('/', fn() => view('konsumen.home'))->name('konsumen.home');
-Route::get('/services', fn() => view('konsumen.services'))->name('konsumen.services');
-Route::get('/part_shop', fn() => view('konsumen.part_shop'))->name('konsumen.part_shop');
-Route::get('/our_profile', fn() => view('konsumen.our_profile'))->name('konsumen.our_profile');
-Route::get('/chat_contact', fn() => view('konsumen.chat_contact'))->name('konsumen.chat_contact');
-Route::get('/history', fn() => view('konsumen.history'))->name('konsumen.history');
-Route::get('/billing', fn() => view('konsumen.billing'))->name('billing');
+
+
+// Guest routes (untuk tamu yang belum login)
+Route::get('/', fn() => view('guest.home'))->name('guest.home');
+Route::get('/services', fn() => view('guest.services'))->name('guest.services');
+Route::get('/part_shop', fn() => view('guest.part_shop'))->name('guest.part_shop');
+Route::get('/our_profile', fn() => view('guest.our_profile'))->name('guest.our_profile');
+Route::get('/chat_contact', fn() => view('guest.chat_contact'))->name('guest.chat_contact');
+Route::get('/history', fn() => view('guest.history'))->name('guest.history');
+
+// Konsumen routes (untuk user yang sudah login)
+Route::get('/konsumen/home', fn() => view('konsumen.home'))->name('konsumen.home');
+Route::get('/konsumen/services', fn() => view('konsumen.services'))->name('konsumen.services');
+Route::get('/konsumen/part_shop', fn() => view('konsumen.part_shop'))->name('konsumen.part_shop');
+Route::get('/konsumen/our_profile', fn() => view('konsumen.our_profile'))->name('konsumen.our_profile');
+Route::get('/konsumen/chat_contact', fn() => view('konsumen.chat_contact'))->name('konsumen.chat_contact');
+Route::get('/konsumen/history', fn() => view('konsumen.history'))->name('konsumen.history');
+Route::get('/konsumen/billing', fn() => view('konsumen.billing'))->name('konsumen.billing');
+
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
@@ -52,6 +64,12 @@ Route::middleware([
 
     // Konsumen routes
     Route::middleware('role:konsumen')->group(function () {
+        Route::get('/konsumen/dashboard', function () {
+            return view('dashboard.konsumen');
+        })->name('konsumen.dashboard');
+        Route::get('/konsumen/profile', function () {
+            return view('profile.show');
+        })->name('konsumen.profile');
         Route::resource('platkendaraan', PlatKendaraanController::class)->except(['show']);
         Route::get('/my-platkendaraan', [PlatKendaraanController::class, 'index'])->name('platkendaraan.index');
         Route::get('/booking/create', [BookingServiceController::class, 'create'])->name('booking.create');
@@ -67,7 +85,8 @@ Route::middleware([
     Route::middleware('role:mekanik')->prefix('mekanik')->group(function () {
         Route::get('/dashboard', [MekanikController::class, 'dashboard'])->name('mekanik.dashboard');
         Route::patch('/booking/{booking}/services', [MekanikController::class, 'saveServices'])->name('mekanik.save-services');
-        Route::match(['get', 'post'], '/booking/{booking}/complete', [MekanikController::class, 'completeJob'])->name('mekanik.complete-job');
+        Route::match(['get', 'post'], '/booking/{booking}/complete', [MekanikController::class, 'completeJob'])->name('mekanik.complete-job'); 
+        // ini
     });
 });
 
@@ -88,6 +107,12 @@ Route::post('/notifications/mark-read/{id}', function($id) {
     if ($notif) $notif->markAsRead();
     return response()->json(['success' => true]);
 })->middleware('auth');
+
+// Logout route
+Route::post('/logout', function () {
+    Auth::logout();
+    return redirect('/');
+})->name('logout')->middleware('auth');
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -117,3 +142,8 @@ Route::prefix('v1')->group(function () {
     Route::get('booking-status/{plateNumber}', [BookingController::class, 'getBookingStatus']);
     Route::get('booking-statistics', [BookingController::class, 'getBookingStatistics']);
 });
+
+// Tambahan route agar dashboard.konsumen terdefinisi
+Route::get('/dashboard/konsumen', function () {
+    return view('dashboard.konsumen');
+})->name('dashboard.konsumen');

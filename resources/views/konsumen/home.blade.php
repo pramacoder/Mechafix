@@ -1,3 +1,3 @@
-<x-layout>
-    <x-get-your-estimate />
-</x-layout>
+<x-layoutkonsumen>
+
+</x-layoutkonsumen>
