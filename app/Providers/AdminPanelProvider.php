@@ -24,7 +24,9 @@ use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use App\Filament\Resources\ServiceResource\Widgets\PenjualanChart;
 use App\Filament\Resources\UserResource;
 use App\Filament\Widgets\MyCalenderWidget;
+use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Support\Facades\App;
+use Laravel\Jetstream\Rules\Role;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -63,6 +65,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                RoleMiddleware::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

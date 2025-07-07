@@ -17,7 +17,7 @@ class PembayaranResource extends Resource
 {
     protected static ?string $model = Pembayaran::class;
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
-    protected static ?string $navigationGroup = 'Financial Management';
+    protected static ?string $navigationGroup = 'Service Management';
     protected static ?string $navigationLabel = 'Payments';
 
     public static function form(Form $form): Form
@@ -113,7 +113,7 @@ class PembayaranResource extends Resource
                     ->image()
                     ->directory('qris-codes')
                     ->visibility('public')
-                    ->default('oli motor.webp')
+                    ->default('qris.jpg')
                     ->helperText('QRIS code untuk pembayaran digital')
                     ->acceptedFileTypes(['image/jpeg', 'image/jpg', 'image/png', 'image/webp']),
 
@@ -189,9 +189,9 @@ class PembayaranResource extends Resource
                         return $booking?->status_booking ?? '-';
                     })
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'selesai' => 'success',
-                        'dikonfirmasi' => 'warning', 
+                        'dikonfirmasi' => 'warning',
                         'pending' => 'gray',
                         default => 'gray',
                     }),
@@ -206,6 +206,20 @@ class PembayaranResource extends Resource
                         return $spareParts->map(function ($tp) {
                             $nama = $tp->sparePart->nama_barang ?? 'Unknown';
                             $qty = $tp->kuantitas_barang;
+                            return $qty > 1 ? "{$nama} (x{$qty})" : $nama;
+                        })->implode(', ');
+                    }),
+
+                Tables\Columns\TextColumn::make('transaksiServices')
+                    ->label('Services')
+                    ->formatStateUsing(function ($record) {
+                        $services = $record->transaksiServices ?? collect();
+
+                        if ($services->isEmpty()) return '-';
+
+                        return $services->map(function ($ts) {
+                            $nama = $ts->service->nama_service ?? 'Unknown';
+                            $qty = $ts->kuantitas_service ?? 1;
                             return $qty > 1 ? "{$nama} (x{$qty})" : $nama;
                         })->implode(', ');
                     }),
@@ -261,7 +275,7 @@ class PembayaranResource extends Resource
                             ->visibility('public')
                             ->required()
                             ->acceptedFileTypes(['image/jpeg', 'image/jpg', 'image/png', 'image/webp']),
-                        
+
                         Forms\Components\FileUpload::make('qris')
                             ->label('QRIS Code (Optional)')
                             ->image()
@@ -275,7 +289,7 @@ class PembayaranResource extends Resource
                             'qris' => $data['qris'] ?? $record->qris,
                             'status_pembayaran' => 'Sudah Dibayar', // Otomatis ubah status
                         ]);
-                        
+
                         // Kirim notifikasi sukses
                         \Filament\Notifications\Notification::make()
                             ->title('Payment proof uploaded successfully!')
@@ -289,10 +303,10 @@ class PembayaranResource extends Resource
                         // 2. Booking status = selesai
                         // 3. Belum ada bukti pembayaran
                         $booking = \App\Models\BookingService::where('id_pembayaran', $record->id_pembayaran)->first();
-                        
-                        return $record->status_pembayaran === 'Belum Dibayar' && 
-                               $booking?->status_booking === 'selesai' &&
-                               empty($record->bukti_pembayaran);
+
+                        return $record->status_pembayaran === 'Belum Dibayar' &&
+                            $booking?->status_booking === 'selesai' &&
+                            empty($record->bukti_pembayaran);
                     }),
 
                 Tables\Actions\Action::make('approve')
@@ -335,7 +349,7 @@ class PembayaranResource extends Resource
                 'transaksiSpareParts.sparePart',
                 'bookingService',
             ]);
-    } 
+    }
 
     public static function getPages(): array
     {

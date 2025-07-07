@@ -1,4 +1,3 @@
-<x-layoutkonsumen>
 <div class="text-center mb-16">
     <div class="text-orange-500 font-bold text-sm mb-4">MECHAFIX</div>
     <h1 class="text-4xl font-bold text-gray-900 mb-2">Our Story</h1>
@@ -194,4 +193,3 @@
         });
     });
 </script> 
-</x-layourkonsumen>

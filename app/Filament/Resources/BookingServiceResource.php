@@ -19,8 +19,8 @@ class BookingServiceResource extends Resource
 {
     protected static ?string $model = BookingService::class;
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
-    protected static ?string $navigationGroup = 'Booking Management';
-    protected static ?string $navigationLabel = 'Bookings (YG JADI)';
+    protected static ?string $navigationGroup = 'Service Management';
+    protected static ?string $navigationLabel = 'Bookings';
     protected static ?int $navigationSort = 5;
 
     public static function form(Form $form): Form
@@ -62,7 +62,6 @@ class BookingServiceResource extends Resource
                     ->label('Mechanic')
                     ->options(function () {
                         $today = Carbon::now()->dayOfWeekIso;
-
                         return \App\Models\Mekanik::with('user')
                             ->where('kuantitas_hari', '>=', $today)
                             ->get()

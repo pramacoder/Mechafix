@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Mekanik\Resources;
 
 use App\Filament\Resources\TransaksiRiwayatResource\Pages;
 use App\Models\RiwayatPerbaikan;
@@ -18,10 +18,11 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Illuminate\Console\View\Components\Task;
 
-class TransaksiRiwayatResource extends Resource
+class TaskResource extends Resource
 {
-    protected static ?string $model = RiwayatPerbaikan::class;
+    protected static ?string $model = Task::class;
     protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
     protected static ?string $navigationGroup = 'Service Management';
     protected static ?string $navigationLabel = 'Complete Service Record';
@@ -37,20 +38,11 @@ class TransaksiRiwayatResource extends Resource
                                 ->label('Booking Service')
                                 ->options(function ($get) {
                                     $selected = $get('id_booking_service');
-
-                                    return \App\Models\BookingService::with(['konsumens.user', 'pembayaran'])
-                                        ->where('id_mekanik', auth()->user()->mekanik->id_mekanik ?? null) 
-                                        ->where('status_booking', 'dikonfirmasi')
-                                        ->where(function ($query) {
-                                            $query->whereNull('id_pembayaran')
-                                                ->orWhereHas('pembayaran', function ($q) {
-                                                    $q->where('status_pembayaran', '!=', 'Sudah Dibayar');
-                                                });
-                                        })
+                                    return \App\Models\BookingService::with(['konsumens.user'])
                                         ->when($selected, fn($query) => $query->orWhere('id_booking_service', $selected))
                                         ->get()
                                         ->mapWithKeys(fn($b) => [
-                                            $b->id_booking_service => "#{$b->id_booking_service} - {$b->konsumens->user->name}"
+                                            $b->id_booking_service => "#{$b->id_booking_service} - {$b->konsumens->user->name}" // Perbaiki: konsumens
                                         ]);
                                 })
                                 ->searchable()
@@ -132,7 +124,7 @@ class TransaksiRiwayatResource extends Resource
                                     if ($bookingId) {
                                         $booking = \App\Models\BookingService::with(['konsumens.user', 'platKendaraan', 'mekanik.user'])->find($bookingId);
                                         if ($booking) {
-                                            $customer = $booking->konsumens->user->name ?? 'Unknown';
+                                            $customer = $booking->konsumens->user->name ?? 'Unknown'; // Perbaiki: konsumens
                                             $vehicle = $booking->platKendaraan->nomor_plat_kendaraan ?? 'Unknown';
                                             $mechanic = $booking->mekanik->user->name ?? 'Unknown';
 
@@ -141,7 +133,7 @@ class TransaksiRiwayatResource extends Resource
                                     }
                                     return 'Select booking service first';
                                 })
-                                ->extraAttributes(['style' => 'white-space: pre-line; background: none; padding: 12px; border: 1px solid #C98500; border-radius: 6px;']),
+                                ->extraAttributes(['style' => 'white-space: pre-line; background: #f3f4f6; padding: 12px; border-radius: 6px;']),
 
                             Forms\Components\Repeater::make('transaksi_services')
                                 ->label('Services Performed')

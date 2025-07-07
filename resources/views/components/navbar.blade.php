@@ -153,7 +153,7 @@
                                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
-                                History Repair
+                                Our History
                             </div>
                         </a>
                     </div>
@@ -163,7 +163,7 @@
                     x-data="notificationComponent()" 
                     x-init="init()">
                     <!-- Notifications -->
-                    <div class="relative">
+                    {{-- <div class="relative">
                         <button @click="toggleNotifications()" 
                                 class="relative p-2 rounded-full hover:bg-orange-50 transition-all duration-300 hover-glow">
                             <img src="{{ asset('Lonceng.svg') }}" alt="Notifications" class="w-6 h-6 object-contain">
@@ -230,7 +230,8 @@
                                 <a href="#" class="text-sm text-orange-600 hover:text-orange-700 font-medium">View all notifications</a>
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
+                    @include('dashboard.notifications')
                 </div>
             </div>
 
@@ -310,7 +311,7 @@
                         </a>
                         <a href="{{ route('guest.history') }}" 
                            class="block px-4 py-2 rounded-lg text-gray-600 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300">
-                            History Repair
+                            Our History
                         </a>
                     </div>
                 </div>

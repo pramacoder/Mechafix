@@ -1,94 +1,3 @@
-
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-    <!-- Total Bookings -->
-    <div class="bg-white overflow-hidden shadow rounded-lg">
-        <div class="p-5">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012-2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                    </svg>
-                </div>
-                <div class="ml-5 w-0 flex-1">
-                    <dl>
-                        <dt class="text-sm font-medium text-gray-500 truncate">Total Bookings</dt>
-                        <dd class="text-lg font-medium text-gray-900">
-                            {{ auth()->user()->konsumen->bookingServices()->count() }}
-                        </dd>
-                    </dl>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- My Vehicles -->
-    <div class="bg-white overflow-hidden shadow rounded-lg">
-        <div class="p-5">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <svg class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m11 0v-4a2 2 0 00-2-2h-4m-2 0h-4a2 2 0 00-2 2v4m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v8" />
-                    </svg>
-                </div>
-                <div class="ml-5 w-0 flex-1">
-                    <dl>
-                        <dt class="text-sm font-medium text-gray-500 truncate">My Vehicles</dt>
-                        <dd class="text-lg font-medium text-gray-900">
-                            {{ auth()->user()->konsumen->platKendaraan()->count() }}
-                        </dd>
-                    </dl>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pending Payments -->
-    <div class="bg-white overflow-hidden shadow rounded-lg">
-        <div class="p-5">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <svg class="h-6 w-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <div class="ml-5 w-0 flex-1">
-                    <dl>
-                        <dt class="text-sm font-medium text-gray-500 truncate">Pending Payment</dt>
-                        <dd class="text-lg font-medium text-gray-900">
-                            {{ auth()->user()->konsumen->bookingServices()->where('status_booking', 'selesai')->whereHas('pembayarans', function ($q) {$q->where('status_pembayaran', 'Belum Dibayar');})->count() }}
-                        </dd>
-                    </dl>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Completed & Paid -->
-    <div class="bg-white overflow-hidden shadow rounded-lg">
-        <div class="p-5">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <svg class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <div class="ml-5 w-0 flex-1">
-                    <dl>
-                        <dt class="text-sm font-medium text-gray-500 truncate">Paid</dt>
-                        <dd class="text-lg font-medium text-gray-900">
-                            {{ auth()->user()->konsumen->bookingServices()->where('status_booking', 'selesai')->whereHas('pembayarans', function ($q) {$q->where('status_pembayaran', 'Sudah Dibayar');})->count() }}
-                        </dd>
-                    </dl>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Pending Payments Alert Section -->
 @php
     $pendingPayments = auth()
@@ -102,7 +11,7 @@
         ->get();
 @endphp
 
-@if ($pendingPayments->count() > 0)
+{{-- @if ($pendingPayments->count() > 0)
     <div class="bg-red-50 border border-red-200 rounded-lg mb-6">
         <div class="p-6">
             <h3 class="text-lg font-medium text-red-900 mb-4">⚠️ Pending Payments</h3>
@@ -277,12 +186,12 @@
             </div>
         </div>
     </div>
-@endif
+@endif --}}
 
 {{-- @include('dashboard.spare-part') --}}
 
 <!-- Quick Actions -->
-<div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mb-6">
+<div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mb-6 mt-10 border-2 border-orange-500">
     <div class="p-6 lg:p-8">
         <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
         <div class="flex space-x-4">
@@ -299,7 +208,7 @@
 </div>
 
 <!-- Recent Bookings -->
-<div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
+<div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mt-10 border-2 border-orange-500">
     <div class="p-6 lg:p-8">
         <h3 class="text-lg font-medium text-gray-900 mb-4">Recent Bookings</h3>
 
@@ -324,19 +233,19 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                                 Vehicle</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                                 Date</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                                 Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                                 Service & Amount</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                                 Payment</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                                 Next Service</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                                 Mechanic</th>
                         </tr>
                     </thead>
@@ -689,3 +598,143 @@
         </div>
     </div>
 </div>
+
+<script>
+    let currentPaymentId = null;
+
+    function openPaymentModal(paymentId, vehicle, amount, qrisPath) {
+        currentPaymentId = paymentId;
+        document.getElementById('paymentModal').classList.remove('hidden');
+        document.getElementById('vehicleInfo').textContent = vehicle;
+        document.getElementById('amountInfo').textContent = 'Rp ' + amount.toLocaleString('id-ID');
+
+        // Set QRIS image source
+        document.getElementById('qrisImage').src = `/storage/${qrisPath}`;
+
+        // Reset payment method selection
+        resetPaymentMethod();
+
+        // Set form actions
+        document.getElementById('cashPaymentForm').action = `/konsumen/payment/${paymentId}/cash`;
+        document.getElementById('cashlessPaymentForm').action = `/konsumen/payment/${paymentId}/upload-bukti`;
+    }
+
+    function closePaymentModal() {
+        document.getElementById('paymentModal').classList.add('hidden');
+        resetPaymentMethod();
+    }
+
+    function selectPaymentMethod(method) {
+        // Reset all selections
+        resetPaymentMethod();
+
+        if (method === 'cash') {
+            document.getElementById('payment_cash').checked = true;
+            document.querySelector('[onclick="selectPaymentMethod(\'cash\')"]').classList.add('border-green-500',
+                'bg-green-50');
+            document.getElementById('cashPaymentSection').classList.remove('hidden');
+        } else if (method === 'cashless') {
+            document.getElementById('payment_cashless').checked = true;
+            document.querySelector('[onclick="selectPaymentMethod(\'cashless\')"]').classList.add('border-blue-500',
+                'bg-blue-50');
+            document.getElementById('cashlessPaymentSection').classList.remove('hidden');
+        }
+    }
+
+    function resetPaymentMethod() {
+        // Reset radio buttons
+        document.getElementById('payment_cash').checked = false;
+        document.getElementById('payment_cashless').checked = false;
+
+        // Reset card styles
+        document.querySelectorAll('[onclick^="selectPaymentMethod"]').forEach(card => {
+            card.classList.remove('border-green-500', 'bg-green-50', 'border-blue-500', 'bg-blue-50');
+        });
+
+        // Hide sections
+        document.getElementById('cashPaymentSection').classList.add('hidden');
+        document.getElementById('cashlessPaymentSection').classList.add('hidden');
+    }
+
+    // Close modal when clicking outside
+    document.addEventListener('mousedown', function(event) {
+        const paymentModal = document.getElementById('paymentModal');
+        if (paymentModal && !paymentModal.classList.contains('hidden') && event.target === paymentModal) {
+            closePaymentModal();
+        }
+    });
+
+    // Show success/error messages from session
+    document.addEventListener('DOMContentLoaded', function() {
+        @if (session('success'))
+            showAlert('success', '{{ session('success') }}');
+        @elseif (session('error'))
+            showAlert('error', '{{ session('error') }}');
+        @endif
+    });
+
+    function showAlert(type, message) {
+        const alertBox = document.createElement('div');
+        alertBox.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg text-sm 
+            ${type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : ''}
+            ${type === 'error' ? 'bg-red-50 border border-red-200 text-red-800' : ''}`;
+        alertBox.innerHTML = `
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    ${type === 'success' ? 
+                        '<svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 00-2 0v6a1 1 0 002 0V5z" clip-rule="evenodd" /></svg>' :
+                        '<svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 00-2 0v6a1 1 0 002 0V5z" clip-rule="evenodd" /></svg>'
+                    }
+                </div>
+                <div class="ml-3">
+                    <p class="font-medium">${type === 'success' ? 'Success!' : 'Error!'}</p>
+                    <p class="mt-1">${message}</p>
+                </div>
+                <div class="ml-auto pl-3">
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-500">
+                        <span class="sr-only">Close</span>
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(alertBox);
+        setTimeout(() => {
+            alertBox.remove();
+        }, 5000);
+    }
+
+    function showCancelModal(bookingId) {
+        const modal = document.getElementById('cancelModal');
+        const form = document.getElementById('cancelBookingForm');
+        form.action = `/booking/${bookingId}/cancel`; // sesuaikan dengan route PATCH kamu
+        modal.classList.remove('hidden');
+    }
+
+    function closeCancelModal() {
+        document.getElementById('cancelModal').classList.add('hidden');
+    }
+
+    let cashPaymentFormToSubmit = null;
+
+    function showCashConfirmModal(form, amount) {
+        cashPaymentFormToSubmit = form;
+        document.getElementById('cashConfirmText').textContent =
+            `Confirm that you will pay Rp ${Number(amount).toLocaleString('id-ID')} in cash at our counter?`;
+        document.getElementById('cashConfirmModal').classList.remove('hidden');
+    }
+
+    function closeCashConfirmModal() {
+        document.getElementById('cashConfirmModal').classList.add('hidden');
+        cashPaymentFormToSubmit = null;
+    }
+
+    document.getElementById('cashConfirmYesBtn').onclick = function() {
+        if (cashPaymentFormToSubmit) {
+            cashPaymentFormToSubmit.submit();
+            closeCashConfirmModal();
+        }
+    };
+</script>

@@ -1,20 +1,20 @@
 @php
-    $admin = $admin ?? null;
+    $adminData = $adminData ?? null;
     $adminUser = $adminUser ?? null;
-    $mekanik = $mekanik ?? null;
+    $mekanikData = $mekanikData ?? null;
     $mekanikUser = $mekanikUser ?? null;
     $messages = $messages ?? collect();
     $conversation = $conversation ?? null;
     $formAction = '#';
 
-    if ($admin && optional($admin)->id_admin) {
-        $formAction = route('filachat.admin.send', ['admin' => $admin->id_admin]);
-    } elseif ($mekanik && optional($mekanik)->id_mekanik) {
-        $formAction = route('filachat.send', ['mekanik' => $mekanik->id_mekanik]);
+    if ($adminData && optional($adminData)->id_admin) {
+        $formAction = route('filachat.admin.send', ['admin' => $adminData->id_admin]);
+    } elseif ($mekanikData && optional($mekanikData)->id_mekanik) {
+        $formAction = route('filachat.send', ['mekanik' => $mekanikData->id_mekanik]);
     }
 
-    $daftarAdmin = \App\Models\Admin::with('user')->get();
-    $daftarMekanik = \App\Models\Mekanik::with('user')->get();
+    $daftarAdmin = $daftarAdmin ?? \App\Models\Admin::with('user')->get();
+    $daftarMekanik = $daftarMekanik ?? \App\Models\Mekanik::with('user')->get();
 @endphp
 
 <x-layoutkonsumen>
@@ -81,7 +81,7 @@
                             @foreach ($daftarAdmin as $adm)
                                 <li>
                                     <a href="{{ route('filachat.admin.show', ['admin' => $adm->id_admin]) }}"
-                                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 transition-all duration-200 group {{ isset($admin) && $admin->id_admin == $adm->id_admin ? 'bg-blue-50 border border-blue-200 shadow-sm' : 'hover:shadow-sm' }} contact-link">
+                                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 transition-all duration-200 group {{ isset($adminData) && $adminData->id_admin == $adm->id_admin ? 'bg-blue-50 border border-blue-200 shadow-sm' : 'hover:shadow-sm' }} contact-link">
                                         <div class="relative">
                                             <span
                                                 class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
@@ -94,7 +94,8 @@
                                             <div class="text-xs text-gray-500 flex items-center mt-1">
                                             </div>
                                         </div>
-                                        @if (isset($admin) && $admin->id_admin == $adm->id_admin)
+                                        {{-- Ubah dari $admin ke $adminData --}}
+                                        @if (isset($adminData) && $adminData->id_admin == $adm->id_admin)
                                             <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
                                         @endif
                                     </a>
@@ -138,7 +139,7 @@
                             @foreach ($daftarMekanik as $mek)
                                 <li>
                                     <a href="{{ route('filachat.show', ['mekanik' => $mek->id_mekanik]) }}"
-                                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-orange-50 transition-all duration-200 group {{ isset($mekanik) && $mekanik->id_mekanik == $mek->id_mekanik ? 'bg-orange-50 border border-orange-200 shadow-sm' : 'hover:shadow-sm' }} contact-link">
+                                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-orange-50 transition-all duration-200 group {{ isset($mekanikData) && $mekanikData->id_mekanik == $mek->id_mekanik ? 'bg-orange-50 border border-orange-200 shadow-sm' : 'hover:shadow-sm' }} contact-link">
                                         <div class="relative">
                                             <span
                                                 class="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
@@ -151,7 +152,8 @@
                                             <div class="text-xs text-gray-500 flex items-center mt-1">
                                             </div>
                                         </div>
-                                        @if (isset($mekanik) && $mekanik->id_mekanik == $mek->id_mekanik)
+                                        {{-- Ubah dari $mekanik ke $mekanikData --}}
+                                        @if (isset($mekanikData) && $mekanikData->id_mekanik == $mek->id_mekanik)
                                             <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
                                         @endif
                                     </a>
@@ -170,7 +172,7 @@
                 class="px-6 py-4 border-b flex items-center gap-4 bg-gradient-to-r from-gray-50 to-orange-50 flex-shrink-0 rounded-t-2xl">
                 <div class="relative">
                     <div
-                        class="w-12 h-12 rounded-full {{ isset($admin) ? 'bg-gradient-to-r from-blue-500 to-blue-600' : 'bg-gradient-to-r from-orange-500 to-orange-600' }} flex items-center justify-center text-white font-bold text-lg shadow-md">
+                        class="w-12 h-12 rounded-full {{ isset($adminData) ? 'bg-gradient-to-r from-blue-500 to-blue-600' : 'bg-gradient-to-r from-orange-500 to-orange-600' }} flex items-center justify-center text-white font-bold text-lg shadow-md">
                         {{ strtoupper(substr(optional($adminUser)->name ?? (optional($mekanikUser)->name ?? 'U'), 0, 1)) }}
                     </div>
                 </div>
@@ -179,7 +181,8 @@
                         {{ optional($adminUser)->name ?? (optional($mekanikUser)->name ?? 'Pilih kontak') }}
                     </div>
                     <div class="text-sm flex items-center gap-2 mt-1">
-                        @if ($admin)
+                        {{-- Ubah dari $admin ke $adminData --}}
+                        @if ($adminData)
                             <span
                                 class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800 font-medium">
                                 <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -208,7 +211,6 @@
             </div>
 
             <!-- Chat Body -->
-            <!-- Chat Body -->
             <div class="flex-1 overflow-y-auto px-6 py-4 space-y-4 custom-scrollbar bg-white" id="chatBody">
                 @if (isset($conversation) && $messages->count() > 0)
                     @foreach ($messages as $msg)
@@ -224,7 +226,7 @@
                             }
 
                             // Tentukan warna berdasarkan tipe chat (admin atau mekanik)
-                            $receiverColor = isset($admin) ? 'blue' : 'orange';
+                            $receiverColor = isset($adminData) ? 'blue' : 'orange';
                         @endphp
                         <div class="flex items-end {{ $isFromKonsumen ? 'justify-end' : 'justify-start' }} mb-3">
                             @if (!$isFromKonsumen)
@@ -242,7 +244,7 @@
                             <div
                                 class="relative max-w-xs md:max-w-md px-4 py-3 rounded-2xl shadow-lg
                     @if ($isFromKonsumen) bg-gradient-to-r from-purple-500 to-purple-600 text-white
-                    @elseif(isset($admin))
+                    @elseif(isset($adminData))
                         bg-gradient-to-r from-blue-500 to-blue-600 text-white
                     @else
                         bg-gradient-to-r from-orange-500 to-orange-600 text-white @endif">
@@ -295,7 +297,7 @@
                         class="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent shadow-sm text-gray-800"
                         autocomplete="off">
                     <button type="submit"
-                        class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-orang-700 px-6 py-3 rounded-full font-semibold transition-all duration-200 transform hover:scale-105 border-2 border-orang-500 shadow-md">Send
+                        class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-3 rounded-full font-semibold transition-all duration-200 transform hover:scale-105 border-2 border-orange-500 shadow-md">Send
                     </button>
                 </form>
             @else

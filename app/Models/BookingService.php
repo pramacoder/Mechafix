@@ -113,4 +113,9 @@ class BookingService extends Model
     {
         return $this->transaksiServices->sum('subtotal_service') + $this->transaksiSpareParts->sum('subtotal_barang');
     }
+
+    public function pembayaran()
+    {
+        return $this->belongsTo(Pembayaran::class, 'id_pembayaran', 'id_pembayaran');
+    }
 }
