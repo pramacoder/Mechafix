@@ -346,8 +346,8 @@
     @endphp
 
     @if ($recentBookings->count() > 0)
-        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mt-10 border-2 border-orange-500">
-            <div class="p-6 lg:p-8">
+        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mt-10 ">
+            <div class="p-6 lg:p-8 border-2 border-orange-500">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Recent Bookings</h3>
 
                 <div class="overflow-x-auto">
