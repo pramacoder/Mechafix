@@ -3,15 +3,15 @@
         <div class="flex justify-between items-center h-16">
             <!-- Logo -->
             <div class="flex items-center">
-                <a href="{{ route('konsumen.home') }}" class="flex items-center group">
+                <a href="{{ route('dashboard.konsumen') }}" class="flex items-center group">
                     <img src="{{ asset('LogoMechafix.svg') }}" alt="Mechafix Logo" 
-                         class="w-16 h-16 object-contain bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+                         class="w-16 h-16 object-contain bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
                 </a>
             </div>
 
             <!-- Desktop Navigation -->
             <div class="hidden md:flex flex-1 justify-center items-center space-x-8">
-                <a href="{{ route('konsumen.home') }}" class="nav-link px-4 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300 font-medium">Home Page</a>
+                <a href="{{ route('dashboard.konsumen') }}" class="nav-link px-4 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300 font-medium">Home Page</a>
                 <a href="{{ route('konsumen.services') }}" class="nav-link px-4 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300 font-medium">Services Offered</a>
                 <a href="{{ route('konsumen.part_shop') }}" class="nav-link px-4 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300 font-medium">Part Shop</a>
                 
@@ -153,7 +153,7 @@
     <!-- Mobile Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden md:hidden bg-white border-t border-orange-100">
         <div class="px-2 pt-2 pb-3 space-y-1">
-            <a href="{{ route('konsumen.home') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300">Home Page</a>
+            <a href="{{ route('dashboard.konsumen') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300">Home Page</a>
             <a href="{{ route('konsumen.services') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300">Services Offered</a>
             <a href="{{ route('konsumen.part_shop') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300">Part Shop</a>
             <a href="{{ route('konsumen.our_profile') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300">Our Profile</a>

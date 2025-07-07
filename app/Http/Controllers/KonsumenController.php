@@ -126,7 +126,7 @@ class KonsumenController extends Controller
             return redirect()->back()->with('error', 'Gagal membatalkan booking: ' . $e->getMessage());
         }
     }
-
+    
     public function mekanikProfile(Mekanik $mekanik)
     {
         try {
@@ -194,5 +194,10 @@ class KonsumenController extends Controller
             Log::error('Error loading mechanic profile: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Failed to load mechanic profile.');
         }
+    }
+    public function services()
+    {
+        $userVehicles = PlatKendaraan::where('id_konsumen', Auth::user()->konsumen->id_konsumen)->get();
+        return view('konsumen.services', compact('userVehicles'));
     }
 }

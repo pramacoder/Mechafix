@@ -1,8 +1,8 @@
 {{-- resources/views/components/services-section.blade.php --}}
-<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-16 px-4" x-data="servicesComponent()">
+<div class="min-h-screen bg-gradient-to-br from-purple-200 to-gray-100 py-16 px-4 mt-20" x-data="servicesComponent()">
     <div class="max-w-7xl mx-auto">
         {{-- Header --}}
-        <div class="text-center mb-16">
+        <div class="text-center mb-16 ">
             <h1 class="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
                 Your Trusted Motorbike Repair Solutions
             </h1>
@@ -21,12 +21,12 @@
                 <div class="relative overflow-hidden rounded-2xl mb-6">
                     <div class="aspect-w-16 aspect-h-12 bg-gradient-to-br from-blue-400 to-blue-600">
                         <div class="absolute inset-0 flex items-center justify-center">
-                            {{-- Placeholder for mechanic working image --}}
+
                             <div class="w-full h-full bg-cover bg-center bg-gray-300 rounded-2xl flex items-center justify-center">
-                                <svg class="w-16 h-16 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <svg class="w-16 h-16 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                </svg>
+                                </svg>                               
                             </div>
                         </div>
                     </div>
@@ -109,7 +109,7 @@
         </div>
 
         {{-- Call to Action Section --}}
-        <div class="mt-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 md:p-12 text-center text-white relative overflow-hidden">
+        <div class="mt-16 bg-gradient-to-br from-purple-900 via-orange-500 to-orange-50 rounded-3xl p-8 md:p-12 text-center text-white relative overflow-hidden">
             <div class="absolute inset-0 bg-white opacity-10"></div>
             <div class="relative z-10">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">
@@ -123,7 +123,7 @@
                         Book Service Now
                     </button>
                     <button class="border-2 border-white text-white font-semibold py-3 px-8 rounded-xl hover:bg-white hover:text-blue-600 transition-all duration-200 transform hover:scale-105">
-                        Get Free Estimate
+                        Check Estimate
                     </button>
                 </div>
             </div>

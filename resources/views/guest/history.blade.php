@@ -10,7 +10,7 @@
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div class="text-center">
                 <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                    Riwayat Perbaikan
+                    Cerita Tentang
                     <span class="bg-clip-text bg-gradient-to-r from-orange-500 to-orange-700 text-orange-600 border-2 border-orange-500">
                         Mechafix
                     </span>
@@ -31,7 +31,7 @@
                     </div>
                     
                     <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">
-                        Login untuk Melihat Riwayat
+                        Login untuk Melihat Cerita Kami
                     </h2>
                     
                     <p class="text-gray-600 text-center mb-6">

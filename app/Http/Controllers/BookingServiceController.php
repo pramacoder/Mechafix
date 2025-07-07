@@ -81,9 +81,8 @@ class BookingServiceController extends Controller
 
     public function create()
     {
-        // Get user's vehicles - Simple belongsTo relationship
-        $userVehicles = PlatKendaraan::where('id_konsumen', Auth::user()->konsumen->id_konsumen)->get();
-
+        $user = auth()->user();
+        $userVehicles = \App\Models\PlatKendaraan::where('id_konsumen', $user->konsumen->id_konsumen)->get();
         return view('booking.create', compact('userVehicles'));
     }
 
@@ -126,7 +125,7 @@ class BookingServiceController extends Controller
             'id_plat_kendaraan' => $request->id_plat_kendaraan,
         ]);
 
-        return redirect()->route('dashboard')->with('success', 'Booking submitted successfully! We will contact you soon.');
+        return redirect()->route('dashboard.konsumen')->with('success', 'Booking submitted successfully! We will contact you soon.');
     }
 
     public function cancel(BookingService $booking)
@@ -161,6 +160,7 @@ class BookingServiceController extends Controller
      */
     public function updateBookingStatus(Request $request, $id): JsonResponse
     {
+        
         $request->validate([
             'status' => 'required|in:menunggu,dikonfirmasi,selesai,batal'
         ]);
@@ -214,7 +214,12 @@ class BookingServiceController extends Controller
             ], 500);
         }
     }
-
+    public function services()
+    {
+        $user = Auth::user();
+        $userVehicles = $user && $user->konsumen ? $user->konsumen->platKendaraan ?? collect() : collect();
+        return view('konsumen.services', compact('userVehicles'));
+    }
     /**
      * Get booking statistics
      */

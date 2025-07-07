@@ -14,11 +14,11 @@ use App\Http\Controllers\SparePartController;
 
 // Guest routes (untuk tamu yang belum login)
 Route::get('/', fn() => view('guest.home'))->name('guest.home');
-Route::get('/services', fn() => view('guest.services'))->name('guest.services');
-Route::get('/part_shop', fn() => view('guest.part_shop'))->name('guest.part_shop');
-Route::get('/our_profile', fn() => view('guest.our_profile'))->name('guest.our_profile');
-Route::get('/chat_contact', fn() => view('guest.chat_contact'))->name('guest.chat_contact');
-Route::get('/history', fn() => view('guest.history'))->name('guest.history');
+Route::get('/guest/services', fn() => view('guest.services'))->name('guest.services');
+Route::get('/guest/part_shop', fn() => view('guest.part_shop'))->name('guest.part_shop');
+Route::get('/guest/our_profile', fn() => view('guest.our_profile'))->name('guest.our_profile');
+Route::get('/guest/chat_contact', fn() => view('guest.chat_contact'))->name('guest.chat_contact');
+Route::get('/guest/history', fn() => view('guest.history'))->name('guest.history');
 
 // Konsumen routes (untuk user yang sudah login)
 Route::get('/konsumen/home', fn() => view('konsumen.home'))->name('konsumen.home');
@@ -62,7 +62,7 @@ Route::middleware([
         }
         return view('dashboard.konsumen', $data);
     })->name('dashboard.konsumen');
-
+    
     // Konsumen routes
     Route::middleware('role:konsumen')->group(function () {
         Route::get('/dashboard/konsumen', function () {
@@ -165,3 +165,6 @@ Route::middleware(['auth', 'role:konsumen'])->group(function () {
     Route::get('admin/{admin}/chat', [\App\Http\Controllers\FilachatController::class, 'showAdminChat'])->name('filachat.admin.show');
     Route::post('admin/{admin}/chat', [\App\Http\Controllers\FilachatController::class, 'sendAdminMessage'])->name('filachat.admin.send');
 });
+
+Route::get('/services', [BookingServiceController::class, 'services'])->name('services');
+Route::get('/booking/create', [BookingServiceController::class, 'create'])->name('booking.create');

@@ -204,23 +204,45 @@
             </div>
 
             <!-- Chat Body -->
-            <div class="flex-1 overflow-y-auto px-6 py-4 space-y-4 bg-gray-50 custom-scrollbar">
-                @if ($messages->count())
-                    @foreach ($messages as $msg)
-                        @php
-                            $isKonsumen =
-                                $msg->senderable_type === get_class($conversation->sender) &&
-                                $msg->senderable_id === $conversation->senderable_id;
-                        @endphp
-                        <div class="flex {{ $isKonsumen ? 'justify-end' : 'justify-start' }}">
-                            <div
-                                class="max-w-xs md:max-w-md px-4 py-3 rounded-2xl {{ $isKonsumen ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white' : 'bg-white text-gray-900 border shadow-sm' }}">
-                                <div class="text-sm">{{ $msg->message }}</div>
-                                <div class="text-xs mt-1 text-right opacity-70">{{ $msg->created_at->format('H:i') }}
+            <div class="flex-1 overflow-y-auto px-6 py-4 space-y-4 custom-scrollbar bg-white" style="background-size: cover;">
+                @if (isset($conversation))
+                    @if ($messages->count())
+                        @foreach ($messages as $msg)
+                            @php
+                                $isKonsumen = $msg->senderable_type === get_class($conversation->sender) && $msg->senderable_id === $conversation->senderable_id;
+                            @endphp
+                            <div class="flex items-end {{ $isKonsumen ? 'justify-end' : 'justify-start' }} mb-2">
+                                @if (!$isKonsumen)
+                                    <div class="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center mr-2 text-white font-bold shadow">
+                                        {{ strtoupper(substr($msg->sender->agentable->name ?? 'U', 0, 1)) }}
+                                    </div>
+                                @endif
+                                <div class="relative max-w-xs md:max-w-md px-4 py-3 rounded-2xl shadow
+                                    {{ $isKonsumen ? 'bg-purple-600 text-white' : 'bg-orange-500 text-white' }}">
+                                    <div class="text-sm break-words pb-2">{{ $msg->message }}</div>
+                                    <div class="text-xs absolute bottom-1 right-3 opacity-70">{{ $msg->created_at->format('H:i') }}</div>
                                 </div>
+                                @if ($isKonsumen)
+                                    <div class="w-9 h-9 rounded-full bg-purple-600 flex items-center justify-center ml-2 text-white font-bold shadow">
+                                        {{ strtoupper(substr(Auth::user()->name ?? 'K', 0, 1)) }}
+                                    </div>
+                                @endif
                             </div>
+                        @endforeach
+                    @else
+                        <div class="text-center text-gray-400 mt-20">
+                            <div class="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                                <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <p class="text-lg font-medium text-gray-600">Belum ada pesan</p>
+                            <p class="text-sm text-gray-500">Kirim pesan untuk memulai chat</p>
                         </div>
-                    @endforeach
+                    @endif
                 @else
                     <div class="text-center text-gray-400 mt-20">
                         <div class="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
@@ -231,26 +253,21 @@
                                 </path>
                             </svg>
                         </div>
-                        <p class="text-lg font-medium text-gray-600">Belum ada pesan</p>
-                        <p class="text-sm text-gray-500">Pilih kontak untuk mulai chat</p>
+                        <p class="text-lg font-medium text-gray-600">Pilih kontak untuk mulai chat</p>
                     </div>
                 @endif
             </div>
 
             <!-- Chat Input -->
-            @if ($formAction !== '#')
+            @if (isset($conversation) && $formAction !== '#')
                 <form action="{{ $formAction }}" method="POST"
                     class="flex items-center gap-3 border-t px-6 py-4 bg-white flex-shrink-0 rounded-b-2xl">
                     @csrf
-                    <input type="text" name="message" placeholder="Type your message..." required
-                        class="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent shadow-sm"
+                    <input type="text" name="message" placeholder="Ketik pesan..." required
+                        class="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent shadow-sm text-gray-800"
                         autocomplete="off">
                     <button type="submit"
-                        class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-3 rounded-full font-semibold transition-all duration-200 transform hover:scale-105 shadow-md">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                        </svg>
+                        class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-orang-700 px-6 py-3 rounded-full font-semibold transition-all duration-200 transform hover:scale-105 border-2 border-orang-500 shadow-md">Send
                     </button>
                 </form>
             @else
