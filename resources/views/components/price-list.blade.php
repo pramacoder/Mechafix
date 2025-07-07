@@ -21,7 +21,7 @@
                 <div class="flex items-start justify-between mb-6">
                     <div>
                         <h3 class="text-2xl font-bold text-gray-900 mb-2">Basic</h3>
-                        <p class="text-gray-600">start from :</p>
+                        <p class="text-gray-600">start from:</p>
                     </div>
                     <div class="bg-orange-100 p-3 rounded-xl">
                         <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,7 +32,9 @@
                 
                 <div class="mb-6">
                     <div class="flex items-baseline">
-                        <span class="text-3xl font-bold text-gray-900">Rp. 45.000</span>
+                        <span class="text-3xl font-bold text-gray-900">
+                            Rp. {{ number_format($cheapestService, 0, ',', '.') }}
+                        </span>
                     </div>
                     <p class="text-gray-600 mt-1">for service</p>
                 </div>
@@ -49,15 +51,17 @@
                 <div class="flex items-start justify-between mb-6">
                     <div>
                         <h3 class="text-2xl font-bold text-gray-900 mb-2">Parts</h3>
-                        <p class="text-gray-600">Start from :</p>
+                        <p class="text-gray-600">Start from:</p>
                     </div>
                 </div>
                 
                 <div class="mb-6">
                     <div class="flex items-baseline">
-                        <span class="text-3xl font-bold text-gray-900">Rp. 15.000</span>
+                        <span class="text-3xl font-bold text-gray-900">
+                            Rp. {{ number_format($cheapestSparePart, 0, ',', '.') }}
+                        </span>
                     </div>
-                    <p class="text-gray-600 mt-1">Per Parts</p>
+                    <p class="text-gray-600 mt-1">Per parts</p>
                 </div>
                 
                 <p class="text-gray-600 mb-6">Best price fort the best part</p>

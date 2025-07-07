@@ -1,6 +1,6 @@
 <x-layoutkonsumen>
 
-    <div class="relative min-h-96 bg-cover bg-center" 
+    <div class="relative min-h-96 bg-cover bg-center"
         style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('{{ asset('Services1.png') }}');">
         <div class="absolute inset-0 bg-black/60"></div>
         <div class="container mx-auto px-6 py-24 relative z-10">
@@ -9,10 +9,14 @@
                 <p class="text-xl text-gray-200 mb-8">Contact us now to schedule your appointment or to learn more
                     about our services.</p>
                 <div class="flex space-x-4">
-                    <button
+                    {{-- <button
                         class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded font-semibold transition duration-300">
                         Inquire
-                    </button>
+                    </button> --}}
+                    <a href="https://wa.me/6287743447862"
+                        class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded font-semibold transition duration-300">
+                        Inquire
+                    </a>
                     <a href="#booking-section"
                         class="border-2 border-white text-white hover:bg-white hover:text-gray-800 px-8 py-3 rounded font-semibold transition duration-300">
                         Schedule
@@ -114,7 +118,7 @@
             </div>
         </div>
     </div>
-    <x-brand-trusted/>
+    <x-brand-trusted />
 
 
     <script>
@@ -142,7 +146,9 @@
                 e.preventDefault();
                 const target = document.getElementById('booking-section');
                 if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
                 }
             });
         }

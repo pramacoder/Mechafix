@@ -28,6 +28,7 @@ Route::get('/konsumen/our_profile', fn() => view('konsumen.our_profile'))->name(
 Route::get('/konsumen/chat_contact', fn() => view('konsumen.chat_contact'))->name('konsumen.chat_contact');
 Route::get('/konsumen/history', fn() => view('konsumen.history'))->name('konsumen.history');
 Route::get('/konsumen/billing', fn() => view('konsumen.billing'))->name('konsumen.billing');
+Route::get('/pricelist', [KonsumenController::class, 'pricelist'])->name('pricelist');
 
 Route::get('/login', function () {
     return view('auth.login');
@@ -95,6 +96,11 @@ Route::middleware([
 Route::prefix('mekanik')->group(function () {
     Route::get('{mekanik}/chat', [FilachatController::class, 'showChat'])->name('filachat.show');
     Route::post('{mekanik}/chat', [FilachatController::class, 'sendMessage'])->name('filachat.send');
+});
+
+Route::prefix('admin')->group(function () {
+    Route::get('{admin}/chat', [FilachatController::class, 'showChat'])->name('filachat.show');
+    Route::post('{admin}/chat', [FilachatController::class, 'sendMessage'])->name('filachat.send');
 });
 
 Route::prefix('dashboard/mekanik')->group(function () {

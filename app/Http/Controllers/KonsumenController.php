@@ -9,9 +9,19 @@ use App\Notifications\PaymentSuccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Service;
+use App\Models\SparePart;
 
 class KonsumenController extends Controller
 {
+    public function pricelist()
+    {
+        $cheapestService = Service::min('biaya_service');
+        $cheapestSparePart = SparePart::min('harga_barang');
+
+        return view('components.price-list', compact('cheapestService', 'cheapestSparePart'));
+    }
+
     public function uploadBuktiPembayaran(Request $request, Pembayaran $pembayaran)
     {
         try {

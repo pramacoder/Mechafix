@@ -92,8 +92,15 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Pesan</label>
                             <textarea x-model="form.message" rows="4" class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200"></textarea>
                         </div>
-                        <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02]">
-                            Send Message
+                        <button type="submit" :disabled="isSubmitting" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span x-show="!isSubmitting">Send Message</span>
+                            <span x-show="isSubmitting" class="flex items-center justify-center">
+                                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Sending...
+                            </span>
                         </button>
                     </form>
                 </div>
@@ -139,6 +146,39 @@
         </div>
     </div>
 
+    {{-- Success Popup Modal --}}
+    <div x-show="showSuccessModal" 
+         x-transition:enter="transition ease-out duration-300" 
+         x-transition:enter-start="opacity-0 transform scale-95" 
+         x-transition:enter-end="opacity-100 transform scale-100" 
+         x-transition:leave="transition ease-in duration-200" 
+         x-transition:leave-start="opacity-100 transform scale-100" 
+         x-transition:leave-end="opacity-0 transform scale-95" 
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
+            {{-- Success Icon --}}
+            <div class="flex items-center justify-center mb-6">
+                <div class="bg-green-100 rounded-full p-4">
+                    <svg class="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+            </div>
+            
+            {{-- Success Message --}}
+            <div class="text-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Message Sent Successfully!</h3>
+                <p class="text-gray-600">Thank you for reaching out to us. We'll get back to you within 24 hours.</p>
+            </div>
+            
+            {{-- Close Button --}}
+            <button @click="closeSuccessModal" 
+                    class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02]">
+                Got it!
+            </button>
+        </div>
+    </div>
+
     {{-- Map Modal --}}
     <div x-show="showMap" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4" @click.away="showMap = false">
         <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden shadow-2xl">
@@ -181,53 +221,55 @@
     
 </div>
 
-
 <!-- FAQ Section dipindahkan ke dalam grid dan span 2 kolom di layar besar -->
 <div class="lg:col-span-2 w-full max-w-3xl mx-auto mt-20 mb-10 clear-both">
-                <h2 class="text-3xl md:text-4xl font-bold text-black mb-8 text-center">Frequently Asked Questions</h2>
-                <div class="space-y-4">
-                    <details class="group border border-orange-200 rounded-xl bg-white p-6">
-                        <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
-                            Bagaimana cara booking service di Mechafix?
-                            <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
-                        </summary>
-                        <div class="mt-3 text-gray-700">
-                            Anda dapat booking service melalui menu "Book Your Service" di website, pilih layanan, isi data, dan pilih jadwal yang tersedia.
-                        </div>
-                    </details>
-                    <details class="group border border-orange-200 rounded-xl bg-white p-6">
-                        <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
-                            Apakah bisa konsultasi masalah motor sebelum booking?
-                            <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
-                        </summary>
-                        <div class="mt-3 text-gray-700">
-                            Tentu! Silakan gunakan fitur chat atau contact yang tersedia untuk konsultasi gratis dengan tim kami.
-                        </div>
-                    </details>
-                    <details class="group border border-orange-200 rounded-xl bg-white p-6">
-                        <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
-                            Apa saja metode pembayaran yang diterima?
-                            <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
-                        </summary>
-                        <div class="mt-3 text-gray-700">
-                            Kami menerima pembayaran tunai, transfer bank, dan e-wallet (OVO, Gopay, dll).
-                        </div>
-                    </details>
-                    <details class="group border border-orange-200 rounded-xl bg-white p-6">
-                        <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
-                            Apakah sparepart yang dijual original?
-                            <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
-                        </summary>
-                        <div class="mt-3 text-gray-700">
-                            Semua sparepart yang kami jual dijamin original dan bergaransi.
-                        </div>
-                    </details>
-                </div>
+    <h2 class="text-3xl md:text-4xl font-bold text-black mb-8 text-center">Frequently Asked Questions</h2>
+    <div class="space-y-4">
+        <details class="group border border-orange-200 rounded-xl bg-white p-6">
+            <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
+                Bagaimana cara booking service di Mechafix?
+                <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="mt-3 text-gray-700">
+                Anda dapat booking service melalui menu "Book Your Service" di website, pilih layanan, isi data, dan pilih jadwal yang tersedia.
             </div>
+        </details>
+        <details class="group border border-orange-200 rounded-xl bg-white p-6">
+            <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
+                Apakah bisa konsultasi masalah motor sebelum booking?
+                <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="mt-3 text-gray-700">
+                Tentu! Silakan gunakan fitur chat atau contact yang tersedia untuk konsultasi gratis dengan tim kami.
+            </div>
+        </details>
+        <details class="group border border-orange-200 rounded-xl bg-white p-6">
+            <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
+                Apa saja metode pembayaran yang diterima?
+                <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="mt-3 text-gray-700">
+                Kami menerima pembayaran tunai, transfer bank, dan e-wallet (OVO, Gopay, dll).
+            </div>
+        </details>
+        <details class="group border border-orange-200 rounded-xl bg-white p-6">
+            <summary class="flex items-center justify-between cursor-pointer text-lg font-semibold text-black group-open:text-orange-500 transition-colors">
+                Apakah sparepart yang dijual original?
+                <span class="ml-2 text-orange-500 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="mt-3 text-gray-700">
+                Semua sparepart yang kami jual dijamin original dan bergaransi.
+            </div>
+        </details>
+    </div>
+</div>
+
 <script>
 function contactComponent() {
     return {
         showMap: false,
+        showSuccessModal: false,
+        isSubmitting: false,
         form: {
             name: '',
             email: '',
@@ -248,12 +290,65 @@ function contactComponent() {
             this.showMap = true;
         },
         
-        submitForm() {
-            // Handle form submission
-            console.log('Form submitted:', this.form);
-            // Add your form submission logic here
-            alert('Thank you for your message! We will get back to you soon.');
-            this.resetForm();
+        async submitForm() {
+            // Basic validation
+            if (!this.form.name || !this.form.email || !this.form.message) {
+                this.showErrorToast('Please fill in all required fields');
+                return;
+            }
+            
+            this.isSubmitting = true;
+            
+            try {
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // Handle form submission
+                console.log('Form submitted:', this.form);
+                
+                // Show success modal
+                this.showSuccessModal = true;
+                this.resetForm();
+                
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                this.showErrorToast('Failed to send message. Please try again.');
+            } finally {
+                this.isSubmitting = false;
+            }
+        },
+        
+        closeSuccessModal() {
+            this.showSuccessModal = false;
+        },
+        
+        showErrorToast(message) {
+            // Create temporary toast notification
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300';
+            toast.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    ${message}
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Animate out and remove
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
         },
         
         resetForm() {
@@ -303,5 +398,16 @@ function contactComponent() {
 
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
     background: #a1a1a1;
+}
+
+/* Loading animation */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
 }
 </style>
