@@ -36,9 +36,9 @@ class Service extends Model
     public function bookingServices()
     {
         return $this->belongsToMany(
-            BookingService::class, 
-            'transaksi_services', 
-            'id_service', 
+            BookingService::class,
+            'transaksi_services',
+            'id_service',
             'id_booking_service',
         )
         ->withPivot('kuantitas_service', 'subtotal_service')
