@@ -30,6 +30,7 @@ class KonsumenResource extends Resource
                     ->getOptionLabelFromRecordUsing(fn($record) => $record->name . ' (' . $record->email . ')'),
                 Forms\Components\Textarea::make('alamat_konsumen')
                     ->label('Address')
+                    ->required()
                     ->rows(3),
             ]);
     }

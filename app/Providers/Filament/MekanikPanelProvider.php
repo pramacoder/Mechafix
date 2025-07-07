@@ -34,6 +34,10 @@ class MekanikPanelProvider extends PanelProvider
             ])
             ->discoverResources(in: app_path('Filament/Mekanik/Resources'), for: 'App\\Filament\\Mekanik\\Resources')
             ->discoverPages(in: app_path('Filament/Mekanik/Pages'), for: 'App\\Filament\\Mekanik\\Pages')
+            ->resources([
+                \App\Filament\Resources\TransaksiRiwayatResource::class,
+                \App\Filament\Resources\ChatResource::class,
+            ])
             ->pages([
                 Pages\Dashboard::class,
             ])
@@ -43,7 +47,7 @@ class MekanikPanelProvider extends PanelProvider
                 // Widgets\FilamentInfoWidget::class,
                 TotalService::class,
                 Orderan::class,
-                Konribusi::class
+                Konribusi::class,
             ])
             ->middleware([
                 EncryptCookies::class,

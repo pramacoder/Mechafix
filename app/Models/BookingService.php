@@ -25,14 +25,14 @@ class BookingService extends Model
     ];
 
     protected $casts = [
-        'tanggal_booking' => 'datetime',
+        'tanggal_booking' => 'date',
         'estimasi_kedatangan' => 'datetime',
         'keluhan_konsumen' => 'string',
         'status_booking' => 'string',
     ];
 
     // Relationships
-    public function konsumen()
+    public function konsumens()
     {
         return $this->belongsTo(Konsumen::class, 'id_konsumen', 'id_konsumen');
     }

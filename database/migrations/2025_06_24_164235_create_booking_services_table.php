@@ -21,8 +21,8 @@ return new class extends Migration
             $table->unsignedBigInteger('id_plat_kendaraan');
             $table->unsignedBigInteger('id_mekanik')->nullable();
             $table->unsignedBigInteger('id_pembayaran')->nullable();
-            $table->timestamps();
-
+            $table->timestamps(); 
+     
             // foreign keys
             $table->foreign('id_konsumen')->references('id_konsumen')->on('konsumens')->onDelete('cascade');
             $table->foreign('id_plat_kendaraan')->references('id_plat_kendaraan')->on('plat_kendaraans')->onDelete('cascade');

@@ -77,7 +77,7 @@ class BookingServiceResource extends Resource
                 Forms\Components\DatePicker::make('tanggal_booking')
                     ->label('Tanggal Booking')
                     ->required()
-                    ->minDate(now()->addDay())
+                    ->minDate(now())
                     ->maxDate(now()->addMonths(3))
                     ->disabledDates(function () {
                         return \App\Models\HariLibur::getHolidayDates(
@@ -116,7 +116,7 @@ class BookingServiceResource extends Resource
                 Tables\Columns\TextColumn::make('id_booking_service')
                     ->label('Booking ID')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('konsumen.user.name')
+                Tables\Columns\TextColumn::make('konsumens.user.name')
                     ->label('Customer')
                     ->searchable()
                     ->sortable(),

@@ -38,4 +38,24 @@ class Konsumen extends Model
     {
         return $this->hasMany(BookingService::class, 'id_konsumen', 'id_konsumen');
     }
+
+    public function sentMessages()
+    {
+        return $this->morphMany(FilachatMessage::class, 'senderable');
+    }
+
+    public function receivedMessages()
+    {
+        return $this->morphMany(FilachatMessage::class, 'receiverable');
+    }
+
+    public function sentConversations()
+    {
+        return $this->morphMany(FilachatConversation::class, 'senderable');
+    }
+
+    public function receivedConversations()
+    {
+        return $this->morphMany(FilachatConversation::class, 'receiverable');
+    }
 }
