@@ -7,15 +7,13 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
-            @if(auth()->user()->isKonsumen())
+
+            @if (auth()->user()->isKonsumen())
                 <!-- Dashboard untuk Konsumen -->
                 @include('dashboard.konsumen')
-                
             @elseif(auth()->user()->isMekanik())
                 <!-- Dashboard untuk Mekanik -->
                 @include('dashboard.mekanik')
-                
             @elseif(auth()->user()->isAdmin())
                 <!-- Dashboard untuk Admin - redirect ke Filament -->
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
@@ -25,12 +23,12 @@
                         <script>
                             window.location.href = '/admin';
                         </script>
-                        <a href="/admin" class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
+                        <a href="/admin"
+                            class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
                             Go to Admin Panel
                         </a>
                     </div>
                 </div>
-                
             @else
                 <!-- Default fallback -->
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
@@ -40,7 +38,7 @@
                     </div>
                 </div>
             @endif
-                
+
         </div>
     </div>
 </x-app-layout>

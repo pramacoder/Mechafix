@@ -5,10 +5,10 @@ import typography from "@tailwindcss/typography";
 /** @type {import('tailwindcss').Config} */
 export default {
     content: [
-        "./resources/**/*.blade.php",
-        "./resources/**/*.js",
-        "./resources/**/*.vue",
-        "./vendor/laravel/jetstream/**/*.blade.php",
+        "./resources//*.blade.php",
+        "./resources//*.js",
+        "./resources//*.vue",
+        "./vendor/laravel/jetstream//*.blade.php",
     ],
     theme: {
         extend: {},

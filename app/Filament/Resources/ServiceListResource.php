@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ServiceListResource\Pages;
 use App\Models\ServiceList;
+use App\Models\Service;
+use App\Models\Mekanik;
 use Filament\Infolists\Components\Tabs;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -57,14 +59,15 @@ class ServiceListResource extends Resource
 
                                 Select::make('mechanic')
                                     ->label('Mechanic')
-                                    ->options ([
-                                        'andi' => 'Andi',
-                                        'budi' => 'Budi',
-                                        'cici' => 'Cici',
-                                        'didi' => 'Didi',
-                                        'bagus'=> 'Bagus',
-                                        ])
-                                    ->default('Select')
+                                    ->options([
+                                        'mechanic1' => 'Mechanic 1',
+                                        'mechanic2' => 'Mechanic 2',])
+                                    // ->options(
+                                    //     \App\Models\Mekanik::query()
+                                    //         ->pluck('nama_mekanik', 'id_mekanik')
+                                    //         ->toArray()
+                                    // )
+                                    ->searchable()
                                     ->required()
                             ]),
 
@@ -80,39 +83,19 @@ class ServiceListResource extends Resource
                                     ->numeric()
                                     ->required(),
 
-                                Repeater::make('service_items')
+                                // Dropdown multiselect untuk List Service
+                                Select::make('service_items')
                                     ->label('List')
-                                    ->schema([
-                                        Grid::make(2)
-                                            ->schema([
-                                                TextInput::make('item_name')
-                                                    ->label('Item')
-                                                    ->required(),
-                                                TextInput::make('price')
-                                                    ->label('Price')
-                                                    ->numeric()
-                                                    ->prefix('Rp.')
-                                                    ->required(),
-                                            ])
-                                    ])
-                                    ->defaultItems(5)
-                                    ->default([
-                                        ['item_name' => 'Oli Kastrol F-1', 'price' => 20000],
-                                        ['item_name' => 'V-Belt', 'price' => 200000],
-                                        ['item_name' => 'Kampas Rem', 'price' => 80000],
-                                        ['item_name' => 'Busi Motor', 'price' => 30000],
-                                        ['item_name' => 'Service Motor', 'price' => 200000],
-                                    ])
+                                    ->multiple()
+                                    ->options(Service::all()->pluck('nama_service', 'id_service'))
+                                    ->searchable()
+                                    ->required()
                                     ->live()
-                                    ->afterStateUpdated(function (Get $get, Set $set) {
-                                        $items = $get('service_items') ?? [];
-                                        $total = collect($items)->sum('price');
+                                    ->afterStateUpdated(function ($state, Set $set) {
+                                        $serviceOptions = \App\Models\Service::query()->pluck('biaya_service', 'nama_service')->toArray();
+                                        $total = collect($state)->sum(fn($item) => $serviceOptions[$item] ?? 0);
                                         $set('total_price', $total);
-                                    })
-                                    ->addActionLabel('Add Item')
-                                    ->reorderable(false)
-                                    ->deletable(true)
-                                    ->collapsible(),
+                                    }),
                             ]),
 
                         Grid::make(3)
@@ -128,25 +111,30 @@ class ServiceListResource extends Resource
 
                                 Grid::make(1)
                                     ->schema([
-                                        TextInput::make('total_price')
-                                            ->label('Subtotal')
-                                            ->prefix('Rp.')
-                                            ->numeric()
-                                            ->default(530000)
-                                            ->readOnly()
-                                            ->extraAttributes([
-                                                'class' => 'font-bold text-lg'
-                                            ]),
-
-                                        TextInput::make('total_price')
-                                            ->label('TOTAL')
-                                            ->prefix('Rp.')
-                                            ->numeric()
-                                            ->default(530000)
-                                            ->readOnly()
-                                            ->extraAttributes([
-                                                'class' => 'font-bold text-xl text-green-600'
-                                            ]),
+                                        Forms\Components\Card::make([
+                                            Forms\Components\Placeholder::make('subtotal')
+                                                ->label('Subtotal')
+                                                ->content(function (Get $get) {
+                                                    $serviceOptions = \App\Models\Service::query()->pluck('biaya_service', 'id_service')->toArray();
+                                                    $serviceNames = \App\Models\Service::query()->pluck('nama_service', 'id_service')->toArray();
+                                                    $items = $get('service_items') ?? [];
+                                                    if (empty($items)) {
+                                                        return 'Belum ada item dipilih';
+                                                    }
+                                                    // Untuk rata kanan harga, cari panjang nama terpanjang
+                                                    $maxNameLength = collect($items)->map(fn($id) => strlen($serviceNames[$id] ?? ''))->max() + 2;
+                                                    $lines = collect($items)->map(function ($id) use ($serviceOptions, $serviceNames, $maxNameLength) {
+                                                        $name = $serviceNames[$id] ?? '-';
+                                                        $price = $serviceOptions[$id] ?? 0;
+                                                        return str_pad($name, $maxNameLength, ' ', STR_PAD_RIGHT) . 'Rp. ' . number_format($price, 0, ',', '.');
+                                                    })->implode("\n");
+                                                    $total = collect($items)->sum(fn($id) => $serviceOptions[$id] ?? 0);
+                                                    return $lines . "\n" . str_repeat('-', 30) . "\n" .
+                                                        str_pad('TOTAL', $maxNameLength, ' ', STR_PAD_RIGHT) . 'Rp. ' . number_format($total, 0, ',', '.');
+                                                })
+                                                ->extraAttributes(['class' => 'font-bold text-lg', 'style' => 'white-space: pre-line;'])
+                                                ->columnSpan(1),
+                                        ])->columnSpan(1),
                                     ]),
                             ]),
 
