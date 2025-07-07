@@ -2,109 +2,165 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Admin;
+use App\Models\Mekanik;
+use App\Models\Konsumen;
 use App\Models\FilachatAgent;
 use App\Models\FilachatConversation;
 use App\Models\FilachatMessage;
-use App\Models\Mekanik;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class FilachatController extends Controller
 {
-    // Show chat between konsumen and mekanik (from konsumen side)
-    public function showChat($mekanikId)
+    // Index - halaman utama chat konsumen
+    public function index()
     {
-        $user = Auth::user();
-        $konsumenAgent = FilachatAgent::firstOrCreate([
-            'agentable_id' => $user->id,
-            'agentable_type' => get_class($user),
-            'role' => 'konsumen',
-        ]);
-        $mekanik = Mekanik::findOrFail($mekanikId);
-        $mekanikUser = $mekanik->user;
-        $mekanikAgent = FilachatAgent::firstOrCreate([
-            'agentable_id' => $mekanikUser->id,
-            'agentable_type' => 'App\\Models\\User', // Standardize type
-            'role' => 'mekanik',
-        ]);
-        $conversation = FilachatConversation::firstOrCreate([
-            'senderable_id' => $konsumenAgent->id,
-            'senderable_type' => get_class($konsumenAgent),
-            'receiverable_id' => $mekanikAgent->id,
-            'receiverable_type' => get_class($mekanikAgent),
-        ]);
-        $messages = $conversation->messages()->with('sender.agentable')->orderBy('created_at')->get();
-        // Pastikan $stats dan $performance ada agar tidak undefined
-        $stats = $stats ?? [];
-        $performance = $performance ?? [];
-        // Ambil ulang data statistik dan bookings agar view tidak error
-        $stats = [
-            'total_jobs' => $mekanik->bookingServices()->count(),
-            'completed_jobs' => $mekanik->bookingServices()->where('status_booking', 'selesai')->count(),
-            'active_jobs' => $mekanik->bookingServices()->where('status_booking', 'dikonfirmasi')->count(),
-            'pending_jobs' => $mekanik->bookingServices()->where('status_booking', 'menunggu')->count(),
-            'working_days' => $mekanik->created_at ? now()->diffInDays($mekanik->created_at) : 0,
-            'working_months' => $mekanik->created_at ? now()->diffInMonths($mekanik->created_at) : 0,
-        ];
-        // Pastikan working_days dan working_months selalu ada
-        if (!isset($stats['working_days'])) $stats['working_days'] = 0;
-        if (!isset($stats['working_months'])) $stats['working_months'] = 0;
-        $myBookings = $mekanik->bookingServices()
-            ->where('id_konsumen', $user->konsumen->id_konsumen ?? null)
-            ->with(['platKendaraan', 'transaksiServices.service', 'pembayarans'])
-            ->latest()
-            ->take(5)
-            ->get();
-        $total_revenue = $mekanik->bookingServices()
-            ->whereHas('pembayarans', function($q) {
-                $q->where('status_pembayaran', 'Sudah Dibayar');
-            })
-            ->with('pembayarans')
-            ->get()
-            ->sum(function($booking) {
-                return $booking->pembayarans->first()->total_pembayaran ?? 0;
-            });
-        $performance = [
-            'completion_rate' => $stats['total_jobs'] > 0 ? round(($stats['completed_jobs'] / $stats['total_jobs']) * 100) : 0,
-            'avg_jobs_per_month' => $stats['working_months'] > 0 ? round($stats['total_jobs'] / $stats['working_months'], 1) : 0,
-            'total_revenue' => $total_revenue,
-        ];
-        return view('konsumen.mekanik-profile', compact('mekanik', 'mekanikUser', 'conversation', 'messages', 'stats', 'performance', 'myBookings'));
+        return view('konsumen.chat_contact');
     }
 
-    // Konsumen sends message to mekanik
-    public function sendMessage(Request $request, $mekanikId)
+    // Show admin chat untuk konsumen
+    public function showAdminChat(Admin $admin)
+    {
+        $konsumen = auth()->user()->konsumen;
+        
+        if (!$konsumen) {
+            return redirect()->route('konsumen.chat')->with('error', 'Data konsumen tidak ditemukan');
+        }
+
+        // Cari atau buat conversation antara konsumen dan admin
+        $conversation = FilachatConversation::firstOrCreate([
+            'senderable_type' => 'App\Models\Konsumen',
+            'senderable_id' => $konsumen->id_konsumen,
+            'receiverable_type' => 'App\Models\Admin',
+            'receiverable_id' => $admin->id_admin,
+        ]);
+
+        // Ambil messages untuk conversation ini
+        $messages = FilachatMessage::where('filachat_conversation_id', $conversation->id)
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        return view('konsumen.chat_contact', [
+            'admin' => $admin,
+            'adminUser' => $admin->user,
+            'conversation' => $conversation,
+            'messages' => $messages,
+        ]);
+    }
+
+    // Send message ke admin
+    public function sendAdminMessage(Request $request, Admin $admin)
     {
         $request->validate([
-            'message' => 'required|string',
+            'message' => 'required|string|max:1000',
         ]);
-        $user = Auth::user();
-        $konsumenAgent = FilachatAgent::firstOrCreate([
-            'agentable_id' => $user->id,
-            'agentable_type' => get_class($user),
-            'role' => 'konsumen',
-        ]);
-        $mekanikUser = Mekanik::findOrFail($mekanikId)->user;
-        $mekanikAgent = FilachatAgent::firstOrCreate([
-            'agentable_id' => $mekanikUser->id,
-            'agentable_type' => 'App\\Models\\User', // Standardize type
-            'role' => 'mekanik',
-        ]);
+
+        $konsumen = auth()->user()->konsumen;
+        
+        if (!$konsumen) {
+            return redirect()->route('konsumen.chat')->with('error', 'Data konsumen tidak ditemukan');
+        }
+
+        // Cari atau buat conversation
         $conversation = FilachatConversation::firstOrCreate([
-            'senderable_id' => $konsumenAgent->id,
-            'senderable_type' => get_class($konsumenAgent),
-            'receiverable_id' => $mekanikAgent->id,
-            'receiverable_type' => get_class($mekanikAgent),
+            'senderable_type' => 'App\Models\Konsumen',
+            'senderable_id' => $konsumen->id_konsumen,
+            'receiverable_type' => 'App\Models\Admin',
+            'receiverable_id' => $admin->id_admin,
         ]);
+
+        // Buat message baru
         FilachatMessage::create([
             'filachat_conversation_id' => $conversation->id,
             'message' => $request->message,
-            'senderable_id' => $konsumenAgent->id,
-            'senderable_type' => get_class($konsumenAgent),
-            'receiverable_id' => $mekanikAgent->id,
-            'receiverable_type' => get_class($mekanikAgent),
+            'senderable_type' => 'App\Models\Konsumen',
+            'senderable_id' => $konsumen->id_konsumen,
+            'receiverable_type' => 'App\Models\Admin',
+            'receiverable_id' => $admin->id_admin,
         ]);
-        return redirect()->route('filachat.show', ['mekanik' => $mekanikId]);
+
+        return redirect()->route('filachat.admin.show', $admin->id_admin);
+    }
+
+    // Show mekanik chat untuk konsumen
+    public function showMekanikChat(Mekanik $mekanik)
+    {
+        $konsumen = auth()->user()->konsumen;
+        
+        if (!$konsumen) {
+            return redirect()->route('konsumen.chat')->with('error', 'Data konsumen tidak ditemukan');
+        }
+
+        // Cari atau buat conversation antara konsumen dan mekanik
+        $conversation = FilachatConversation::firstOrCreate([
+            'senderable_type' => 'App\Models\Konsumen',
+            'senderable_id' => $konsumen->id_konsumen,
+            'receiverable_type' => 'App\Models\Mekanik',
+            'receiverable_id' => $mekanik->id_mekanik,
+        ]);
+
+        // Ambil messages untuk conversation ini
+        $messages = FilachatMessage::where('filachat_conversation_id', $conversation->id)
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        return view('konsumen.chat_contact', [
+            'mekanik' => $mekanik,
+            'mekanikUser' => $mekanik->user,
+            'conversation' => $conversation,
+            'messages' => $messages,
+        ]);
+    }
+
+    // Send message ke mekanik
+    public function sendMekanikMessage(Request $request, Mekanik $mekanik)
+    {
+        $request->validate([
+            'message' => 'required|string|max:1000',
+        ]);
+
+        $konsumen = auth()->user()->konsumen;
+        
+        if (!$konsumen) {
+            return redirect()->route('konsumen.chat')->with('error', 'Data konsumen tidak ditemukan');
+        }
+
+        // Cari atau buat conversation
+        $conversation = FilachatConversation::firstOrCreate([
+            'senderable_type' => 'App\Models\Konsumen',
+            'senderable_id' => $konsumen->id_konsumen,
+            'receiverable_type' => 'App\Models\Mekanik',
+            'receiverable_id' => $mekanik->id_mekanik,
+        ]);
+
+        // Buat message baru
+        FilachatMessage::create([
+            'filachat_conversation_id' => $conversation->id,
+            'message' => $request->message,
+            'senderable_type' => 'App\Models\Konsumen',
+            'senderable_id' => $konsumen->id_konsumen,
+            'receiverable_type' => 'App\Models\Mekanik',
+            'receiverable_id' => $mekanik->id_mekanik,
+        ]);
+
+        return redirect()->route('filachat.show', $mekanik->id_mekanik);
+    }
+
+    // Legacy methods for backward compatibility (menggunakan FilachatAgent system)
+    
+    // Show chat between konsumen and mekanik (legacy - redirect to new method)
+    public function showChat($mekanikId)
+    {
+        $mekanik = Mekanik::findOrFail($mekanikId);
+        return $this->showMekanikChat($mekanik);
+    }
+
+    // Send message (legacy - redirect to new method)
+    public function sendMessage(Request $request, $mekanikId)
+    {
+        $mekanik = Mekanik::findOrFail($mekanikId);
+        return $this->sendMekanikMessage($request, $mekanik);
     }
 
     // Mekanik inbox: list all conversations for this mekanik
@@ -116,43 +172,18 @@ class FilachatController extends Controller
             'agentable_type' => get_class($user),
             'role' => 'mekanik',
         ]);
+        
         $conversations = FilachatConversation::where('receiverable_id', $mekanikAgent->id)
             ->where('receiverable_type', get_class($mekanikAgent))
             ->with(['sender.agentable', 'messages' => function ($q) {
                 $q->orderBy('created_at', 'asc');
             }])
             ->get()
-            ->sortByDesc(function($conv) {
+            ->sortByDesc(function ($conv) {
                 return optional($conv->messages->last())->created_at;
             });
+            
         return view('dashboard.mekanik', compact('conversations'));
-    }
-
-    // Mekanik replies to a conversation
-    public function mekanikReply(Request $request, $conversationId)
-    {
-        $request->validate([
-            'message' => 'required|string',
-        ]);
-        $user = Auth::user();
-        $mekanikAgent = FilachatAgent::firstOrCreate([
-            'agentable_id' => $user->id,
-            'agentable_type' => get_class($user),
-            'role' => 'mekanik',
-        ]);
-        $conversation = FilachatConversation::findOrFail($conversationId);
-        if ($conversation->receiverable_id != $mekanikAgent->id || $conversation->receiverable_type != get_class($mekanikAgent)) {
-            abort(403);
-        }
-        FilachatMessage::create([
-            'filachat_conversation_id' => $conversation->id,
-            'message' => $request->message,
-            'senderable_id' => $mekanikAgent->id,
-            'senderable_type' => get_class($mekanikAgent),
-            'receiverable_id' => $conversation->senderable_id,
-            'receiverable_type' => $conversation->senderable_type,
-        ]);
-        return redirect()->route('dashboard');
     }
 
     // Mekanik views a specific chat thread
@@ -164,6 +195,7 @@ class FilachatController extends Controller
             'agentable_type' => get_class($user),
             'role' => 'mekanik',
         ]);
+        
         $conversation = FilachatConversation::with([
             'sender.agentable',
             'messages.sender.agentable'
@@ -177,5 +209,37 @@ class FilachatController extends Controller
         $messages = $conversation->messages()->with('sender.agentable')->orderBy('created_at')->get();
 
         return view('dashboard.mekanik-chat', compact('conversation', 'messages'));
+    }
+
+    // Mekanik replies to a conversation
+    public function mekanikReply(Request $request, $conversationId)
+    {
+        $request->validate([
+            'message' => 'required|string',
+        ]);
+        
+        $user = Auth::user();
+        $mekanikAgent = FilachatAgent::firstOrCreate([
+            'agentable_id' => $user->id,
+            'agentable_type' => get_class($user),
+            'role' => 'mekanik',
+        ]);
+        
+        $conversation = FilachatConversation::findOrFail($conversationId);
+        
+        if ($conversation->receiverable_id != $mekanikAgent->id || $conversation->receiverable_type != get_class($mekanikAgent)) {
+            abort(403);
+        }
+        
+        FilachatMessage::create([
+            'filachat_conversation_id' => $conversation->id,
+            'message' => $request->message,
+            'senderable_id' => $mekanikAgent->id,
+            'senderable_type' => get_class($mekanikAgent),
+            'receiverable_id' => $conversation->senderable_id,
+            'receiverable_type' => $conversation->senderable_type,
+        ]);
+        
+        return redirect()->route('dashboard');
     }
 }

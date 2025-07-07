@@ -61,16 +61,18 @@ class PlatKendaraanResource extends Resource
                     ->label('Engine (CC)')
                     ->suffix(' CC')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('konsumen.user.name')
+                Tables\Columns\TextColumn::make('konsumens.user.name')
                     ->label('Owner')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('konsumen.user.email')
+                Tables\Columns\TextColumn::make('konsumens.user.email')
                     ->label('Owner Email')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('bookingServices_count')
+                Tables\Columns\TextColumn::make('total_bookings')
                     ->label('Total Bookings')
-                    ->counts('bookingServices'),
+                    ->getStateUsing(function ($record) {
+                        return $record->bookingServices()->count();
+                    }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -102,6 +104,13 @@ class PlatKendaraanResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['konsumens.user'])
+            ->withCount('bookingServices as booking_services_count');
     }
 
     public static function getPages(): array

@@ -20,7 +20,7 @@ class BookingServiceResource extends Resource
     protected static ?string $model = BookingService::class;
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
     protected static ?string $navigationGroup = 'Booking Management';
-    protected static ?string $navigationLabel = 'Bookings';
+    protected static ?string $navigationLabel = 'Bookings (YG JADI)';
     protected static ?int $navigationSort = 5;
 
     public static function form(Form $form): Form
@@ -116,7 +116,7 @@ class BookingServiceResource extends Resource
                 Tables\Columns\TextColumn::make('id_booking_service')
                     ->label('Booking ID')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('konsumen.user.name')
+                Tables\Columns\TextColumn::make('konsumens.user.name')
                     ->label('Customer')
                     ->searchable()
                     ->sortable(),

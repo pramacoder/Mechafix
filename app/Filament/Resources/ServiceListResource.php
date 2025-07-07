@@ -30,7 +30,7 @@ class ServiceListResource extends Resource
 {
     protected static ?string $model = ServiceList::class;
     protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
-    protected static ?string $navigationLabel = 'Booking (FIX)';
+    protected static ?string $navigationLabel = 'Booking (gajadi)';
     protected static ?string $navigationGroup = 'Customer Management';
     protected static ?int $navigationSort = 1;
 
