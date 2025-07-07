@@ -14,8 +14,8 @@ class Mekanik extends Model
     public $incrementing = true;
 
     protected $fillable = [
+        'id_mekanik',
         'kuantitas_hari',
-        'id',
     ];
 
     protected $casts = [

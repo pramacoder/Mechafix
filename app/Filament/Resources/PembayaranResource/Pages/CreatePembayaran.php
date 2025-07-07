@@ -39,7 +39,7 @@ class CreatePembayaran extends CreateRecord
                 'id_booking_service' => $bookingId,
                 'id_service' => $service['id_service'],
                 'kuantitas_service' => $kuantitas,
-                'subtotal_service' => $subtotal, 
+                'subtotal_service' => $subtotal,
             ]);
         }
 
@@ -88,11 +88,11 @@ class CreatePembayaran extends CreateRecord
         foreach ($data['transaksiServices'] as $index => $service) {
             $serviceModel = \App\Models\Service::find($service['id_service']);
             if (!$serviceModel) continue;
-            
+
             $harga = $serviceModel->biaya_service;
             $qty = max(1, (int)($service['kuantitas_service'] ?? 1));
             $subtotal = $harga * $qty;
-            
+
             $data['transaksiServices'][$index]['subtotal_service'] = $subtotal;
             $serviceTotal += $subtotal;
         }
@@ -101,11 +101,11 @@ class CreatePembayaran extends CreateRecord
         foreach ($data['transaksiSpareParts'] as $index => $sp) {
             $sparePartModel = \App\Models\SparePart::find($sp['id_barang']);
             if (!$sparePartModel) continue;
-            
+
             $harga = $sparePartModel->harga_barang;
             $qty = max(1, (int)($sp['kuantitas_barang'] ?? 1));
             $subtotal = $harga * $qty;
-            
+
             $data['transaksiSpareParts'][$index]['subtotal_barang'] = $subtotal;
             $sparepartTotal += $subtotal;
         }

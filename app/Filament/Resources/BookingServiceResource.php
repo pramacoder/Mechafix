@@ -21,6 +21,7 @@ class BookingServiceResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
     protected static ?string $navigationGroup = 'Booking Management';
     protected static ?string $navigationLabel = 'Bookings';
+    protected static ?int $navigationSort = 5;
 
     public static function form(Form $form): Form
     {
@@ -76,7 +77,7 @@ class BookingServiceResource extends Resource
                 Forms\Components\DatePicker::make('tanggal_booking')
                     ->label('Tanggal Booking')
                     ->required()
-                    ->minDate(now()->addDay())
+                    ->minDate(now())
                     ->maxDate(now()->addMonths(3))
                     ->disabledDates(function () {
                         return \App\Models\HariLibur::getHolidayDates(

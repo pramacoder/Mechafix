@@ -34,7 +34,13 @@ class PlatKendaraanResource extends Resource
                     ->maxValue(10000),
                 Forms\Components\Select::make('id_konsumen')
                     ->label('Owner')
-                    ->relationship('konsumen.user', 'name')
+                    ->options(function () {
+                        return \App\Models\Konsumen::with('user')
+                            ->get()
+                            ->mapWithKeys(function ($konsumen) {
+                                return [$konsumen->id_konsumen => $konsumen->user->name ?? 'Unknown User'];
+                            });
+                    })
                     ->required()
                     ->searchable(),
             ]);
