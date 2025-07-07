@@ -45,7 +45,7 @@
     <!-- Footer Bottom -->
     <div class="bg-gray-200 py-4 mt-8 border-t border-gray-700">
         <div class="container mx-auto flex justify-between items-center">
-            <p class="text-gray-600 text-xs">© 2024 Mechafix. All rights reserved.</p>
+            <p class="text-gray-600 text-xs">© 2025 Mechafix. All rights reserved.</p>
             <div class="flex space-x-4">
                 <a href="#" class="text-gray-700 hover:text-orange-500 text-sm">Privacy Policy</a>
                 <a href="#" class="text-gray-700 hover:text-orange-500 text-sm">Terms of Use</a>

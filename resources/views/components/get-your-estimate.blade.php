@@ -23,6 +23,25 @@
         </button>
     </div>
 
+    {{-- Loading State --}}
+    <div id="loadingState" class="hidden text-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-400 mx-auto mb-4"></div>
+        <p class="text-gray-600">Loading booking information...</p>
+    </div>
+
+    {{-- Error State --}}
+    <div id="errorState" class="hidden text-center py-12">
+        <div class="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+            <div class="flex items-center justify-center mb-4">
+                <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-medium text-red-800 mb-2">Booking Not Found</h3>
+            <p class="text-red-600" id="errorMessage">No booking found for this license plate number.</p>
+        </div>
+    </div>
+
     {{-- Job Estimation Statistics (Hidden by default) --}}
     <div id="estimationStats" class="hidden min-h-screen flex-col items-center">
         <div class="bg-gray-900 backdrop-blur-sm border border-gray-700 rounded-lg p-8">
@@ -47,8 +66,8 @@
                             </svg>
                         </div>
                         <div>
-                            <div class="text-white font-medium" id="customerName">DK 1988 ADS</div>
-                            <div class="text-gray-400 text-sm">Customer</div>
+                            <div class="text-white font-medium" id="customerName">-</div>
+                            <div class="text-gray-400 text-sm">License Plate</div>
                         </div>
                         <div class="ml-6">
                             <div class="text-orange-400 font-bold text-lg">MECHAFIX</div>
@@ -62,25 +81,32 @@
                 {{-- Progress Card --}}
                 <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-8 relative">
                     <div class="absolute left-0 top-0 bottom-0 w-1 bg-teal-400 rounded-l-lg"></div>
-                    <div class="text-6xl font-bold text-teal-400 mb-4">5%</div>
+                    <div class="text-4xl font-bold text-teal-400 mb-4" id="progressStatus">-</div>
                     <div class="text-teal-400 text-lg font-medium">Progress</div>
+                    <div class="text-gray-300 text-sm mt-2" id="progressDescription">Current booking status</div>
                 </div>
 
                 {{-- Estimate Time Card --}}
                 <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-8 relative">
                     <div class="absolute left-0 top-0 bottom-0 w-1 bg-teal-400 rounded-l-lg"></div>
-                    <div class="text-6xl font-bold text-teal-400 mb-4">2 Days</div>
-                    <div class="text-gray-300 text-sm mb-1">Retrievable on <span class="text-teal-400">23 March
-                            2025</span></div>
-                    <div class="text-orange-400 text-lg font-medium">Average Estimate Time</div>
+                    <div class="text-4xl font-bold text-teal-400 mb-4" id="estimateTime">-</div>
+                    <div class="text-gray-300 text-sm mb-1" id="estimateDate">-</div>
+                    <div class="text-orange-400 text-lg font-medium">Estimate Time</div>
                 </div>
 
-                {{-- Accuracy Card --}}
+                {{-- Booking Info Card --}}
                 <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-8 relative">
                     <div class="absolute left-0 top-0 bottom-0 w-1 bg-teal-400 rounded-l-lg"></div>
-                    <div class="text-6xl font-bold text-teal-400 mb-4">99%</div>
-                    <div class="text-teal-400 text-lg font-medium">Accuracy of Estimates</div>
+                    <div class="text-2xl font-bold text-teal-400 mb-4" id="bookingDate">-</div>
+                    <div class="text-teal-400 text-lg font-medium">Booking Date</div>
+                    <div class="text-gray-300 text-sm mt-2" id="arrivalTime">-</div>
                 </div>
+            </div>
+
+            {{-- Customer Complaint --}}
+            <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-6 mb-8">
+                <h3 class="text-white font-medium mb-3">Customer Complaint</h3>
+                <p class="text-gray-300" id="customerComplaint">-</p>
             </div>
 
             {{-- Action Buttons --}}
@@ -92,7 +118,7 @@
                     </svg>
                     Chat to Mechanic
                 </button>
-                <a href="/billing" class="{{ request()->is('billing') ? 'bg-orange-500' : 'bg-orange-400' }}">
+                <a href="/billing">
                     <button
                         class="bg-orange-400 hover:bg-orange-500 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-300">
                         Billing
@@ -104,6 +130,8 @@
 </div>
 
 <script>
+    let countdownInterval;
+
     function checkInput() {
         const input = document.getElementById('bikeNumbers');
         const button = document.getElementById('viewQueueBtn');
@@ -119,36 +147,162 @@
 
     function showEstimation() {
         const input = document.getElementById('bikeNumbers');
-        const customerName = document.getElementById('customerName');
-        const estimationStats = document.getElementById('estimationStats');
+        const plateNumber = input.value.trim();
+        
+        if (!plateNumber) return;
 
-        if (input.value.trim()) {
-            // Update customer name dengan input plat motor
-            customerName.textContent = input.value.trim().toUpperCase();
+        // Show loading state
+        document.getElementById('loadingState').classList.remove('hidden');
+        document.getElementById('errorState').classList.add('hidden');
+        document.getElementById('estimationStats').classList.add('hidden');
 
-            // Show estimation statistics dengan smooth scroll
-            estimationStats.classList.remove('hidden');
-            estimationStats.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+        // Fetch booking data
+        fetch(`/api/booking-status/${encodeURIComponent(plateNumber)}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('loadingState').classList.add('hidden');
+                
+                if (data.success) {
+                    updateEstimationStats(data.booking);
+                    showEstimationStats();
+                } else {
+                    showError(data.message || 'Booking not found');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('loadingState').classList.add('hidden');
+                showError('Failed to load booking information');
             });
+    }
 
-            // Optional: Add loading animation
-            estimationStats.style.opacity = '0';
-            estimationStats.style.transform = 'translateY(20px)';
+    function updateEstimationStats(booking) {
+        // Update customer name (license plate)
+        document.getElementById('customerName').textContent = booking.plat_kendaraan.nomor_plat_kendaraan;
 
-            setTimeout(() => {
-                estimationStats.style.transition = 'all 0.6s ease-out';
-                estimationStats.style.opacity = '1';
-                estimationStats.style.transform = 'translateY(0)';
-            }, 100);
+        // Update progress status
+        const statusMap = {
+            'menunggu': { text: 'Waiting', color: 'text-yellow-400', description: 'Waiting for confirmation' },
+            'dikonfirmasi': { text: 'Confirmed', color: 'text-blue-400', description: 'Work in progress' },
+            'selesai': { text: 'Completed', color: 'text-green-400', description: 'Service completed' },
+            'batal': { text: 'Cancelled', color: 'text-red-400', description: 'Booking cancelled' }
+        };
+
+        const statusInfo = statusMap[booking.status_booking] || { text: booking.status_booking, color: 'text-gray-400', description: 'Unknown status' };
+        
+        const progressElement = document.getElementById('progressStatus');
+        progressElement.textContent = statusInfo.text;
+        progressElement.className = `text-4xl font-bold mb-4 ${statusInfo.color}`;
+        document.getElementById('progressDescription').textContent = statusInfo.description;
+
+        // Update booking date and arrival time
+        const bookingDate = new Date(booking.tanggal_booking);
+        document.getElementById('bookingDate').textContent = bookingDate.toLocaleDateString('id-ID');
+        document.getElementById('arrivalTime').textContent = `Arrival: ${booking.estimasi_kedatangan}`;
+
+        // Update customer complaint
+        document.getElementById('customerComplaint').textContent = booking.keluhan_konsumen;
+
+        // Update estimate time based on status
+        updateEstimateTime(booking);
+    }
+
+    function updateEstimateTime(booking) {
+        const estimateTimeElement = document.getElementById('estimateTime');
+        const estimateDateElement = document.getElementById('estimateDate');
+
+        if (booking.status_booking === 'dikonfirmasi') {
+            // Calculate 48 hours from confirmation
+            const confirmationTime = new Date(booking.updated_at); // Assuming updated_at is when status changed to 'dikonfirmasi'
+            const completionTime = new Date(confirmationTime.getTime() + (48 * 60 * 60 * 1000)); // Add 48 hours
+            
+            startCountdown(completionTime);
+            estimateDateElement.textContent = `Expected completion: ${completionTime.toLocaleDateString('id-ID')} ${completionTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
+        } else if (booking.status_booking === 'selesai') {
+            estimateTimeElement.textContent = 'Completed';
+            estimateDateElement.textContent = 'Your motorcycle is ready for pickup';
+        } else if (booking.status_booking === 'batal') {
+            estimateTimeElement.textContent = 'Cancelled';
+            estimateDateElement.textContent = 'Booking has been cancelled';
+        } else {
+            estimateTimeElement.textContent = 'Pending';
+            estimateDateElement.textContent = 'Waiting for confirmation';
         }
     }
 
-    // Optional: Allow Enter key to trigger estimation
+    function startCountdown(targetDate) {
+        // Clear existing countdown
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+        }
+
+        const estimateTimeElement = document.getElementById('estimateTime');
+
+        countdownInterval = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = targetDate.getTime() - now;
+
+            if (distance < 0) {
+                estimateTimeElement.textContent = 'Overdue';
+                estimateTimeElement.className = 'text-4xl font-bold text-red-400 mb-4';
+                clearInterval(countdownInterval);
+                return;
+            }
+
+            const hours = Math.floor(distance / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+
+            if (hours > 24) {
+                const days = Math.floor(hours / 24);
+                const remainingHours = hours % 24;
+                estimateTimeElement.textContent = `${days}d ${remainingHours}h`;
+            } else {
+                estimateTimeElement.textContent = `${hours}h ${minutes}m`;
+            }
+        }, 1000);
+    }
+
+    function showEstimationStats() {
+        const estimationStats = document.getElementById('estimationStats');
+        
+        // Show estimation statistics with smooth scroll
+        estimationStats.classList.remove('hidden');
+        estimationStats.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+
+        // Add loading animation
+        estimationStats.style.opacity = '0';
+        estimationStats.style.transform = 'translateY(20px)';
+
+        setTimeout(() => {
+            estimationStats.style.transition = 'all 0.6s ease-out';
+            estimationStats.style.opacity = '1';
+            estimationStats.style.transform = 'translateY(0)';
+        }, 100);
+    }
+
+    function showError(message) {
+        document.getElementById('errorMessage').textContent = message;
+        document.getElementById('errorState').classList.remove('hidden');
+    }
+
+    // Allow Enter key to trigger estimation
     document.getElementById('bikeNumbers').addEventListener('keypress', function(e) {
         if (e.key === 'Enter' && !document.getElementById('viewQueueBtn').disabled) {
             showEstimation();
         }
     });
+
+    // Clean up countdown when page is unloaded
+    window.addEventListener('beforeunload', function() {
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+        }
+    });
 </script>
+<script src="{{ asset('js/app.js') }}"></script>

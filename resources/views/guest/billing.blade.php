@@ -1,4 +1,4 @@
-<x-layoutkonsumen>
+<x-layout>
     <style>
         .fade-in {
             animation: fadeIn 0.3s ease-in-out;
@@ -301,4 +301,4 @@
             });
         </script>
     </div>
-</x-layoutkonsumen>
+</x-layout>

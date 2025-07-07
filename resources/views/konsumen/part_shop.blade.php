@@ -1,4 +1,4 @@
-<x-layout>
+<x-layoutkonsumen>
     <!-- Main Content -->
     <div class="container mx-auto px-6 py-8">
         <!-- Title Section -->
@@ -6,240 +6,254 @@
             <h1 class="text-5xl font-bold text-gray-900 mb-4">Our Products</h1>
             <p class="text-gray-600 text-lg mb-8">Explore our extensive range of motorbike parts.</p>
 
-            <!-- Filter Dropdown -->
-            <div class="inline-block relative">
-                <select
-                    class="appearance-none bg-white border border-gray-300 px-6 py-3 pr-12 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer text-gray-700 font-medium">
-                    <option>Select By</option>
-                    <option>Brake Parts</option>
-                    <option>Engine Parts</option>
-                    <option>Electrical</option>
-                    <option>Transmission</option>
-                    <option>Lighting</option>
+            <!-- Search Section -->
+            <form method="GET" action="" class="flex justify-center items-center gap-2 mt-4">
+                <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama barang..."
+                    class="w-64 px-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-700 font-medium" />
+                <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300">
+                    Search
+                </button>
+            </form>
+        </div>
+
+        <!-- Filter & Sort Section -->
+        <div class="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <label class="text-gray-700 font-medium">Sort by:</label>
+                <select id="sortType" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <option value="default">Default</option>
+                    <option value="name">Name</option>
+                    <option value="price">Price</option>
+                    <option value="stock">Stock</option>
                 </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-700">
-                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                    </svg>
+                <div class="flex gap-2">
+                    <button id="sortAsc" class="px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors duration-300" title="Sort Ascending">
+                        ↑
+                    </button>
+                    <button id="sortDesc" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-300" title="Sort Descending">
+                        ↓
+                    </button>
+                    <button id="resetSort" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-300" title="Reset to Default">
+                        Reset
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Products Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            <!-- Product 1: Brake Pads -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+        <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            @foreach($spareParts as $index => $part)
+            <div class="product-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 {{ $index >= 12 ? 'hidden' : '' }}" 
+                 data-name="{{ strtolower($part->nama_barang) }}" 
+                 data-price="{{ $part->harga_barang }}" 
+                 data-stock="{{ $part->kuantitas_barang }}"
+                 data-original-order="{{ $index }}">
                 <div class="aspect-square bg-gray-100 p-4 flex items-center justify-center">
-                    <div class="w-full h-full bg-red-500 rounded-lg flex items-center justify-center relative">
-                        <div class="bg-white p-4 rounded shadow-md">
-                            <div class="text-xs text-gray-600 mb-2">YAMAHA</div>
-                            <div class="w-16 h-12 bg-gray-300 rounded mb-2"></div>
-                            <div class="text-xs font-bold">BRAKE PAD KIT</div>
-                        </div>
-                    </div>
+                    <img src="{{ asset('storage/' . $part->gambar_barang) }}" alt="{{ $part->nama_barang }}" class="object-contain w-full h-full">
                 </div>
                 <div class="p-4">
-                    <h3 class="font-bold text-lg text-gray-900 mb-1">Brake Pads</h3>
-                    <p class="text-sm text-gray-600 mb-3">Standard</p>
-                    <p class="font-bold text-lg text-gray-900 mb-3">Rp 45.000,00</p>
-                    <button
-                        class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded font-medium transition-colors duration-300">
-                        Check it out on shopee
-                    </button>
+                    <h3 class="font-bold text-lg text-gray-900 mb-1">{{ $part->nama_barang }}</h3>
+                    <p class="text-sm text-gray-600 mb-3">Stok: <span class="stock-value">{{ $part->kuantitas_barang }}</span></p>
+                    <p class="font-bold text-lg text-gray-900 mb-3 price-value">Rp {{ number_format($part->harga_barang, 0, ',', '.') }}</p>
+                    <a href="{{ $part->link_shopee }}" target="_blank"
+                        class="w-full block bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded font-medium transition-colors duration-300 text-center">
+                        Check it out on Shopee
+                    </a>
                 </div>
             </div>
-
-            <!-- Product 2: Oil Filter -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <div class="aspect-square bg-gray-200 p-8 flex items-center justify-center">
-                    <div class="w-20 h-24 bg-black rounded-full relative">
-                        <div class="absolute top-2 left-1/2 transform -translate-x-1/2 text-white text-xs font-bold">
-                            YAMAHA</div>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <h3 class="font-bold text-lg text-gray-900 mb-1">Oil Filter</h3>
-                    <p class="text-sm text-gray-600 mb-3">Premium</p>
-                    <p class="font-bold text-lg text-gray-900 mb-3">Rp 45.000,00</p>
-                    <button
-                        class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded font-medium transition-colors duration-300">
-                        Check it out on shopee
-                    </button>
-                </div>
-            </div>
-
-            <!-- Product 3: Chain Kit -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <div class="aspect-square bg-gray-100 p-4 flex items-center justify-center">
-                    <div class="w-full h-full bg-red-500 rounded-lg flex items-center justify-center relative">
-                        <div class="bg-white p-4 rounded shadow-md w-3/4">
-                            <div class="text-xs text-red-600 font-bold mb-2">HONDA</div>
-                            <div class="w-full h-8 bg-gray-200 rounded mb-2 flex items-center justify-center">
-                                <div class="w-6 h-6 bg-gray-400 rounded-full"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <h3 class="font-bold text-lg text-gray-900 mb-1">Chain Kit</h3>
-                    <p class="text-sm text-gray-600 mb-3">Standard</p>
-                    <p class="font-bold text-lg text-gray-900 mb-3">Rp 45.000,00</p>
-                    <button
-                        class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded font-medium transition-colors duration-300">
-                        Check it out on shopee
-                    </button>
-                </div>
-            </div>
-
-            <!-- Product 4: Spark Plug -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <div class="aspect-square bg-gray-100 p-8 flex items-center justify-center">
-                    <div class="flex space-x-2">
-                        <div class="w-4 h-16 bg-gradient-to-b from-gray-300 to-gray-600 rounded-full"></div>
-                        <div class="w-4 h-16 bg-gradient-to-b from-gray-300 to-gray-600 rounded-full"></div>
-                        <div class="w-4 h-16 bg-gradient-to-b from-gray-300 to-gray-600 rounded-full"></div>
-                        <div class="w-4 h-16 bg-gradient-to-b from-gray-300 to-gray-600 rounded-full"></div>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <h3 class="font-bold text-lg text-gray-900 mb-1">Spark Plug</h3>
-                    <p class="text-sm text-gray-600 mb-3">NGK</p>
-                    <p class="font-bold text-lg text-gray-900 mb-3">Rp 45.000,00</p>
-                    <button
-                        class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded font-medium transition-colors duration-300">
-                        Check it out on shopee
-                    </button>
-                </div>
-            </div>
-
-            <!-- Product 5: Throttle Cable -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <div class="aspect-square bg-gray-100 p-4 flex items-center justify-center relative">
-                    <div class="w-24 h-24 rounded-full border-4 border-black relative">
-                        <div class="absolute inset-4 bg-white rounded-full"></div>
-                        <div class="absolute top-2 left-8 text-xs font-bold text-red-600">QUICK</div>
-                    </div>
-                    <!-- Quality badges -->
-                    <div class="absolute bottom-2 left-2 flex space-x-1">
-                        <div class="bg-red-600 text-white text-xs px-1 py-0.5 rounded">100% ORIGINAL</div>
-                        <div class="bg-red-600 text-white text-xs px-1 py-0.5 rounded">HIGH QUALITY</div>
-                        <div class="bg-red-600 text-white text-xs px-1 py-0.5 rounded">FAST DELIVERY</div>
-                        <div class="bg-red-600 text-white text-xs px-1 py-0.5 rounded">SATISFACTION</div>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <h3 class="font-bold text-lg text-gray-900 mb-1">Throttle Cable</h3>
-                    <p class="text-sm text-gray-600 mb-3">OEM</p>
-                    <p class="font-bold text-lg text-gray-900 mb-3">Rp 45.000,00</p>
-                    <button
-                        class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded font-medium transition-colors duration-300">
-                        Check it out on shopee
-                    </button>
-                </div>
-            </div>
-
-            <!-- Product 6: Headlight Bulb -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <div class="aspect-square bg-gray-300 p-8 flex items-center justify-center">
-                    <div class="w-16 h-20 bg-gradient-to-b from-gray-200 to-gray-400 rounded-lg relative">
-                        <div
-                            class="absolute top-4 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-gray-100 rounded-full">
-                        </div>
-                        <div
-                            class="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-orange-400 rounded-full">
-                        </div>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <h3 class="font-bold text-lg text-gray-900 mb-1">Headlight Bulb</h3>
-                    <p class="text-sm text-gray-600 mb-3">LED</p>
-                    <p class="font-bold text-lg text-gray-900 mb-3">Rp 45.000,00</p>
-                    <button
-                        class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded font-medium transition-colors duration-300">
-                        Check it out on shopee
-                    </button>
-                </div>
-            </div>
-
-            <!-- Product 7: Placeholder -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <div class="aspect-square bg-gray-200 p-8 flex items-center justify-center">
-                    <div class="w-16 h-16 bg-gray-300 rounded flex items-center justify-center">
-                        <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <h3 class="font-bold text-lg text-gray-900 mb-1">Product name</h3>
-                    <p class="text-sm text-gray-600 mb-3">Variant</p>
-                    <p class="font-bold text-lg text-gray-900 mb-3">Rp 45.000,00</p>
-                    <button
-                        class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded font-medium transition-colors duration-300">
-                        Check it out on shopee
-                    </button>
-                </div>
-            </div>
-
-            <!-- Product 8: Placeholder -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <div class="aspect-square bg-gray-200 p-8 flex items-center justify-center">
-                    <div class="w-16 h-16 bg-gray-300 rounded flex items-center justify-center">
-                        <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <h3 class="font-bold text-lg text-gray-900 mb-1">Product name</h3>
-                    <p class="text-sm text-gray-600 mb-3">Variant</p>
-                    <p class="font-bold text-lg text-gray-900 mb-3">Rp 45.000,00</p>
-                    <button
-                        class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded font-medium transition-colors duration-300">
-                        Check it out on shopee
-                    </button>
-                </div>
-            </div>
+            @endforeach
         </div>
 
-        <!-- View All Button -->
-        <div class="text-center">
-            <button
-                class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-300 transform hover:scale-105">
-                View all
+        <!-- View More/Less Section -->
+        <div class="text-center mb-6" id="viewControls">
+            <!-- Results Info -->
+            <div class="text-gray-600 mb-4">
+                <span id="resultsInfo">Showing <span id="currentCount">{{ min(12, count($spareParts)) }}</span> of <span id="totalCount">{{ count($spareParts) }}</span> products</span>
+            </div>
+            
+            <!-- View More/Less Button -->
+            @if(count($spareParts) > 12)
+            <button id="viewToggle" class="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors duration-300">
+                View More
             </button>
+            @endif
         </div>
     </div>
 
     <script>
-        // Add click handlers for buttons
-        document.querySelectorAll('button').forEach(button => {
-            if (button.textContent.includes('Check it out on shopee')) {
-                button.addEventListener('click', function() {
-                    alert('Redirecting to Shopee...');
+        document.addEventListener('DOMContentLoaded', function() {
+            const productCards = document.querySelectorAll('.product-card');
+            const viewToggleBtn = document.getElementById('viewToggle');
+            const sortTypeSelect = document.getElementById('sortType');
+            const sortAscBtn = document.getElementById('sortAsc');
+            const sortDescBtn = document.getElementById('sortDesc');
+            const resetSortBtn = document.getElementById('resetSort');
+            const currentCountSpan = document.getElementById('currentCount');
+            const totalCountSpan = document.getElementById('totalCount');
+            const productsGrid = document.getElementById('productsGrid');
+
+            let isViewingAll = false;
+            let currentSortOrder = 'asc'; // 'asc' or 'desc'
+            const ITEMS_TO_SHOW = 12;
+
+            // Store original order for reset
+            const originalOrder = Array.from(productCards);
+
+            // View More/Less functionality
+            if (viewToggleBtn) {
+                viewToggleBtn.addEventListener('click', function() {
+                    if (!isViewingAll) {
+                        // View More
+                        productCards.forEach(card => {
+                            card.classList.remove('hidden');
+                        });
+                        isViewingAll = true;
+                        currentCountSpan.textContent = productCards.length;
+                        this.textContent = 'View Less';
+                        this.classList.remove('bg-orange-500', 'hover:bg-orange-600');
+                        this.classList.add('bg-gray-500', 'hover:bg-gray-600');
+                    } else {
+                        // View Less
+                        productCards.forEach((card, index) => {
+                            if (index >= ITEMS_TO_SHOW) {
+                                card.classList.add('hidden');
+                            }
+                        });
+                        isViewingAll = false;
+                        currentCountSpan.textContent = Math.min(ITEMS_TO_SHOW, productCards.length);
+                        this.textContent = 'View More';
+                        this.classList.remove('bg-gray-500', 'hover:bg-gray-600');
+                        this.classList.add('bg-orange-500', 'hover:bg-orange-600');
+                        
+                        // Scroll to top of products grid
+                        productsGrid.scrollIntoView({ behavior: 'smooth' });
+                    }
                 });
             }
-        });
 
-        // Add hover effects
-        document.querySelectorAll('.bg-white').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-5px)';
-                this.style.transition = 'transform 0.3s ease';
-            });
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-            });
-        });
+            // Sort direction buttons
+            function updateSortButtons() {
+                if (currentSortOrder === 'asc') {
+                    sortAscBtn.classList.add('bg-orange-500', 'text-white');
+                    sortAscBtn.classList.remove('bg-gray-200', 'text-gray-700');
+                    sortDescBtn.classList.add('bg-gray-200', 'text-gray-700');
+                    sortDescBtn.classList.remove('bg-orange-500', 'text-white');
+                } else {
+                    sortDescBtn.classList.add('bg-orange-500', 'text-white');
+                    sortDescBtn.classList.remove('bg-gray-200', 'text-gray-700');
+                    sortAscBtn.classList.add('bg-gray-200', 'text-gray-700');
+                    sortAscBtn.classList.remove('bg-orange-500', 'text-white');
+                }
+            }
 
-        // Filter functionality
-        document.querySelector('select').addEventListener('change', function() {
-            console.log('Filter changed to:', this.value);
-            // Here you would implement actual filtering logic
+            sortAscBtn.addEventListener('click', function() {
+                currentSortOrder = 'asc';
+                updateSortButtons();
+                performSort();
+            });
+
+            sortDescBtn.addEventListener('click', function() {
+                currentSortOrder = 'desc';
+                updateSortButtons();
+                performSort();
+            });
+
+            sortTypeSelect.addEventListener('change', function() {
+                if (this.value === 'default') {
+                    resetToDefault();
+                } else {
+                    performSort();
+                }
+            });
+
+            // Reset button functionality
+            resetSortBtn.addEventListener('click', function() {
+                resetToDefault();
+            });
+
+            function resetToDefault() {
+                // Reset to original order
+                originalOrder.forEach(card => {
+                    productsGrid.appendChild(card);
+                });
+
+                // Reset sort controls
+                sortTypeSelect.value = 'default';
+                currentSortOrder = 'asc';
+                updateSortButtons();
+
+                // Apply view state
+                if (!isViewingAll) {
+                    originalOrder.forEach((card, index) => {
+                        if (index >= ITEMS_TO_SHOW) {
+                            card.classList.add('hidden');
+                        } else {
+                            card.classList.remove('hidden');
+                        }
+                    });
+                }
+            }
+
+            // Sorting functionality
+            function performSort() {
+                const sortType = sortTypeSelect.value;
+                
+                if (sortType === 'default') {
+                    resetToDefault();
+                    return;
+                }
+
+                const cardsArray = Array.from(productCards);
+                
+                cardsArray.sort((a, b) => {
+                    let comparison = 0;
+                    
+                    switch(sortType) {
+                        case 'name':
+                            comparison = a.dataset.name.localeCompare(b.dataset.name);
+                            break;
+                        case 'price':
+                            comparison = parseInt(a.dataset.price) - parseInt(b.dataset.price);
+                            break;
+                        case 'stock':
+                            comparison = parseInt(a.dataset.stock) - parseInt(b.dataset.stock);
+                            break;
+                    }
+                    
+                    return currentSortOrder === 'asc' ? comparison : -comparison;
+                });
+
+                // Re-append sorted cards to the grid
+                cardsArray.forEach(card => {
+                    productsGrid.appendChild(card);
+                });
+
+                // Apply view state after sorting
+                if (!isViewingAll) {
+                    cardsArray.forEach((card, index) => {
+                        if (index >= ITEMS_TO_SHOW) {
+                            card.classList.add('hidden');
+                        } else {
+                            card.classList.remove('hidden');
+                        }
+                    });
+                }
+            }
+
+            // Card hover effects
+            productCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.transition = 'transform 0.3s ease';
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Initialize
+            updateSortButtons();
         });
     </script>
-</x-layout>
+
+</x-layoutkonsumen>
