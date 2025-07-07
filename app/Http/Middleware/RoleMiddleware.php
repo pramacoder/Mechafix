@@ -16,7 +16,7 @@ class RoleMiddleware
 
         $userRole = auth()->user()->role;
 
-        if (!in_array($userRole, $roles)) {
+        if (auth()->user()->role !== 'admin' && !in_array($userRole, $roles)) {
             abort(403, 'Unauthorized access.');
         }
 
