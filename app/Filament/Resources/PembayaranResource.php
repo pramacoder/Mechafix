@@ -17,7 +17,7 @@ class PembayaranResource extends Resource
 {
     protected static ?string $model = Pembayaran::class;
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
-    protected static ?string $navigationGroup = 'Financial Management';
+    protected static ?string $navigationGroup = 'Service Management';
     protected static ?string $navigationLabel = 'Payments';
 
     public static function form(Form $form): Form
