@@ -22,6 +22,8 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Laravel\Jetstream\Rules\Role;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 
 class MekanikPanelProvider extends PanelProvider
 {
@@ -66,5 +68,9 @@ class MekanikPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+        // ->authGuard('web');
+        // ->authorization(function () {
+        //     return Auth::check() && Auth::user()->role === 'mekanik';
+        // });
     }
 }

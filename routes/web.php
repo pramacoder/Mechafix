@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\BookingServiceController;
 use App\Http\Controllers\Auth\WebLoginController;
-use App\Http\Controllers\Auth\RegisteredUserController;
+// use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\FilachatController;
 use App\Http\Controllers\KonsumenController;
 use App\Http\Controllers\MekanikController;
@@ -22,19 +22,32 @@ Route::get('/guest/our_profile', fn() => view('guest.our_profile'))->name('guest
 Route::get('/guest/chat_contact', fn() => view('guest.chat_contact'))->name('guest.chat_contact');
 Route::get('/guest/history', fn() => view('guest.history'))->name('guest.history');
 
-// Auth routes - DIPERBAIKI DAN DISEDERHANAKAN
+// Auth routes
+// Route::get('/login', function () {
+//     return view('auth.login');
+// })->name('login');
+
+// Route::post('/login', [WebLoginController::class, 'store'])->name('login');
+
+// Route::get('/register', function () {
+//     return view('auth.register');
+// })->name('register');
+
 Route::middleware('guest')->group(function () {
     // Login routes
     Route::get('/login', [WebLoginController::class, 'create'])->name('login');
     Route::post('/login', [WebLoginController::class, 'store']);
 
     // Register routes
-    Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
-    Route::post('/register', [RegisteredUserController::class, 'store']);
+    Route::get('/register', function () {
+        return view('auth.register');
+    })->name('register');
+    Route::post('/register');
 });
 
 // Logout route
 Route::post('/logout', [WebLoginController::class, 'destroy'])->name('logout')->middleware('auth');
+
 
 // Dashboard route - redirect berdasarkan role
 Route::get('/dashboard', function () {
@@ -43,7 +56,8 @@ Route::get('/dashboard', function () {
     if ($user->role === 'konsumen') {
         return redirect()->route('dashboard.konsumen');
     } elseif ($user->role === 'mekanik') {
-        return redirect()->route('dashboard.mekanik');
+        // dd("Konsumen dashboard");
+        return redirect()->route('filament.mekanik.pages.dashboard');
     } elseif ($user->role === 'admin') {
         return redirect()->route('filament.admin.pages.dashboard');
     } else {
@@ -120,7 +134,10 @@ Route::middleware([
     // Mekanik routes
     Route::middleware('role:mekanik')->prefix('mekanik')->group(function () {
         // Dashboard mekanik
-        Route::get('/dashboard', [MekanikController::class, 'dashboard'])->name('dashboard.mekanik');
+        // Route::get('/dashboard', [MekanikController::class, 'dashboard'])->name('filament.mekanik.pages.dashboard');
+        Route::middleware(['auth'])->get('/mekanik-panel', function () {
+            return redirect('/mekanik');
+        });
         Route::patch('/booking/{booking}/services', [MekanikController::class, 'saveServices'])->name('mekanik.save-services');
         Route::match(['get', 'post'], '/booking/{booking}/complete', [MekanikController::class, 'completeJob'])->name('mekanik.complete-job');
 
@@ -319,6 +336,12 @@ Route::middleware([
     });
 });
 
+// Logout route
+Route::post('/logout', function () {
+    Auth::logout();
+    return redirect('/');
+})->name('logout')->middleware('auth');
+
 // Public API Routes (no authentication required)
 Route::prefix('api')->group(function () {
     Route::get('/booking-status/{plateNumber}', [BookingServiceController::class, 'getBookingStatus']);
@@ -357,14 +380,21 @@ Route::middleware('auth:sanctum')->prefix('api')->group(function () {
     });
 });
 
-// Legacy/backward compatibility routes
-Route::get('/dashboard/konsumen', function () {
-    return redirect()->route('dashboard.konsumen');
-})->middleware('auth');
+Route::get('/logout', function () {
+    Auth::logout();
+    session()->invalidate();
+    session()->regenerateToken();
 
-Route::get('/dashboard/mekanik', function () {
-    return redirect()->route('dashboard.mekanik');
-})->middleware('auth');
+    return redirect('/login');
+})->name('logout');
+// Legacy/backward compatibility routes
+// Route::get('/dashboard/konsumen', function () {
+//     return redirect()->route('dashboard.konsumen');
+// })->middleware('auth');
+
+// Route::get('/dashboard/mekanik', function () {
+//     return redirect()->route('dashboard.mekanik');
+// })->middleware('auth');
 
 // Tambahan route untuk booking service yang mungkin diperlukan
 Route::get('/booking-service/create', [BookingServiceController::class, 'create'])->name('booking-service.create');

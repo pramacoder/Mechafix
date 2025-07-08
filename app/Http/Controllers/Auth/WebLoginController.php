@@ -41,7 +41,7 @@ class WebLoginController extends Controller
             if ($user->role === 'konsumen') {
                 return redirect()->intended(route('dashboard.konsumen'));
             } elseif ($user->role === 'mekanik') {
-                return redirect()->intended(route('dashboard.mekanik'));
+                return redirect()->intended(route('filament.mekanik.pages.dashboard'));
             } elseif ($user->role === 'admin') {
                 return redirect()->intended(route('filament.admin.pages.dashboard'));
             } else {
