@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-layoutkonsumen>
     <x-slot name="header">
         <h2 class="font-bold text-2xl text-black leading-tight">
             {{ __('Edit Vehicle') }}
@@ -46,4 +46,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-layoutkonsumen>

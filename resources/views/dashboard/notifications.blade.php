@@ -11,9 +11,9 @@
             <ul class="divide-y divide-gray-200 max-h-80 overflow-y-auto" id="notifList">
                 @php
                     $unreadNotifs = collect();
-                if (auth()->check()) {
-                    $unreadNotifs = auth()->user()->unreadNotifications->take(10);
-                }
+                    if (auth()->check()) {
+                        $unreadNotifs = auth()->user()->unreadNotifications->take(10);
+                    }
                 @endphp
                 @forelse($unreadNotifs as $notif)
                     <li class="py-2 flex justify-between items-center" id="notif-{{ $notif->id }}">
