@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('id_pembayaran');
             $table->date('tanggal_pembayaran');
             $table->bigInteger('total_pembayaran')->default(0);
-            $table->string('qris')->default('qris.jpg');
+            $table->string('qris')->nullable();
             $table->string('bukti_pembayaran')->nullable();
             $table->enum('status_pembayaran', ['Belum Dibayar', 'Sudah Dibayar'])->default('Belum Dibayar');
             $table->unsignedBigInteger('id_konsumen')->nullable();

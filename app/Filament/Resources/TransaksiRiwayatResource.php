@@ -37,11 +37,20 @@ class TransaksiRiwayatResource extends Resource
                                 ->label('Booking Service')
                                 ->options(function ($get) {
                                     $selected = $get('id_booking_service');
-                                    return \App\Models\BookingService::with(['konsumens.user'])
+
+                                    return \App\Models\BookingService::with(['konsumens.user', 'pembayaran'])
+                                        ->where('id_mekanik', auth()->user()->mekanik->id_mekanik ?? null) 
+                                        ->where('status_booking', 'dikonfirmasi')
+                                        ->where(function ($query) {
+                                            $query->whereNull('id_pembayaran')
+                                                ->orWhereHas('pembayaran', function ($q) {
+                                                    $q->where('status_pembayaran', '!=', 'Sudah Dibayar');
+                                                });
+                                        })
                                         ->when($selected, fn($query) => $query->orWhere('id_booking_service', $selected))
                                         ->get()
                                         ->mapWithKeys(fn($b) => [
-                                            $b->id_booking_service => "#{$b->id_booking_service} - {$b->konsumens->user->name}" // Perbaiki: konsumens
+                                            $b->id_booking_service => "#{$b->id_booking_service} - {$b->konsumens->user->name}"
                                         ]);
                                 })
                                 ->searchable()

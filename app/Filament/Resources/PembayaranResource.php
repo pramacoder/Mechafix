@@ -189,7 +189,7 @@ class PembayaranResource extends Resource
                         return $booking?->status_booking ?? '-';
                     })
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'selesai' => 'success',
                         'dikonfirmasi' => 'warning',
                         'pending' => 'gray',
@@ -206,6 +206,20 @@ class PembayaranResource extends Resource
                         return $spareParts->map(function ($tp) {
                             $nama = $tp->sparePart->nama_barang ?? 'Unknown';
                             $qty = $tp->kuantitas_barang;
+                            return $qty > 1 ? "{$nama} (x{$qty})" : $nama;
+                        })->implode(', ');
+                    }),
+
+                Tables\Columns\TextColumn::make('transaksiServices')
+                    ->label('Services')
+                    ->formatStateUsing(function ($record) {
+                        $services = $record->transaksiServices ?? collect();
+
+                        if ($services->isEmpty()) return '-';
+
+                        return $services->map(function ($ts) {
+                            $nama = $ts->service->nama_service ?? 'Unknown';
+                            $qty = $ts->kuantitas_service ?? 1;
                             return $qty > 1 ? "{$nama} (x{$qty})" : $nama;
                         })->implode(', ');
                     }),
@@ -291,8 +305,8 @@ class PembayaranResource extends Resource
                         $booking = \App\Models\BookingService::where('id_pembayaran', $record->id_pembayaran)->first();
 
                         return $record->status_pembayaran === 'Belum Dibayar' &&
-                               $booking?->status_booking === 'selesai' &&
-                               empty($record->bukti_pembayaran);
+                            $booking?->status_booking === 'selesai' &&
+                            empty($record->bukti_pembayaran);
                     }),
 
                 Tables\Actions\Action::make('approve')

@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ChatResource\Pages;
 use App\Models\User;
 use App\Models\Konsumen;
+use App\Models\FilachatConversation;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -14,104 +15,30 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ChatResource extends Resource
 {
-    // Gunakan model FilachatMessage yang sebenarnya
-    protected static ?string $model = \App\Models\FilachatMessage::class;
+    protected static ?string $model = FilachatConversation::class;
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-ellipsis';
     protected static ?string $navigationGroup = 'Communication';
-    protected static ?string $navigationLabel = 'Chat Messages';
-    protected static ?string $modelLabel = 'Chat Message';
-    protected static ?string $pluralModelLabel = 'Chat Messages';
+    protected static ?string $navigationLabel = 'Customer Chats';
+    protected static ?string $modelLabel = 'Chat';
+    protected static ?string $pluralModelLabel = 'Customer Chats';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Message Details')
-                    ->schema([
-                        Forms\Components\Select::make('filachat_conversation_id')
-                            ->label('Conversation')
-                            ->options(function () {
-                                return \App\Models\FilachatConversation::with(['senderable', 'receiverable'])
-                                    ->get()
-                                    ->mapWithKeys(function ($conv) {
-                                        $senderName = self::getAgentName($conv->senderable_type, $conv->senderable_id);
-                                        $receiverName = self::getAgentName($conv->receiverable_type, $conv->receiverable_id);
-                                        return [$conv->id => "#{$conv->id} - {$senderName} ↔ {$receiverName}"];
-                                    });
-                            })
-                            ->searchable()
-                            ->required(),
+                Forms\Components\Textarea::make('message')
+                    ->label('Message')
+                    ->placeholder('Type your message...')
+                    ->required()
+                    ->rows(3),
 
-                        Forms\Components\Textarea::make('message')
-                            ->label('Message')
-                            ->required()
-                            ->rows(3),
-
-                        Forms\Components\Select::make('senderable_type')
-                            ->label('Sender Type')
-                            ->options([
-                                'App\\Models\\User' => 'Admin/Staff',
-                                'App\\Models\\Konsumen' => 'Customer',
-                            ])
-                            ->required()
-                            ->reactive()
-                            ->afterStateUpdated(fn($state, callable $set) => $set('senderable_id', null)),
-
-                        Forms\Components\Select::make('senderable_id')
-                            ->label('Sender')
-                            ->options(function (callable $get) {
-                                $type = $get('senderable_type');
-                                if ($type === 'App\\Models\\User') {
-                                    return User::where('role', '!=', 'konsumen')
-                                        ->get()
-                                        ->mapWithKeys(fn($u) => [$u->id => $u->name . " ({$u->role})"]);
-                                } elseif ($type === 'App\\Models\\Konsumen') {
-                                    return Konsumen::with('user')
-                                        ->get()
-                                        ->mapWithKeys(fn($k) => [$k->id_konsumen => $k->user->name ?? 'Unknown']);
-                                }
-                                return [];
-                            })
-                            ->searchable()
-                            ->required(),
-
-                        Forms\Components\Select::make('receiverable_type')
-                            ->label('Receiver Type')
-                            ->options([
-                                'App\\Models\\User' => 'Admin/Staff',
-                                'App\\Models\\Konsumen' => 'Customer',
-                            ])
-                            ->required()
-                            ->reactive()
-                            ->afterStateUpdated(fn($state, callable $set) => $set('receiverable_id', null)),
-
-                        Forms\Components\Select::make('receiverable_id')
-                            ->label('Receiver')
-                            ->options(function (callable $get) {
-                                $type = $get('receiverable_type');
-                                if ($type === 'App\\Models\\User') {
-                                    return User::where('role', '!=', 'konsumen')
-                                        ->get()
-                                        ->mapWithKeys(fn($u) => [$u->id => $u->name . " ({$u->role})"]);
-                                } elseif ($type === 'App\\Models\\Konsumen') {
-                                    return Konsumen::with('user')
-                                        ->get()
-                                        ->mapWithKeys(fn($k) => [$k->id_konsumen => $k->user->name ?? 'Unknown']);
-                                }
-                                return [];
-                            })
-                            ->searchable()
-                            ->required(),
-
-                        Forms\Components\FileUpload::make('attachments')
-                            ->label('Attachments')
-                            ->multiple()
-                            ->directory('chat-attachments')
-                            ->visibility('public'),
-
-                        Forms\Components\Toggle::make('is_starred')
-                            ->label('Starred Message'),
-                    ]),
+                Forms\Components\FileUpload::make('attachments')
+                    ->label('Attachments')
+                    ->multiple()
+                    ->directory('chat-attachments')
+                    ->visibility('public')
+                    ->acceptedFileTypes(['image/*', 'application/pdf'])
+                    ->maxSize(5120), // 5MB
             ]);
     }
 
@@ -119,175 +46,223 @@ class ChatResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')
-                    ->label('ID')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('filachat_conversation_id')
-                    ->label('Conversation')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('sender_info')
-                    ->label('Sender')
+                Tables\Columns\ImageColumn::make('customer_avatar')
+                    ->label('')
                     ->getStateUsing(function ($record) {
-                        return self::getAgentName($record->senderable_type, $record->senderable_id);
+                        $customerName = self::getCustomerName($record);
+                        return 'https://ui-avatars.com/api/?name=' . urlencode($customerName) . '&color=7F9CF5&background=EBF4FF';
                     })
-                    ->badge()
-                    ->color(fn($record) => $record->senderable_type === 'App\\Models\\User' ? 'info' : 'warning'),
+                    ->circular()
+                    ->size(50),
 
-                Tables\Columns\TextColumn::make('receiver_info')
-                    ->label('Receiver')
-                    ->getStateUsing(function ($record) {
-                        return self::getAgentName($record->receiverable_type, $record->receiverable_id);
-                    })
-                    ->badge()
-                    ->color(fn($record) => $record->receiverable_type === 'App\\Models\\User' ? 'info' : 'warning'),
+                Tables\Columns\Layout\Stack::make([
+                    Tables\Columns\TextColumn::make('customer_name')
+                        ->label('Customer')
+                        ->getStateUsing(fn($record) => self::getCustomerName($record))
+                        ->weight('bold')
+                        ->size('lg'),
 
-                Tables\Columns\TextColumn::make('message')
-                    ->label('Message')
-                    ->limit(50)
-                    ->tooltip(function ($record) {
-                        return $record->message;
-                    }),
+                    Tables\Columns\TextColumn::make('last_message')
+                        ->label('')
+                        ->getStateUsing(function ($record) {
+                            $lastMessage = $record->messages()->latest()->first();
+                            return $lastMessage ? \Str::limit($lastMessage->message, 60) : 'No messages yet';
+                        })
+                        ->color('gray')
+                        ->size('sm'),
 
-                Tables\Columns\IconColumn::make('is_starred')
-                    ->label('Starred')
-                    ->boolean()
-                    ->trueIcon('heroicon-o-star')
-                    ->falseIcon('heroicon-o-star')
-                    ->trueColor('warning')
-                    ->falseColor('gray'),
+                    Tables\Columns\TextColumn::make('conversation_info')
+                        ->label('')
+                        ->getStateUsing(function ($record) {
+                            $totalMessages = $record->messages()->count();
+                            $lastActivity = $record->messages()->latest()->first();
+                            $lastTime = $lastActivity ? $lastActivity->created_at->diffForHumans() : 'No activity';
 
-                Tables\Columns\TextColumn::make('attachments')
-                    ->label('Attachments')
-                    ->getStateUsing(function ($record) {
-                        $attachments = is_string($record->attachments) 
-                            ? json_decode($record->attachments, true) 
-                            : $record->attachments;
-                        
-                        return $attachments ? count($attachments) . ' file(s)' : 'None';
-                    })
-                    ->badge()
-                    ->color(fn($state) => $state !== 'None' ? 'success' : 'gray'),
+                            return "{$totalMessages} messages • {$lastTime}";
+                        })
+                        ->color('gray')
+                        ->size('xs'),
+                ])->space(1),
 
-                Tables\Columns\TextColumn::make('last_read_at')
-                    ->label('Read At')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(),
+                Tables\Columns\Layout\Stack::make([
+                    Tables\Columns\BadgeColumn::make('unread_count')
+                        ->label('')
+                        ->getStateUsing(function ($record) {
+                            $user = auth()->user();
+                            $count = $record->messages()
+                                ->whereNull('last_read_at')
+                                ->where('senderable_type', 'App\\Models\\Konsumen')
+                                ->count();
+                            return $count > 0 ? $count : null;
+                        })
+                        ->color('danger')
+                        ->size('sm'),
 
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Sent At')
-                    ->dateTime()
-                    ->sortable(),
+                    Tables\Columns\IconColumn::make('online_status')
+                        ->label('')
+                        ->getStateUsing(fn() => true)
+                        ->icon('heroicon-o-signal')
+                        ->color('success')
+                        ->size('sm'),
+                ])->space(1),
+            ])
+            ->contentGrid([
+                'md' => 1,
+                'xl' => 1,
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('senderable_type')
-                    ->label('Sender Type')
-                    ->options([
-                        'App\\Models\\User' => 'Admin/Staff',
-                        'App\\Models\\Konsumen' => 'Customer',
-                    ]),
-
-                Tables\Filters\SelectFilter::make('receiverable_type')
-                    ->label('Receiver Type')
-                    ->options([
-                        'App\\Models\\User' => 'Admin/Staff',
-                        'App\\Models\\Konsumen' => 'Customer',
-                    ]),
-
-                Tables\Filters\TernaryFilter::make('is_starred')
-                    ->label('Starred Messages'),
-
                 Tables\Filters\Filter::make('unread')
                     ->label('Unread Messages')
-                    ->query(fn($query) => $query->whereNull('last_read_at')),
+                    ->query(function ($query) {
+                        return $query->whereHas('messages', function ($q) {
+                            $q->whereNull('last_read_at')
+                                ->where('senderable_type', 'App\\Models\\Konsumen');
+                        });
+                    }),
 
-                Tables\Filters\Filter::make('today')
-                    ->label('Today\'s Messages')
-                    ->query(fn($query) => $query->whereDate('created_at', today())),
+                Tables\Filters\Filter::make('recent')
+                    ->label('Recent (Today)')
+                    ->query(function ($query) {
+                        return $query->whereHas('messages', function ($q) {
+                            $q->whereDate('created_at', today());
+                        });
+                    }),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                
-                Tables\Actions\Action::make('mark_as_read')
-                    ->label('Mark as Read')
+                Tables\Actions\Action::make('open_chat')
+                    ->label('Open Chat')
+                    ->icon('heroicon-o-chat-bubble-left-right')
+                    ->color('primary')
+                    ->button()
+                    ->action(function ($record) {
+                        return redirect()->to(static::getUrl('conversation', ['conversation' => $record->id]));
+                    }), 
+
+                Tables\Actions\Action::make('mark_all_read')
+                    ->label('Mark All Read')
                     ->icon('heroicon-o-eye')
                     ->color('success')
-                    ->action(fn($record) => $record->update(['last_read_at' => now()]))
-                    ->visible(fn($record) => is_null($record->last_read_at)),
-
-                Tables\Actions\Action::make('star_message')
-                    ->label('Star')
-                    ->icon('heroicon-o-star')
-                    ->color('warning')
-                    ->action(fn($record) => $record->update(['is_starred' => !$record->is_starred]))
-                    ->visible(fn($record) => !$record->is_starred),
-
-                Tables\Actions\Action::make('unstar_message')
-                    ->label('Unstar')
-                    ->icon('heroicon-s-star')
-                    ->color('gray')
-                    ->action(fn($record) => $record->update(['is_starred' => !$record->is_starred]))
-                    ->visible(fn($record) => $record->is_starred),
+                    ->action(function ($record) {
+                        $record->messages()
+                            ->whereNull('last_read_at')
+                            ->update(['last_read_at' => now()]);
+                    })
+                    ->visible(function ($record) {
+                        return $record->messages()->whereNull('last_read_at')->exists();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                    
-                    Tables\Actions\BulkAction::make('mark_as_read')
-                        ->label('Mark Selected as Read')
+                    Tables\Actions\BulkAction::make('mark_all_read')
+                        ->label('Mark All as Read')
                         ->icon('heroicon-o-eye')
                         ->color('success')
-                        ->action(fn($records) => $records->each(fn($record) => $record->update(['last_read_at' => now()])))
-                        ->requiresConfirmation(),
-
-                    Tables\Actions\BulkAction::make('star_messages')
-                        ->label('Star Selected')
-                        ->icon('heroicon-o-star')
-                        ->color('warning')
-                        ->action(fn($records) => $records->each(fn($record) => $record->update(['is_starred' => true])))
+                        ->action(function ($records) {
+                            foreach ($records as $record) {
+                                $record->messages()
+                                    ->whereNull('last_read_at')
+                                    ->update(['last_read_at' => now()]);
+                            }
+                        })
                         ->requiresConfirmation(),
                 ]),
             ])
-            ->defaultSort('created_at', 'desc');
+            ->defaultSort('updated_at', 'desc')
+            ->striped(false)
+            ->paginated([10, 25, 50]);
     }
 
-    private static function getAgentName($type, $id): string
+    private static function getCustomerName($record): string
     {
-        if ($type === 'App\\Models\\User') {
-            $user = User::find($id);
-            return $user ? $user->name . " ({$user->role})" : 'Unknown User';
-        } elseif ($type === 'App\\Models\\Konsumen') {
-            $konsumen = Konsumen::with('user')->find($id);
-            return $konsumen?->user?->name ?? 'Unknown Customer';
+        // Check if customer is sender or receiver
+        if ($record->senderable_type === 'App\\Models\\Konsumen') {
+            return $record->senderable?->user?->name ?? 'Unknown Customer';
+        } elseif ($record->receiverable_type === 'App\\Models\\Konsumen') {
+            return $record->receiverable?->user?->name ?? 'Unknown Customer';
         }
-        return 'Unknown';
+
+        return 'Unknown Customer';
     }
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
-            ->latest('created_at');
+        // $user = auth()->user();
+
+        // return parent::getEloquentQuery()
+        //     ->where(function ($query) use ($user) {
+        //         if ($user->role === 'admin') {
+        //             // Admin dapat melihat semua conversation
+        //             return $query;
+        //         } else {
+        //             // Mekanik hanya melihat conversation yang melibatkan mereka
+        //             $query->where(function ($q) use ($user) {
+        //                 $q->where('senderable_type', 'App\\Models\\User')
+        //                   ->where('senderable_id', $user->id)
+        //                   ->orWhere('receiverable_type', 'App\\Models\\User')
+        //                   ->where('receiverable_id', $user->id);
+        //             });
+        //         }
+
+        //         return $query;
+        //     })
+        //     ->orderBy('updated_at', 'desc');
+        return parent::getEloquentQuery()->orderBy('updated_at', 'desc');
     }
 
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListChats::route('/'),
-            'create' => Pages\CreateChat::route('/create'),
-            'edit' => Pages\EditChat::route('/{record}/edit'),
+            'conversation' => Pages\ChatConversation::route('/conversation/{conversation}'),
         ];
     }
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::whereNull('last_read_at')->count();
+        $user = auth()->user();
+
+        $query = static::getEloquentQuery()
+            ->whereHas('messages', function ($q) {
+                $q->whereNull('last_read_at')
+                    ->where('senderable_type', 'App\\Models\\Konsumen');
+            });
+
+        $count = $query->count();
+        return $count > 0 ? (string) $count : null;
     }
 
     public static function getNavigationBadgeColor(): ?string
     {
         return static::getNavigationBadge() > 0 ? 'warning' : 'primary';
+    }
+
+    public static function canViewAny(): bool
+    {
+        return true;
+    }
+
+    public static function canView($record): bool
+    {
+        return true;
+    }
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function canEdit($record): bool
+    {
+        return false;
+    }
+
+    public static function canDelete($record): bool
+    {
+        return false;
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return false;
     }
 }

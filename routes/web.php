@@ -66,13 +66,24 @@ Route::middleware([
         Route::get('/konsumen/history', fn() => view('konsumen.history'))->name('konsumen.history');
         Route::get('/konsumen/billing', fn() => view('konsumen.billing'))->name('konsumen.billing');
 
-        // Chat routes untuk konsumen - TAMBAHKAN ROUTE YANG HILANG
-        Route::get('/konsumen/chat', [FilachatController::class, 'index'])->name('konsumen.chat');
-        Route::get('/konsumen/chat_contact', [FilachatController::class, 'index'])->name('konsumen.chat_contact'); // Route yang hilang
-        Route::get('/konsumen/chat/admin/{admin}', [FilachatController::class, 'showAdminChat'])->name('filachat.admin.show');
-        Route::post('/konsumen/chat/admin/{admin}/send', [FilachatController::class, 'sendAdminMessage'])->name('filachat.admin.send');
-        Route::get('/konsumen/chat/mekanik/{mekanik}', [FilachatController::class, 'showMekanikChat'])->name('filachat.show');
-        Route::post('/konsumen/chat/mekanik/{mekanik}/send', [FilachatController::class, 'sendMekanikMessage'])->name('filachat.send');
+        // Chat routes untuk konsumen - PERBAIKAN ROUTE
+        Route::prefix('konsumen/chat')->name('filachat.')->group(function () {
+            // Chat index/contact list
+            Route::get('/', [FilachatController::class, 'chatIndex'])->name('index');
+            Route::get('/contact', [FilachatController::class, 'chatIndex'])->name('contact'); // alias untuk chat_contact
+            
+            // Chat dengan admin
+            Route::get('/admin/{admin}', [FilachatController::class, 'showAdminChat'])->name('admin.show');
+            Route::post('/admin/{admin}/send', [FilachatController::class, 'sendAdminMessage'])->name('admin.send');
+            
+            // Chat dengan mekanik
+            Route::get('/mekanik/{mekanik}', [FilachatController::class, 'showMekanikChat'])->name('show');
+            Route::post('/mekanik/{mekanik}/send', [FilachatController::class, 'sendMekanikMessage'])->name('send');
+        });
+
+        // Backward compatibility routes
+        Route::get('/konsumen/chat_contact', [FilachatController::class, 'chatIndex'])->name('konsumen.chat_contact');
+        Route::get('/konsumen/chat', [FilachatController::class, 'chatIndex'])->name('konsumen.chat');
 
         // Profile & vehicle management
         Route::get('/konsumen/profile', function () {
@@ -110,11 +121,192 @@ Route::middleware([
         Route::post('/chat/{conversation}', [FilachatController::class, 'mekanikReply'])->name('filachat.mekanik.reply');
     });
 
-    // Notifications
-    Route::post('/notifications/mark-read/{id}', function($id) {
-        $notif = auth()->user()->unreadNotifications()->find($id);
-        if ($notif) $notif->markAsRead();
-        return response()->json(['success' => true]);
+    // ===============================
+    // NOTIFICATION ROUTES - DIPERBAIKI DAN DILENGKAPI
+    // ===============================
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        // Mark single notification as read
+        Route::post('/mark-read/{id}', function ($id) {
+            try {
+                $notification = auth()->user()->notifications()->where('id', $id)->first();
+                if ($notification) {
+                    $notification->markAsRead();
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Notifikasi berhasil ditandai sebagai sudah dibaca'
+                    ]);
+                }
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Notifikasi tidak ditemukan'
+                ], 404);
+            } catch (\Exception $e) {
+                \Log::error('Error marking notification as read:', [
+                    'notification_id' => $id,
+                    'user_id' => auth()->id(),
+                    'error' => $e->getMessage()
+                ]);
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Terjadi kesalahan saat menandai notifikasi'
+                ], 500);
+            }
+        })->name('mark-read');
+
+        // Mark all notifications as read
+        Route::post('/mark-all-read', function () {
+            try {
+                $user = auth()->user();
+                $count = $user->unreadNotifications()->count();
+                $user->unreadNotifications->markAsRead();
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => "Berhasil menandai {$count} notifikasi sebagai sudah dibaca",
+                    'count' => $count
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Error marking all notifications as read:', [
+                    'user_id' => auth()->id(),
+                    'error' => $e->getMessage()
+                ]);
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Terjadi kesalahan saat menandai semua notifikasi'
+                ], 500);
+            }
+        })->name('mark-all-read');
+
+        // Get notification count
+        Route::get('/count', function () {
+            try {
+                $count = auth()->user()->unreadNotifications()->count();
+                return response()->json([
+                    'success' => true,
+                    'count' => $count
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Error getting notification count:', [
+                    'user_id' => auth()->id(),
+                    'error' => $e->getMessage()
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'count' => 0
+                ]);
+            }
+        })->name('count');
+
+        // Get latest notifications (AJAX)
+        Route::get('/latest', function () {
+            try {
+                $notifications = auth()->user()
+                    ->unreadNotifications()
+                    ->limit(10)
+                    ->get()
+                    ->map(function ($notif) {
+                        return [
+                            'id' => $notif->id,
+                            'title' => $notif->data['title'] ?? 'Notifikasi Baru',
+                            'message' => $notif->data['message'] ?? $notif->type,
+                            'type' => $notif->type,
+                            'created_at' => $notif->created_at->diffForHumans(),
+                            'data' => $notif->data
+                        ];
+                    });
+
+                return response()->json([
+                    'success' => true,
+                    'notifications' => $notifications,
+                    'count' => $notifications->count()
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Error getting latest notifications:', [
+                    'user_id' => auth()->id(),
+                    'error' => $e->getMessage()
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'notifications' => [],
+                    'count' => 0
+                ]);
+            }
+        })->name('latest');
+
+        // View all notifications page
+        Route::get('/all', function () {
+            try {
+                $notifications = auth()->user()
+                    ->notifications()
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(20);
+
+                return view('dashboard.all-notifications', compact('notifications'));
+            } catch (\Exception $e) {
+                \Log::error('Error loading all notifications page:', [
+                    'user_id' => auth()->id(),
+                    'error' => $e->getMessage()
+                ]);
+                return redirect()->back()->with('error', 'Gagal memuat halaman notifikasi');
+            }
+        })->name('all');
+
+        // Delete single notification
+        Route::delete('/delete/{id}', function ($id) {
+            try {
+                $notification = auth()->user()->notifications()->where('id', $id)->first();
+                if ($notification) {
+                    $notification->delete();
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Notifikasi berhasil dihapus'
+                    ]);
+                }
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Notifikasi tidak ditemukan'
+                ], 404);
+            } catch (\Exception $e) {
+                \Log::error('Error deleting notification:', [
+                    'notification_id' => $id,
+                    'user_id' => auth()->id(),
+                    'error' => $e->getMessage()
+                ]);
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Terjadi kesalahan saat menghapus notifikasi'
+                ], 500);
+            }
+        })->name('delete');
+
+        // Clear all notifications
+        Route::delete('/clear-all', function () {
+            try {
+                $user = auth()->user();
+                $count = $user->notifications()->count();
+                $user->notifications()->delete();
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => "Berhasil menghapus {$count} notifikasi",
+                    'count' => $count
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Error clearing all notifications:', [
+                    'user_id' => auth()->id(),
+                    'error' => $e->getMessage()
+                ]);
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Terjadi kesalahan saat menghapus semua notifikasi'
+                ], 500);
+            }
+        })->name('clear-all');
+    });
+
+    // Legacy notification route (untuk backward compatibility)
+    Route::post('/notifications/mark-read/{id}', function ($id) {
+        return redirect()->route('notifications.mark-read', $id);
     });
 });
 
@@ -140,20 +332,34 @@ Route::middleware('auth:sanctum')->prefix('api')->group(function () {
         Route::put('/status/{id}', [BookingServiceController::class, 'updateBookingStatus']);
         Route::get('/all', [BookingServiceController::class, 'getAllBookings']);
     });
+
+    // API Notifications untuk mobile atau AJAX
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', function () {
+            $notifications = auth()->user()
+                ->notifications()
+                ->orderBy('created_at', 'desc')
+                ->limit(50)
+                ->get();
+            return response()->json(['data' => $notifications]);
+        });
+
+        Route::get('/unread', function () {
+            $notifications = auth()->user()
+                ->unreadNotifications()
+                ->orderBy('created_at', 'desc')
+                ->get();
+            return response()->json(['data' => $notifications]);
+        });
+    });
 });
 
-// Legacy/backward compatibility routes (redirect to new routes)
-// PERBAIKAN: Ubah redirect untuk menggunakan route yang sudah ada
-Route::get('/konsumen/chat_contact_old', function() {
-    return redirect()->route('konsumen.chat_contact'); // Redirect ke route yang baru ditambahkan
-})->middleware('auth');
-
-// PERBAIKAN: gunakan route name yang benar
-Route::get('/dashboard/konsumen', function() {
+// Legacy/backward compatibility routes
+Route::get('/dashboard/konsumen', function () {
     return redirect()->route('dashboard.konsumen');
 })->middleware('auth');
 
-Route::get('/dashboard/mekanik', function() {
+Route::get('/dashboard/mekanik', function () {
     return redirect()->route('dashboard.mekanik');
 })->middleware('auth');
 

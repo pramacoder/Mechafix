@@ -78,7 +78,7 @@
                             </div>
 
                             <div class="flex items-center justify-end mt-6 space-x-2">
-                                <a href="{{ route('dashboard') }}"
+                                <a href="{{ route('dashboard.konsumen') }}"
                                     class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
                                     Cancel
                                 </a>
