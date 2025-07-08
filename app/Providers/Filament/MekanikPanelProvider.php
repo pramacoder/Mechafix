@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Mekanik\Resources\DashboardResource\Widgets\TotalService;
 use App\Filament\Mekanik\Resources\DashboardResource\Widgets\Orderan;
 use App\Filament\Mekanik\Resources\DashboardResource\Widgets\Konribusi;
+use App\Http\Middleware\RoleMiddleware;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -20,6 +21,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Laravel\Jetstream\Rules\Role;
 
 class MekanikPanelProvider extends PanelProvider
 {
@@ -59,6 +61,7 @@ class MekanikPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                RoleMiddleware::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
