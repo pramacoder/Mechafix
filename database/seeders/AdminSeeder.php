@@ -60,7 +60,7 @@ class AdminSeeder extends Seeder
                 'email_verified_at' => now(),
             ]);
 
-            // Create Admin record  
+            // Create Admin record
             Admin::create([
                 'id' => $user->id,
                 'shift_kerja' => $adminData['shift_kerja'],

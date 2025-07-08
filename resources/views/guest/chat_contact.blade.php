@@ -6,7 +6,7 @@
     <!-- Hero Section -->
     <div class="relative overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-r from-orange-400/10 to-orange-600/10"></div>
-        
+
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div class="text-center">
                 <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
@@ -16,10 +16,10 @@
                     </span>
                 </h1>
                 <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-                    Hubungi tim Mechafix untuk konsultasi, pertanyaan, atau bantuan terkait 
+                    Hubungi tim Mechafix untuk konsultasi, pertanyaan, atau bantuan terkait
                     layanan perbaikan motor Anda.
                 </p>
-                
+
                 <!-- Login Required Message -->
                 <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 mb-12 max-w-2xl mx-auto shadow-xl border border-orange-200">
                     <div class="flex items-center justify-center mb-6">
@@ -29,26 +29,26 @@
                             </svg>
                         </div>
                     </div>
-                    
+
                     <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">
                         Login untuk Mengakses Chat
                     </h2>
-                    
+
                     <p class="text-gray-600 text-center mb-6">
-                        Untuk mengakses fitur chat dengan mekanik dan tim support, 
+                        Untuk mengakses fitur chat dengan mekanik dan tim support,
                         silakan login atau daftar akun terlebih dahulu.
                     </p>
-                    
+
                     <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <a href="{{ route('login') }}" 
+                        <a href="{{ route('login') }}"
                            class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-orange-500  font-semibold rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
                             </svg>
                             Login
                         </a>
-                        
-                        <a href="{{ route('register') }}" 
+
+                        <a href="{{ route('register') }}"
                            class="inline-flex items-center justify-center px-8 py-4 bg-white text-orange-600 font-semibold rounded-xl border-2 border-orange-500 hover:bg-orange-50 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
@@ -72,7 +72,7 @@
                     Berbagai cara untuk menghubungi tim Mechafix. Login untuk mengakses fitur chat langsung.
                 </p>
             </div>
-            
+
             <div class="grid md:grid-cols-3 gap-8">
                 <!-- Chat Support -->
                 <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-8 border border-orange-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
@@ -83,14 +83,14 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-4 text-center">Live Chat</h3>
                     <p class="text-gray-600 text-center mb-6">
-                        Chat langsung dengan tim support dan mekanik profesional untuk konsultasi 
+                        Chat langsung dengan tim support dan mekanik profesional untuk konsultasi
                         dan bantuan teknis.
                     </p>
                     <div class="bg-orange-100 rounded-lg p-3">
                         <p class="text-orange-800 text-sm font-medium text-center">Login untuk mengakses chat</p>
                     </div>
                 </div>
-                
+
                 <!-- WhatsApp -->
                 <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-8 border border-green-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                     <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -100,14 +100,14 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-4 text-center">WhatsApp</h3>
                     <p class="text-gray-600 text-center mb-6">
-                        Hubungi kami melalui WhatsApp untuk konsultasi cepat dan bantuan 
+                        Hubungi kami melalui WhatsApp untuk konsultasi cepat dan bantuan
                         terkait layanan perbaikan motor.
                     </p>
                     <div class="bg-green-100 rounded-lg p-3">
                         <p class="text-green-800 text-sm font-medium text-center">+62 812-3456-7890</p>
                     </div>
                 </div>
-                
+
                 <!-- Email -->
                 <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-8 border border-blue-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                     <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -117,7 +117,7 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-4 text-center">Email</h3>
                     <p class="text-gray-600 text-center mb-6">
-                        Kirim email untuk pertanyaan detail, keluhan, atau kerjasama 
+                        Kirim email untuk pertanyaan detail, keluhan, atau kerjasama
                         dengan tim Mechafix.
                     </p>
                     <div class="bg-blue-100 rounded-lg p-3">
@@ -139,7 +139,7 @@
                     Tim support kami siap membantu Anda setiap hari.
                 </p>
             </div>
-            
+
             <div class="grid md:grid-cols-2 gap-8">
                 <!-- Customer Support -->
                 <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
@@ -157,7 +157,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Technical Support -->
                 <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                     <div class="text-center">
@@ -190,7 +190,7 @@
                     Beberapa pertanyaan yang sering diajukan. Login untuk melihat FAQ lengkap.
                 </p>
             </div>
-            
+
             <div class="space-y-6">
                 <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 border border-orange-200">
                     <h3 class="text-lg font-bold text-gray-900 mb-2">Bagaimana cara booking layanan?</h3>
@@ -201,7 +201,7 @@
                         <p class="text-orange-800 text-sm font-medium">Login untuk melihat panduan lengkap</p>
                     </div>
                 </div>
-                
+
                 <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 border border-orange-200">
                     <h3 class="text-lg font-bold text-gray-900 mb-2">Apakah ada garansi untuk layanan?</h3>
                     <p class="text-gray-600 mb-4">
@@ -211,7 +211,7 @@
                         <p class="text-orange-800 text-sm font-medium">Login untuk melihat detail garansi</p>
                     </div>
                 </div>
-                
+
                 <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 border border-orange-200">
                     <h3 class="text-lg font-bold text-gray-900 mb-2">Bagaimana cara menghubungi mekanik?</h3>
                     <p class="text-gray-600 mb-4">
@@ -236,14 +236,14 @@
                     Login sekarang dan nikmati layanan chat langsung dengan tim support dan mekanik profesional.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="{{ route('login') }}" 
-                       class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-orange-500  font-semibold rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                    <a href="{{ route('login') }}"
+                       class="inline-flex items-center justify-center px-8 py-4 bg-white text-orange-600 font-semibold rounded-xl border-2 border-orange-500 hover:bg-orange-50 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
                         </svg>
                         Login Sekarang
                     </a>
-                    <a href="{{ route('register') }}" 
+                    <a href="{{ route('register') }}"
                        class="inline-flex items-center justify-center px-8 py-4 bg-white text-orange-600 font-semibold rounded-xl border-2 border-orange-500 hover:bg-orange-50 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
