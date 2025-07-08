@@ -58,6 +58,8 @@ Route::middleware([
             return view('dashboard.konsumen');
         })->name('dashboard.konsumen');
 
+        Route::get('/konsumen/mekanik/{mekanik}/profile', [KonsumenController::class, 'mekanikProfile'])->name('konsumen.mekanik-profile');
+        
         // Konsumen pages
         Route::get('/konsumen/home', fn() => view('konsumen.home'))->name('konsumen.home');
         Route::get('/konsumen/services', fn() => view('konsumen.services'))->name('konsumen.services');
@@ -71,11 +73,11 @@ Route::middleware([
             // Chat index/contact list
             Route::get('/', [FilachatController::class, 'chatIndex'])->name('index');
             Route::get('/contact', [FilachatController::class, 'chatIndex'])->name('contact'); // alias untuk chat_contact
-            
+
             // Chat dengan admin
             Route::get('/admin/{admin}', [FilachatController::class, 'showAdminChat'])->name('admin.show');
             Route::post('/admin/{admin}/send', [FilachatController::class, 'sendAdminMessage'])->name('admin.send');
-            
+
             // Chat dengan mekanik
             Route::get('/mekanik/{mekanik}', [FilachatController::class, 'showMekanikChat'])->name('show');
             Route::post('/mekanik/{mekanik}/send', [FilachatController::class, 'sendMekanikMessage'])->name('send');
@@ -137,7 +139,7 @@ Route::middleware([
                     ]);
                 }
                 return response()->json([
-                    'success' => false, 
+                    'success' => false,
                     'message' => 'Notifikasi tidak ditemukan'
                 ], 404);
             } catch (\Exception $e) {
@@ -147,7 +149,7 @@ Route::middleware([
                     'error' => $e->getMessage()
                 ]);
                 return response()->json([
-                    'success' => false, 
+                    'success' => false,
                     'message' => 'Terjadi kesalahan saat menandai notifikasi'
                 ], 500);
             }
@@ -159,7 +161,7 @@ Route::middleware([
                 $user = auth()->user();
                 $count = $user->unreadNotifications()->count();
                 $user->unreadNotifications->markAsRead();
-                
+
                 return response()->json([
                     'success' => true,
                     'message' => "Berhasil menandai {$count} notifikasi sebagai sudah dibaca",
@@ -171,7 +173,7 @@ Route::middleware([
                     'error' => $e->getMessage()
                 ]);
                 return response()->json([
-                    'success' => false, 
+                    'success' => false,
                     'message' => 'Terjadi kesalahan saat menandai semua notifikasi'
                 ], 500);
             }
@@ -263,7 +265,7 @@ Route::middleware([
                     ]);
                 }
                 return response()->json([
-                    'success' => false, 
+                    'success' => false,
                     'message' => 'Notifikasi tidak ditemukan'
                 ], 404);
             } catch (\Exception $e) {
@@ -273,7 +275,7 @@ Route::middleware([
                     'error' => $e->getMessage()
                 ]);
                 return response()->json([
-                    'success' => false, 
+                    'success' => false,
                     'message' => 'Terjadi kesalahan saat menghapus notifikasi'
                 ], 500);
             }
@@ -285,7 +287,7 @@ Route::middleware([
                 $user = auth()->user();
                 $count = $user->notifications()->count();
                 $user->notifications()->delete();
-                
+
                 return response()->json([
                     'success' => true,
                     'message' => "Berhasil menghapus {$count} notifikasi",
@@ -297,7 +299,7 @@ Route::middleware([
                     'error' => $e->getMessage()
                 ]);
                 return response()->json([
-                    'success' => false, 
+                    'success' => false,
                     'message' => 'Terjadi kesalahan saat menghapus semua notifikasi'
                 ], 500);
             }
