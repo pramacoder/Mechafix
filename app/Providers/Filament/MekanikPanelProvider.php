@@ -4,7 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Mekanik\Resources\DashboardResource\Widgets\TotalService;
 use App\Filament\Mekanik\Resources\DashboardResource\Widgets\Orderan;
-use App\Filament\Mekanik\Resources\DashboardResource\Widgets\Konribusi;
+use App\Filament\Mekanik\Resources\DashboardResource\Widgets\Kontribusi;
 use App\Http\Middleware\RoleMiddleware;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -49,7 +49,7 @@ class MekanikPanelProvider extends PanelProvider
                 // Widgets\FilamentInfoWidget::class,
                 TotalService::class,
                 Orderan::class,
-                Konribusi::class,
+                Kontribusi::class,
             ])
             ->middleware([
                 EncryptCookies::class,

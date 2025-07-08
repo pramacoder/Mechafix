@@ -38,7 +38,7 @@ class HariLibur extends Model
     public static function isHoliday($date)
     {
         $checkDate = Carbon::parse($date)->format('Y-m-d');
-        
+
         return static::where('tanggal_mulai', '<=', $checkDate)
                     ->where('tanggal_berakhir', '>=', $checkDate)
                     ->exists();
@@ -47,67 +47,67 @@ class HariLibur extends Model
     public static function getHolidayName($date)
     {
         $checkDate = Carbon::parse($date)->format('Y-m-d');
-        
+
         $holiday = static::where('tanggal_mulai', '<=', $checkDate)
                          ->where('tanggal_berakhir', '>=', $checkDate)
                          ->first();
-                         
+
         return $holiday ? $holiday->nama_hari_libur : null;
     }
 
     public static function getHolidayDates($startDate = null, $endDate = null)
     {
         $query = static::query();
-        
+
         if ($startDate) {
             $query->where('tanggal_berakhir', '>=', $startDate);
         }
-        
+
         if ($endDate) {
             $query->where('tanggal_mulai', '<=', $endDate);
         }
-        
+
         $holidays = $query->get();
         $holidayDates = [];
-        
+
         foreach ($holidays as $holiday) {
             $current = $holiday->tanggal_mulai->copy();
             $end = $holiday->tanggal_berakhir;
-            
+
             while ($current->lte($end)) {
                 $holidayDates[] = $current->format('Y-m-d');
                 $current->addDay();
             }
         }
-        
+
         return $holidayDates;
     }
 
     public static function getHolidayDetails($startDate = null, $endDate = null)
     {
         $query = static::query();
-        
+
         if ($startDate) {
             $query->where('tanggal_berakhir', '>=', $startDate);
         }
-        
+
         if ($endDate) {
             $query->where('tanggal_mulai', '<=', $endDate);
         }
-        
+
         $holidays = $query->orderBy('tanggal_mulai')->get();
         $holidayDetails = [];
-        
+
         foreach ($holidays as $holiday) {
             $dates = [];
             $current = $holiday->tanggal_mulai->copy();
             $end = $holiday->tanggal_berakhir;
-            
+
             while ($current->lte($end)) {
                 $dates[] = $current->format('Y-m-d');
                 $current->addDay();
             }
-            
+
             $holidayDetails[] = [
                 'nama' => $holiday->nama_hari_libur,
                 'dates' => $dates,
@@ -117,7 +117,7 @@ class HariLibur extends Model
                 'duration' => count($dates),
             ];
         }
-        
+
         return $holidayDetails;
     }
 }

@@ -1,3 +1,4 @@
+
 <!-- Pending Payments Alert Section -->
 @php
     $pendingPayments = auth()
@@ -209,6 +210,7 @@
 
 <!-- Recent Bookings -->
 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mt-10 border-2 border-orange-500">
+<div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mt-10 border-2 border-orange-500">
     <div class="p-6 lg:p-8">
         <h3 class="text-lg font-medium text-gray-900 mb-4">Recent Bookings</h3>
 
@@ -234,17 +236,24 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                                 Vehicle</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                                 Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                                 Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                                 Service & Amount</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                                 Payment</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                                 Next Service</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                                 Mechanic</th>
                         </tr>

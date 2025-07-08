@@ -67,7 +67,7 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-
+    
     // Role helpers
     public function isKonsumen()
     {
@@ -94,7 +94,6 @@ class User extends Authenticatable
     {
         return $this->hasOne(Mekanik::class, 'id', 'id');
     }
-
     public function admin()
     {
         return $this->hasOne(Admin::class, 'id', 'id');
@@ -103,5 +102,9 @@ class User extends Authenticatable
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->role === 'admin';
+    }
+    public function getUserVehicles()
+    {
+        return $this->konsumen ? $this->konsumen->platKendaraans : collect();
     }
 }

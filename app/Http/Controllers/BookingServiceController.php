@@ -25,9 +25,8 @@ class BookingServiceController extends Controller
 
     public function create()
     {
-        // Get user's vehicles - Simple belongsTo relationship
-        $userVehicles = PlatKendaraan::where('id_konsumen', Auth::user()->konsumen->id_konsumen)->get();
-
+        $user = auth()->user();
+        $userVehicles = \App\Models\PlatKendaraan::where('id_konsumen', $user->konsumen->id_konsumen)->get();
         return view('booking.create', compact('userVehicles'));
     }
 
@@ -70,7 +69,7 @@ class BookingServiceController extends Controller
             'id_plat_kendaraan' => $request->id_plat_kendaraan,
         ]);
 
-        return redirect()->route('dashboard')->with('success', 'Booking submitted successfully! We will contact you soon.');
+        return redirect()->route('dashboard.konsumen')->with('success', 'Booking submitted successfully! We will contact you soon.');
     }
 
     public function cancel(BookingService $booking)
@@ -94,5 +93,145 @@ class BookingServiceController extends Controller
         $booking->update(['status_booking' => 'batal']);
 
         return back()->with('success', 'Booking cancelled successfully.');
+    }
+    /**
+     * Get booking status by license plate number
+     */
+
+
+    /**
+     * Update booking status
+     */
+    public function updateBookingStatus(Request $request, $id): JsonResponse
+    {
+
+        $request->validate([
+            'status' => 'required|in:menunggu,dikonfirmasi,selesai,batal'
+        ]);
+
+        try {
+            $booking = BookingService::findOrFail($id);
+
+            $oldStatus = $booking->status_booking;
+            $booking->status_booking = $request->status;
+
+            // If status is changing to 'dikonfirmasi', update the timestamp
+            if ($oldStatus !== 'dikonfirmasi' && $request->status === 'dikonfirmasi') {
+                $booking->updated_at = Carbon::now();
+            }
+
+            $booking->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Status updated successfully',
+                'booking' => $booking
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update status'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get all bookings (for admin dashboard)
+     */
+    public function getAllBookings(): JsonResponse
+    {
+        try {
+            $bookings = BookingService::with(['konsumen', 'platKendaraan', 'mekanik'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'bookings' => $bookings
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch bookings'
+            ], 500);
+        }
+    }
+    public function services()
+    {
+        $user = Auth::user();
+        $userVehicles = $user && $user->konsumen ? $user->konsumen->platKendaraan ?? collect() : collect();
+        return view('konsumen.services', compact('userVehicles'));
+    }
+    /**
+     * Get booking statistics
+     */
+    public function getBookingStatistics(): JsonResponse
+    {
+        try {
+            $stats = [
+                'total_bookings' => BookingService::count(),
+                'pending_bookings' => BookingService::where('status_booking', 'menunggu')->count(),
+                'confirmed_bookings' => BookingService::where('status_booking', 'dikonfirmasi')->count(),
+                'completed_bookings' => BookingService::where('status_booking', 'selesai')->count(),
+                'cancelled_bookings' => BookingService::where('status_booking', 'batal')->count(),
+                'average_completion_time' => $this->calculateAverageCompletionTime(),
+                'accuracy_percentage' => $this->calculateAccuracyPercentage()
+            ];
+
+            return response()->json([
+                'success' => true,
+                'statistics' => $stats
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch statistics'
+            ], 500);
+        }
+    }
+
+    /**
+     * Calculate average completion time
+     */
+    private function calculateAverageCompletionTime()
+    {
+        // This is a simplified calculation
+        // In a real scenario, you'd track when status changes occur
+        $completedBookings = BookingService::where('status_booking', 'selesai')
+            ->select('created_at', 'updated_at')
+            ->get();
+
+        if ($completedBookings->isEmpty()) {
+            return 0;
+        }
+
+        $totalHours = 0;
+        foreach ($completedBookings as $booking) {
+            $totalHours += Carbon::parse($booking->created_at)
+                ->diffInHours(Carbon::parse($booking->updated_at));
+        }
+
+        return round($totalHours / $completedBookings->count(), 1);
+    }
+
+    /**
+     * Calculate accuracy percentage
+     */
+    private function calculateAccuracyPercentage()
+    {
+        // This is a simplified calculation
+        // In production, you'd track actual vs estimated completion times
+        $completedBookings = BookingService::where('status_booking', 'selesai')->count();
+        $totalBookings = BookingService::whereIn('status_booking', ['selesai', 'dikonfirmasi'])->count();
+
+        if ($totalBookings === 0) {
+            return 0;
+        }
+
+        // Assuming 95% accuracy for completed bookings
+        return round(($completedBookings / $totalBookings) * 95, 1);
     }
 }

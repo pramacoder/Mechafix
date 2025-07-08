@@ -4,7 +4,7 @@ namespace App\Filament\Mekanik\Resources\DashboardResource\Widgets;
 
 use Filament\Widgets\ChartWidget;
 
-class Konribusi extends ChartWidget
+class Kontribusi extends ChartWidget
 {
     protected static ?string $heading = 'Kontribusi Bulanan';
 

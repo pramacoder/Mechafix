@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\BookingServiceController;
+use App\Http\Controllers\Auth\WebLoginController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\FilachatController;
 use App\Http\Controllers\KonsumenController;
 use App\Http\Controllers\MekanikController;
@@ -14,20 +16,25 @@ use Illuminate\Support\Facades\Route;
 
 // Guest routes (untuk tamu yang belum login)
 Route::get('/', fn() => view('guest.home'))->name('guest.home');
-Route::get('/services', fn() => view('guest.services'))->name('guest.services');
-Route::get('/part_shop', fn() => view('guest.part_shop'))->name('guest.part_shop');
-Route::get('/our_profile', fn() => view('guest.our_profile'))->name('guest.our_profile');
-Route::get('/chat_contact', fn() => view('guest.chat_contact'))->name('guest.chat_contact');
-Route::get('/history', fn() => view('guest.history'))->name('guest.history');
+Route::get('/guest/services', fn() => view('guest.services'))->name('guest.services');
+Route::get('/guest/part_shop', fn() => view('guest.part_shop'))->name('guest.part_shop');
+Route::get('/guest/our_profile', fn() => view('guest.our_profile'))->name('guest.our_profile');
+Route::get('/guest/chat_contact', fn() => view('guest.chat_contact'))->name('guest.chat_contact');
+Route::get('/guest/history', fn() => view('guest.history'))->name('guest.history');
 
-// Auth routes
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+// Auth routes - DIPERBAIKI DAN DISEDERHANAKAN
+Route::middleware('guest')->group(function () {
+    // Login routes
+    Route::get('/login', [WebLoginController::class, 'create'])->name('login');
+    Route::post('/login', [WebLoginController::class, 'store']);
 
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
+    // Register routes
+    Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+    Route::post('/register', [RegisteredUserController::class, 'store']);
+});
+
+// Logout route
+Route::post('/logout', [WebLoginController::class, 'destroy'])->name('logout')->middleware('auth');
 
 // Dashboard route - redirect berdasarkan role
 Route::get('/dashboard', function () {
@@ -52,7 +59,7 @@ Route::middleware([
 ])->group(function () {
 
     // Konsumen routes
-    Route::middleware('role:konsumen')->group(function () {
+    Route::middleware('auth')->group(function () {
         // Dashboard konsumen
         Route::get('/konsumen/dashboard', function () {
             return view('dashboard.konsumen');
@@ -311,12 +318,6 @@ Route::middleware([
         return redirect()->route('notifications.mark-read', $id);
     });
 });
-
-// Logout route
-Route::post('/logout', function () {
-    Auth::logout();
-    return redirect('/');
-})->name('logout')->middleware('auth');
 
 // Public API Routes (no authentication required)
 Route::prefix('api')->group(function () {

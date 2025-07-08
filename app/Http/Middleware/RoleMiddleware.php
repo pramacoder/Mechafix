@@ -12,15 +12,16 @@ class RoleMiddleware
     {
         // if(auth()->user() && auth()->user()->role !== 'admin') {
         //     abort(403, 'Unauthorized access.'); }
-        // if (!auth()->check()) {
-        //     return redirect('/login');
-        // }
 
-        // $userRole = auth()->user()->role;
+        if (!auth()->check()) {
+            return redirect('/login');
+        }
 
-        // if (auth()->user()->role !== 'admin' && !in_array($userRole, $roles)) {
-        //     abort(403, 'Unauthorized access.');
-        // }
+        $userRole = auth()->user()->role;
+
+        if (auth()->user()->role !== 'admin' && !in_array($userRole, $roles)) {
+            abort(403, 'Unauthorized access.');
+        }
 
         return $next($request);
     }
