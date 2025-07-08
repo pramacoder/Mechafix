@@ -17,6 +17,7 @@ class TransaksiService extends Model
         'id_service',
         'kuantitas_service',
         'subtotal_service',
+        'id_pembayaran',
         'id_booking_service',
     ];
 

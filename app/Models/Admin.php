@@ -32,7 +32,7 @@ class Admin extends Model
     public function hariLibur()
     {
         return $this->hasMany(HariLibur::class, 'id_admin', 'id_admin');
-    }    
+    }
 
     public function isPagiShift()
     {
@@ -42,5 +42,25 @@ class Admin extends Model
     public function isSoreShift()
     {
         return $this->shift_kerja === 'Sore';
+    }
+
+    public function sentMessages()
+    {
+        return $this->morphMany(FilachatMessage::class, 'senderable');
+    }
+
+    public function receivedMessages()
+    {
+        return $this->morphMany(FilachatMessage::class, 'receiverable');
+    }
+
+    public function sentConversations()
+    {
+        return $this->morphMany(FilachatConversation::class, 'senderable');
+    }
+
+    public function receivedConversations()
+    {
+        return $this->morphMany(FilachatConversation::class, 'receiverable');
     }
 }

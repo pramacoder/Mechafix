@@ -25,14 +25,14 @@ class BookingService extends Model
     ];
 
     protected $casts = [
-        'tanggal_booking' => 'datetime',
+        'tanggal_booking' => 'date',
         'estimasi_kedatangan' => 'datetime',
         'keluhan_konsumen' => 'string',
         'status_booking' => 'string',
     ];
 
     // Relationships
-    public function konsumen()
+    public function konsumens()
     {
         return $this->belongsTo(Konsumen::class, 'id_konsumen', 'id_konsumen');
     }
@@ -112,5 +112,10 @@ class BookingService extends Model
     public function getGrandTotalAttribute()
     {
         return $this->transaksiServices->sum('subtotal_service') + $this->transaksiSpareParts->sum('subtotal_barang');
+    }
+
+    public function pembayaran()
+    {
+        return $this->belongsTo(Pembayaran::class, 'id_pembayaran', 'id_pembayaran');
     }
 }

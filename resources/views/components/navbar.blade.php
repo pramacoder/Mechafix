@@ -163,7 +163,7 @@
                     x-data="notificationComponent()" 
                     x-init="init()">
                     <!-- Notifications -->
-                    <div class="relative">
+                    {{-- <div class="relative">
                         <button @click="toggleNotifications()" 
                                 class="relative p-2 rounded-full hover:bg-orange-50 transition-all duration-300 hover-glow">
                             <img src="{{ asset('Lonceng.svg') }}" alt="Notifications" class="w-6 h-6 object-contain">
@@ -230,7 +230,8 @@
                                 <a href="#" class="text-sm text-orange-600 hover:text-orange-700 font-medium">View all notifications</a>
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
+                    @include('dashboard.notifications')
                 </div>
             </div>
 
