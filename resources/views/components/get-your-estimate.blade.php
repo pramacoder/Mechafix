@@ -198,7 +198,7 @@
                                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                         <h6 class="font-medium text-blue-900 mb-2">💳 QRIS Transfer</h6>
                                         <div class="mb-3">
-                                            <img src="{{ asset('storage/' . $payment->qris) }}" alt="QRIS Code"
+                                            <img src="{{ asset('public/qris-codes/qris.jpg' . $payment->qris) }}" alt="QRIS Code"
                                                 class="w-32 h-32 mx-auto border rounded">
                                         </div>
 
@@ -399,7 +399,7 @@
 
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span
-                                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                                             @if ($booking->status_booking === 'menunggu') bg-yellow-100 text-yellow-800
                                             @elseif($booking->status_booking === 'dikonfirmasi') bg-blue-100 text-blue-800
                                             @elseif($booking->status_booking === 'selesai') bg-green-100 text-green-800
@@ -869,7 +869,7 @@
     function showEstimation() {
         const input = document.getElementById('bikeNumbers');
         const plateNumber = input.value.trim();
-        
+
         if (!plateNumber) return;
 
         // Show loading state
@@ -885,7 +885,7 @@
             })
             .then(data => {
                 document.getElementById('loadingState').classList.add('hidden');
-                
+
                 if (data.success) {
                     updateEstimationStats(data.booking);
                     showEstimationStats();
@@ -913,7 +913,7 @@
         };
 
         const statusInfo = statusMap[booking.status_booking] || { text: booking.status_booking, color: 'text-gray-400', description: 'Unknown status' };
-        
+
         const progressElement = document.getElementById('progressStatus');
         progressElement.textContent = statusInfo.text;
         progressElement.className = `text-4xl font-bold mb-4 ${statusInfo.color}`;
@@ -939,6 +939,6 @@
             // Calculate 48 hours from confirmation
             const confirmationTime = new Date(booking.updated_at); // Assuming updated_at is when status changed to 'dikonfirmasi'
             const completionTime = new Date(confirmationTime.getTime() + (48 * 60 * 60 * 1000)); // Add 48 hours
-            
+
             startCountdown(completionTime);
             estimateDateElement.textContent = `

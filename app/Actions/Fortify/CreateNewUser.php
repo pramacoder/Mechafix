@@ -51,6 +51,8 @@ class CreateNewUser implements CreatesNewUsers
             'email' => $input['email'],
             'role' => $input['role'],
             'password' => Hash::make($input['password']),
+            'alamat_konsumen' => ['required_if:role,konsumen'],
+            'kuantitas_hari' => ['required_if:role,mekanik'],
         ]);
 
         // Create related records based on role

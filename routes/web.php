@@ -15,11 +15,11 @@ use Illuminate\Support\Facades\Route;
 
 // Guest routes (untuk tamu yang belum login)
 Route::get('/', fn() => view('guest.home'))->name('guest.home');
-Route::get('/services', fn() => view('guest.services'))->name('guest.services');
-Route::get('/part_shop', fn() => view('guest.part_shop'))->name('guest.part_shop');
-Route::get('/our_profile', fn() => view('guest.our_profile'))->name('guest.our_profile');
-Route::get('/chat_contact', fn() => view('guest.chat_contact'))->name('guest.chat_contact');
-Route::get('/history', fn() => view('guest.history'))->name('guest.history');
+Route::get('/guest/services', fn() => view('guest.services'))->name('guest.services');
+Route::get('/guest/part_shop', fn() => view('guest.part_shop'))->name('guest.part_shop');
+Route::get('/guest/our_profile', fn() => view('guest.our_profile'))->name('guest.our_profile');
+Route::get('/guest/chat_contact', fn() => view('guest.chat_contact'))->name('guest.chat_contact');
+Route::get('/guest/history', fn() => view('guest.history'))->name('guest.history');
 
 // Auth routes
 // Route::get('/login', function () {
@@ -30,22 +30,20 @@ Route::get('/history', fn() => view('guest.history'))->name('guest.history');
 //     return view('auth.register');
 // })->name('register');
 
-Route::middleware('guest')->group(function () {
-    // Login routes
-    Route::get('/login', [WebLoginController::class, 'create'])->name('login');
-    Route::post('/login', [WebLoginController::class, 'store']);
+// Route::middleware('guest')->group(function () {
+//     // Login routes
+//     Route::get('/login', [WebLoginController::class, 'create'])->name('login');
+//     Route::post('/login', [WebLoginController::class, 'store']);
 
-    // Register routes
-    Route::get('/register', function () {
-        return view('auth.register');
-    })->name('register');
-    Route::post('/register');
-});
+//     // Register routes
+//     Route::get('/register', [WebLoginController::class, 'showRegisterForm'])->name('register');
+//     Route::post('/register', [WebLoginController::class, 'store']);
+// });
 
-Route::post('/logout', [WebLoginController::class, 'destroy'])->name('logout')->middleware('auth');
+// Route::post('/logout', [WebLoginController::class, 'destroy'])->name('logout')->middleware('auth');
 // Dashboard route - redirect berdasarkan role
 Route::get('/dashboard', function () {
-    $user = auth()->user();
+    $user = auth('web')->user();
 
     if ($user->role === 'konsumen') {
         return redirect()->route('dashboard.konsumen');
@@ -144,7 +142,7 @@ Route::middleware([
         // Mark single notification as read
         Route::post('/mark-read/{id}', function ($id) {
             try {
-                $notification = auth()->user()->notifications()->where('id', $id)->first();
+                $notification = auth('web')->user()->notifications()->where('id', $id)->first();
                 if ($notification) {
                     $notification->markAsRead();
                     return response()->json([
@@ -159,7 +157,7 @@ Route::middleware([
             } catch (\Exception $e) {
                 \Log::error('Error marking notification as read:', [
                     'notification_id' => $id,
-                    'user_id' => auth()->id(),
+                    'user_id' => auth('web')->id(),
                     'error' => $e->getMessage()
                 ]);
                 return response()->json([
@@ -172,7 +170,7 @@ Route::middleware([
         // Mark all notifications as read
         Route::post('/mark-all-read', function () {
             try {
-                $user = auth()->user();
+                $user = auth('web')->user();
                 $count = $user->unreadNotifications()->count();
                 $user->unreadNotifications->markAsRead();
 
@@ -183,7 +181,7 @@ Route::middleware([
                 ]);
             } catch (\Exception $e) {
                 \Log::error('Error marking all notifications as read:', [
-                    'user_id' => auth()->id(),
+                    'user_id' => auth('web')->id(),
                     'error' => $e->getMessage()
                 ]);
                 return response()->json([
@@ -196,14 +194,14 @@ Route::middleware([
         // Get notification count
         Route::get('/count', function () {
             try {
-                $count = auth()->user()->unreadNotifications()->count();
+                $count = auth('web')->user()->unreadNotifications()->count();
                 return response()->json([
                     'success' => true,
                     'count' => $count
                 ]);
             } catch (\Exception $e) {
                 \Log::error('Error getting notification count:', [
-                    'user_id' => auth()->id(),
+                    'user_id' => auth('web')->id(),
                     'error' => $e->getMessage()
                 ]);
                 return response()->json([
@@ -216,7 +214,7 @@ Route::middleware([
         // Get latest notifications (AJAX)
         Route::get('/latest', function () {
             try {
-                $notifications = auth()->user()
+                $notifications = auth('web')->user()
                     ->unreadNotifications()
                     ->limit(10)
                     ->get()
@@ -238,7 +236,7 @@ Route::middleware([
                 ]);
             } catch (\Exception $e) {
                 \Log::error('Error getting latest notifications:', [
-                    'user_id' => auth()->id(),
+                    'user_id' => auth('web')->id(),
                     'error' => $e->getMessage()
                 ]);
                 return response()->json([
@@ -252,7 +250,7 @@ Route::middleware([
         // View all notifications page
         Route::get('/all', function () {
             try {
-                $notifications = auth()->user()
+                $notifications = auth('web')->user()
                     ->notifications()
                     ->orderBy('created_at', 'desc')
                     ->paginate(20);
@@ -260,7 +258,7 @@ Route::middleware([
                 return view('dashboard.all-notifications', compact('notifications'));
             } catch (\Exception $e) {
                 \Log::error('Error loading all notifications page:', [
-                    'user_id' => auth()->id(),
+                    'user_id' => auth('web')->id(),
                     'error' => $e->getMessage()
                 ]);
                 return redirect()->back()->with('error', 'Gagal memuat halaman notifikasi');
@@ -270,7 +268,7 @@ Route::middleware([
         // Delete single notification
         Route::delete('/delete/{id}', function ($id) {
             try {
-                $notification = auth()->user()->notifications()->where('id', $id)->first();
+                $notification = auth('web')->user()->notifications()->where('id', $id)->first();
                 if ($notification) {
                     $notification->delete();
                     return response()->json([
@@ -285,7 +283,7 @@ Route::middleware([
             } catch (\Exception $e) {
                 \Log::error('Error deleting notification:', [
                     'notification_id' => $id,
-                    'user_id' => auth()->id(),
+                    'user_id' => auth('web')->id(),
                     'error' => $e->getMessage()
                 ]);
                 return response()->json([
@@ -298,7 +296,7 @@ Route::middleware([
         // Clear all notifications
         Route::delete('/clear-all', function () {
             try {
-                $user = auth()->user();
+                $user = auth('web')->user();
                 $count = $user->notifications()->count();
                 $user->notifications()->delete();
 
@@ -309,7 +307,7 @@ Route::middleware([
                 ]);
             } catch (\Exception $e) {
                 \Log::error('Error clearing all notifications:', [
-                    'user_id' => auth()->id(),
+                    'user_id' => auth('web')->id(),
                     'error' => $e->getMessage()
                 ]);
                 return response()->json([
@@ -352,7 +350,7 @@ Route::middleware('auth:sanctum')->prefix('api')->group(function () {
     // API Notifications untuk mobile atau AJAX
     Route::prefix('notifications')->group(function () {
         Route::get('/', function () {
-            $notifications = auth()->user()
+            $notifications = auth('web')->user()
                 ->notifications()
                 ->orderBy('created_at', 'desc')
                 ->limit(50)
@@ -361,7 +359,7 @@ Route::middleware('auth:sanctum')->prefix('api')->group(function () {
         });
 
         Route::get('/unread', function () {
-            $notifications = auth()->user()
+            $notifications = auth('web')->user()
                 ->unreadNotifications()
                 ->orderBy('created_at', 'desc')
                 ->get();

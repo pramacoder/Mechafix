@@ -4,7 +4,7 @@
             <!-- Logo -->
             <div class="flex items-center">
                 <a href="{{ route('dashboard.konsumen') }}" class="flex items-center group">
-                    <img src="{{ asset('LogoMechafix.svg') }}" alt="Mechafix Logo" 
+                    <img src="{{ asset('LogoMechafix.svg') }}" alt="Mechafix Logo"
                          class="w-16 h-16 object-contain bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
                 </a>
             </div>
@@ -14,7 +14,7 @@
                 <a href="{{ route('dashboard.konsumen') }}" class="nav-link px-4 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300 font-medium">Home Page</a>
                 <a href="{{ route('konsumen.services') }}" class="nav-link px-4 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300 font-medium">Services Offered</a>
                 <a href="{{ route('konsumen.part_shop') }}" class="nav-link px-4 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300 font-medium">Part Shop</a>
-                
+
                 <!-- More Info Dropdown -->
                 <div class="relative group">
                     <button class="nav-link px-4 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300 font-medium flex items-center">
@@ -63,7 +63,7 @@
                         <!-- Notification Badge -->
                         <span class="absolute -top-1 -right-1 bg-red-500 text-orange-600 text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ auth()->check() ? auth()->user()->unreadNotifications->count() : 0 }}</span>
                     </button>
-                    
+
                     <!-- Notification Dropdown -->
                     <div class="absolute hidden group-hover:block bg-white shadow-xl rounded-xl top-full right-0 mt-2 w-80 py-4 border border-orange-100 z-50">
                         @php
