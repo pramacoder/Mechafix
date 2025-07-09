@@ -13,7 +13,7 @@ class TotalService extends BaseWidget
         return [
             Stat::make('Total Service', BookingService::count() . ' Services')
                 ->description('Jumlah Pesanan'),
-            Stat::make('Booking Service', BookingService::where('status_booking', 'menunggu')->count() . ' Services')
+            Stat::make('Booking Service Belum Terkonfirmasi', BookingService::where('status_booking', 'menunggu')->count() . ' Services')
                 ->description('Jumlah Pesanan'),
             Stat::make('Inprogress', BookingService::where('status_booking', 'dikonfirmasi')->count() . ' Services')
                 ->description('Jumlah Pesanan'),
