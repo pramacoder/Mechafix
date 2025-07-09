@@ -41,7 +41,7 @@ class ServiceSeeder extends Seeder
                 'biaya_service' => 100000,
                 'estimasi_waktu' => 60,
             ],
-
+            
             // Service Berat
             [
                 'nama_service' => 'Overhaul Mesin',

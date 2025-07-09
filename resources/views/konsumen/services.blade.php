@@ -1,5 +1,8 @@
 <x-layoutkonsumen>
-
+@php
+    $user = auth()->user();
+    $userVehicles = ($user && $user->konsumen && $user->konsumen->platKendaraan) ? $user->konsumen->platKendaraan : collect();
+@endphp
     <div class="relative min-h-96 bg-cover bg-center"
         style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('{{ asset('Services1.png') }}');">
         <div class="absolute inset-0 bg-black/60"></div>
@@ -72,54 +75,116 @@
 
             <!-- Right Side - Form -->
             <div class="lg:w-1/2">
-                <form class="space-y-6" method="POST" action="/book-service">
-                    @csrf
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Name</label>
-                            <input type="text" id="name" name="name" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition duration-200">
+                <div class="bg-white border border-black/10 shadow-xl rounded-2xl p-8 min-h-[420px] flex flex-col justify-center">
+                {{-- Debug --}}
+                {{-- {{ dd($userVehicles) }} --}}
+                    @if ($userVehicles->count() > 0)
+                        <form method="POST" action="{{ route('booking.store') }}" class="space-y-8">
+                            @csrf
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <!-- Pilih Kendaraan -->
+                                <div class="md:col-span-2">
+                                    <label for="id_plat_kendaraan" class="block text-sm font-semibold text-gray-700 mb-2">Pilih Kendaraan</label>
+                                    <select id="id_plat_kendaraan" name="id_plat_kendaraan"
+                                        class="block w-full px-4 py-3 border border-black/10 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition duration-200 text-black bg-white shadow-sm" required>
+                                        <option value="">-- Select Your Vehicle --</option>
+                                        @foreach ($userVehicles as $vehicle)
+                                            <option value="{{ $vehicle->id_plat_kendaraan }}"
+                                                {{ old('id_plat_kendaraan') == $vehicle->id_plat_kendaraan ? 'selected' : '' }}>
+                                                {{ $vehicle->nomor_plat_kendaraan }} - {{ $vehicle->cc_kendaraan }} CC
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('id_plat_kendaraan')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <!-- Tanggal Booking -->
+                                <div>
+                                    <label for="tanggal_booking" class="block text-sm font-semibold text-gray-700 mb-2">Tanggal Booking</label>
+                                    <input id="tanggal_booking" class="block w-full px-4 py-3 border border-black/10 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition duration-200 text-black bg-white shadow-sm" type="date"
+                                        name="tanggal_booking" value="{{ old('tanggal_booking') }}"
+                                        min="{{ date('Y-m-d', strtotime('+1 day')) }}"
+                                        max="{{ date('Y-m-d', strtotime('+3 months')) }}" required />
+                                    @error('tanggal_booking')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        <span class="text-red-500">⚠️</span> Jika tidak bisa memilih tanggal maka bengkel tutup.
+                                    </p>
+                                </div>
+
+                                <!-- Estimasi Kedatangan -->
+                                <div>
+                                    <label for="estimasi_kedatangan" class="block text-sm font-semibold text-gray-700 mb-2">Jam Kedatangan</label>
+                                    <select id="estimasi_kedatangan" name="estimasi_kedatangan"
+                                        class="block w-full px-4 py-3 border border-black/10 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition duration-200 text-black bg-white shadow-sm"
+                                        required>
+                                        @for ($i = 0; $i < 24; $i++)
+                                            @php
+                                                $hour = str_pad($i, 2, '0', STR_PAD_LEFT);
+                                                $isClosed = $i >= 19 || $i < 8;
+                                            @endphp
+                                            <option value="{{ $hour }}:00"
+                                                @if($isClosed) style="color:red;font-weight:bold;" disabled @endif
+                                                {{ old('estimasi_kedatangan') == $hour.':00' ? 'selected' : '' }}>
+                                                {{ $hour }}:00 {{ $isClosed ? '(Tutup)' : '' }}
+                                            </option>
+                                        @endfor
+                                    </select>
+                                    @error('estimasi_kedatangan')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <!-- Keluhan Konsumen -->
+                                <div class="md:col-span-2">
+                                    <label for="keluhan_konsumen" class="block text-sm font-semibold text-gray-700 mb-2">Masalah Kendaraan</label>
+                                    <textarea id="keluhan_konsumen" name="keluhan_konsumen" rows="4"
+                                        class="block w-full px-4 py-3 border border-black/10 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition duration-200 text-black bg-white shadow-sm"
+                                        placeholder="Tuliskan permasalahan kendaraanmu..." required>{{ old('keluhan_konsumen') }}</textarea>
+                                    @error('keluhan_konsumen')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-end mt-8 space-x-3">
+                                <a href="{{ route('dashboard.konsumen') }}"
+                                    class="inline-flex items-center px-5 py-2 bg-black text-white rounded-lg font-semibold text-sm shadow hover:bg-gray-800 transition-all duration-200">
+                                    Cancel
+                                </a>
+                                <button type="submit" class="inline-flex items-center px-6 py-2 bg-orange-500 text-white rounded-lg font-semibold text-sm shadow hover:bg-orange-600 transition-all duration-200">
+                                    {{ __('Submit Booking') }}
+                                </button>
+                            </div>
+                        </form>
+                    @else
+                        <div class="flex flex-col items-center justify-center h-full py-16">
+                            <svg class="mx-auto h-16 w-16 text-gray-300" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m11 0v-4a2 2 0 00-2-2h-4m-2 0h-4a2 2 0 00-2 2v4m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v8" />
+                            </svg>
+                            <h3 class="mt-4 text-xl font-bold text-black">Tidak ditemukan kendaraan</h3>
+                            <p class="mt-2 text-base text-gray-500">Kamu harus menambah kendaraan sebelum booking service.</p>
+                            <div class="mt-8">
+                                <a href="{{ route('platkendaraan.create') }}"
+                                    class="inline-flex items-center px-6 py-3 rounded-xl text-white bg-orange-500 hover:bg-orange-600 font-semibold shadow transition-all duration-200">
+                                    Add Vehicle First
+                                </a>
+                            </div>
                         </div>
-
-                        <div>
-                            <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-2">Tanggal</label>
-                            <input type="date" id="tanggal" name="tanggal" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition duration-200">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="arrival_time" class="block text-sm font-medium text-gray-700 mb-2">Arrival
-                                time</label>
-                            <input type="time" id="arrival_time" name="arrival_time" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition duration-200">
-                        </div>
-
-                        <div>
-                            <label for="plat_number" class="block text-sm font-medium text-gray-700 mb-2">Plat
-                                Number</label>
-                            <input type="text" id="plat_number" name="plat_number" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition duration-200">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="complaint" class="block text-sm font-medium text-gray-700 mb-2">Complaint</label>
-                        <textarea id="complaint" name="complaint" rows="6" required placeholder="Enter your message..."
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition duration-200 resize-none"></textarea>
-                    </div>
-
-                    <button type="submit"
-                        class="w-full md:w-auto bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-semibold transition duration-300 transform hover:scale-105">
-                        Send
-                    </button>
-                </form>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
     <x-brand-trusted />
-
+    <x-section1-service>
+        
+    </x-section1-service>
 
     <script>
         // Add some interactive behavior
@@ -152,6 +217,65 @@
                 }
             });
         }
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateInput = document.getElementById('tanggal_booking');
+
+            // Ambil semua data hari libur dari sistem (database Filament)
+            const holidayDates = @json(\App\Models\HariLibur::getHolidayDates(now()->format('Y-m-d'), now()->addMonths(3)->format('Y-m-d')));
+            const holidayDetails = @json(\App\Models\HariLibur::getHolidayDetails(now()->format('Y-m-d'), now()->addMonths(3)->format('Y-m-d')));
+
+            function isHoliday(date) {
+                return holidayDates.includes(date);
+            }
+
+            function getHolidayName(date) {
+                const holiday = holidayDetails.find(h =>
+                    h.dates && h.dates.includes(date)
+                );
+                return holiday ? holiday.nama : 'Hari Libur';
+            }
+
+            dateInput.addEventListener('change', function() {
+                const selectedDate = this.value;
+                if (selectedDate && isHoliday(selectedDate)) {
+                    const holidayName = getHolidayName(selectedDate);
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Tanggal Libur!',
+                        html: `Tanggal yang Anda pilih adalah hari libur:<br><b>"${holidayName}"</b><br>Silakan pilih tanggal lain.`,
+                        confirmButtonText: 'OK'
+                    });
+
+                    this.value = '';
+                    this.focus();
+                    this.classList.add('border-red-500', 'bg-red-50');
+                    setTimeout(() => {
+                        this.classList.remove('border-red-500', 'bg-red-50');
+                    }, 3000);
+                }
+            });
+
+            const form = dateInput.closest('form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const selectedDate = dateInput.value;
+                    if (selectedDate && isHoliday(selectedDate)) {
+                        e.preventDefault();
+                        const holidayName = getHolidayName(selectedDate);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Tidak bisa booking di hari libur!',
+                            html: `Hari libur: <b>"${holidayName}"</b><br>Silakan pilih tanggal lain.`,
+                            confirmButtonText: 'OK'
+                        });
+                        dateInput.focus();
+                        return false;
+                    }
+                });
+            }
+        });
     </script>
 
 

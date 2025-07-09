@@ -15,7 +15,7 @@ class KonsumenResource extends Resource
 {
     protected static ?string $model = Konsumen::class;
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
-    protected static ?string $navigationGroup = 'User Management';
+    protected static ?string $navigationGroup = 'Service Management';
     protected static ?string $navigationLabel = 'Customers';
 
     public static function form(Form $form): Form
@@ -30,6 +30,7 @@ class KonsumenResource extends Resource
                     ->getOptionLabelFromRecordUsing(fn($record) => $record->name . ' (' . $record->email . ')'),
                 Forms\Components\Textarea::make('alamat_konsumen')
                     ->label('Address')
+                    ->required()
                     ->rows(3),
             ]);
     }

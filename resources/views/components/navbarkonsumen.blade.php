@@ -45,7 +45,7 @@
                                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
-                                History Repair
+                                Our History
                             </div>
                         </a>
                     </div>
@@ -158,7 +158,7 @@
             <a href="{{ route('konsumen.part_shop') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300">Part Shop</a>
             <a href="{{ route('konsumen.our_profile') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300">Our Profile</a>
             <a href="{{ route('konsumen.chat_contact') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300">Chat Contact</a>
-            <a href="{{ route('konsumen.history') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300">History Repair</a>
+            <a href="{{ route('konsumen.history') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300">Our History</a>
         </div>
 
         <!-- Mobile Account Management -->

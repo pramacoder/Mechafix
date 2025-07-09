@@ -1,6 +1,6 @@
 <x-guest-layout>
     <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-100 via-white to-orange-50">
-        <div class="w-full max-w-md border-2 border-orange-500 bg-white shadow-xl p-10" style="border-radius:0;">
+        <div class="w-full max-w-md bg-white shadow-xl p-8 rounded-xl border border-orange-200">
             <div class="mb-8 text-center">
             <div class="flex justify-center mb-4">
                 <img src="{{ asset('LogoMechafix.svg') }}" alt="">
@@ -45,7 +45,7 @@
                 </div>
 
                 <div class="flex flex-col gap-3 mt-8">
-                    <button type="submit" class="w-full py-2 bg-orange-600 text-white font-semibold text-sm tracking-widest hover:bg-orange-500 transition rounded-md">
+                    <button type="submit" class="w-full py-2 text-center border-2 border-orange-500 text-orange-600 font-semibold text-sm tracking-widest hover:bg-orange-50 transition rounded-md  ">
                         Log in
                     </button>
                     @if (Route::has('register'))

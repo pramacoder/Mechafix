@@ -19,7 +19,7 @@ class BookingServiceResource extends Resource
 {
     protected static ?string $model = BookingService::class;
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
-    protected static ?string $navigationGroup = 'Booking Management';
+    protected static ?string $navigationGroup = 'Service Management';
     protected static ?string $navigationLabel = 'Bookings';
     protected static ?int $navigationSort = 5;
 
@@ -62,7 +62,6 @@ class BookingServiceResource extends Resource
                     ->label('Mechanic')
                     ->options(function () {
                         $today = Carbon::now()->dayOfWeekIso;
-
                         return \App\Models\Mekanik::with('user')
                             ->where('kuantitas_hari', '>=', $today)
                             ->get()
@@ -77,7 +76,7 @@ class BookingServiceResource extends Resource
                 Forms\Components\DatePicker::make('tanggal_booking')
                     ->label('Tanggal Booking')
                     ->required()
-                    ->minDate(now()->addDay())
+                    ->minDate(now())
                     ->maxDate(now()->addMonths(3))
                     ->disabledDates(function () {
                         return \App\Models\HariLibur::getHolidayDates(
@@ -116,7 +115,7 @@ class BookingServiceResource extends Resource
                 Tables\Columns\TextColumn::make('id_booking_service')
                     ->label('Booking ID')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('konsumen.user.name')
+                Tables\Columns\TextColumn::make('konsumens.user.name')
                     ->label('Customer')
                     ->searchable()
                     ->sortable(),

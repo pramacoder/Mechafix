@@ -146,12 +146,12 @@ class MekanikController extends Controller
         $booking->update(['status_booking' => 'selesai']);
 
         $booking->konsumen->user->notify(new BookingCompleted($booking));
-        
+
         // Buat pembayaran (TIDAK perlu id_booking_service di tabel pembayaran)
         $pembayaran = Pembayaran::create([
             'tanggal_pembayaran' => today(),
             'total_pembayaran' => $calculatedTotal,
-            'qris' => 'oli motor.webp',
+            'qris' => 'qris.jpg',
             'status_pembayaran' => 'Belum Dibayar',
         ]);
 
@@ -165,7 +165,7 @@ class MekanikController extends Controller
             ->update(['id_pembayaran' => $pembayaran->id_pembayaran]);
         BookingService::where('id_booking_service', $pembayaran->id_booking_service)
             ->update(['id_booking_service' => $pembayaran->id_pembayaran]);
-            
+
         $dokumentasiPath = null;
         if ($request->hasFile('dokumentasi_perbaikan')) {
             $dokumentasiPath = $request->file('dokumentasi_perbaikan')->store('riwayat_perbaikan', 'public');
