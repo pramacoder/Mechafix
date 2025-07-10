@@ -9,10 +9,12 @@ class MekanikAssignedToBooking extends Notification
     use Queueable;
 
     public $booking;
+    public $message;
 
-    public function __construct($booking)
+    public function __construct($booking, $message)
     {
         $this->booking = $booking;
+        $this->message = $message;
     }
 
     public function via($notifiable)

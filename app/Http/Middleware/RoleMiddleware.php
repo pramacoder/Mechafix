@@ -12,6 +12,7 @@ class RoleMiddleware
     {
         // if(auth()->user() && auth()->user()->role !== 'admin') {
         //     abort(403, 'Unauthorized access.'); }
+
         // if (!auth()->check()) {
         //     return redirect('/login');
         // }

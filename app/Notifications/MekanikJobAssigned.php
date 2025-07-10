@@ -1,6 +1,7 @@
 <?php
 namespace App\Notifications;
 
+use GuzzleHttp\Psr7\Message;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
@@ -9,11 +10,14 @@ class MekanikJobAssigned extends Notification
     use Queueable;
 
     public $booking;
+    public $message;
 
-    public function __construct($booking)
+    public function __construct($booking, $message)
     {
         $this->booking = $booking;
+        $this->message = $message;
     }
+
 
     public function via($notifiable)
     {
